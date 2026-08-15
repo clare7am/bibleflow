@@ -133,9 +133,36 @@ function appendBookButtons(books, container) {
     books.forEach(book => {
         const item = document.createElement("button");
         item.className = "book-item";
-        item.textContent = getBookAbbr(book);
         item.title = getBookDisplayName(book);
         item.dataset.bookId = book.id;
+
+        // 主要版本缩写（大字）
+        const mainName = document.createElement("span");
+        mainName.className = "book-item-main";
+        mainName.textContent = getBookAbbr(book);
+        item.appendChild(mainName);
+
+        // 次要版本书卷名（小字，仅在有次要版本且名称不同时显示）
+        const secondary = window.Bible.secondaryVersions || [];
+        if (secondary.length > 0) {
+            const secKey = secondary[0]; // 取第一个次要版本
+            const secField = getFieldForVersion(secKey);
+            if (secField) {
+                const secBucket = book[secField];
+                if (secBucket && secBucket.abbr && secBucket.abbr !== getBookAbbr(book)) {
+                    const subName = document.createElement("span");
+                    subName.className = "book-item-sub";
+                    subName.textContent = secBucket.abbr;
+                    item.appendChild(subName);
+                } else if (secBucket && secBucket.name && secBucket.name !== getBookDisplayName(book)) {
+                    const subName = document.createElement("span");
+                    subName.className = "book-item-sub";
+                    // 中文取第一个字作为小字标注
+                    subName.textContent = secBucket.name.charAt(0);
+                    item.appendChild(subName);
+                }
+            }
+        }
 
         if (Number(Bible.book) === book.id) {
             item.classList.add("active");
@@ -144,6 +171,13 @@ function appendBookButtons(books, container) {
         item.addEventListener("click", () => selectBook(book));
         container.appendChild(item);
     });
+}
+
+/* 根据版本 key 获取对应的书卷名称字段 */
+function getFieldForVersion(versionKey) {
+    if (versionKey === "zh_sigao") return "zh_cath";
+    if (versionKey === "zh_hehe") return "zh_prot";
+    return "en"; // 英文版本统一用 en
 }
 
 /* ---------- 选中书卷（左侧点击） ---------- */
@@ -220,7 +254,32 @@ function renderChapters(book) {
     const list = document.getElementById("chapter-list");
     if (!list) return;
 
-    if (header) header.textContent = getBookDisplayName(book);
+    // 章节头部：主要版本全名 + 次要版本全名（小字）
+    if (header) {
+        header.innerHTML = "";
+
+        const mainName = getBookDisplayName(book);
+        const mainSpan = document.createElement("span");
+        mainSpan.className = "chapter-header-main";
+        mainSpan.textContent = mainName;
+        header.appendChild(mainSpan);
+
+        // 次要版本全名
+        const secondary = window.Bible.secondaryVersions || [];
+        if (secondary.length > 0) {
+            const secField = getFieldForVersion(secondary[0]);
+            const currentField = getBookNameField();
+            if (secField && secField !== currentField) {
+                const secBucket = book[secField];
+                if (secBucket && secBucket.name && secBucket.name !== mainName) {
+                    const subSpan = document.createElement("span");
+                    subSpan.className = "chapter-header-sub";
+                    subSpan.textContent = secBucket.name;
+                    header.appendChild(subSpan);
+                }
+            }
+        }
+    }
 
     const chapters = window._currentChapters;
     if (!chapters || chapters.length === 0) {
@@ -291,14 +350,38 @@ function updateBookPanelLanguage() {
     // 1. 重绘书卷列表（书卷名 + 分类标题语言切换）
     renderBooks(window._currentTestament);
 
-    // 2. 更新 Tab 文字（旧约/新约 → 跟随语言）
+    // 2. 更新 Tab 文字（双语）
     updateTabLabels();
 
-    // 3. 更新右侧章节头部（当前书卷名）
+    // 3. 更新右侧章节头部（双语全名）
     const book = window._allBooks.find(b => b.id === Bible.book);
     if (book) {
         const header = document.getElementById("chapter-list-header");
-        if (header) header.textContent = getBookDisplayName(book);
+        if (header) {
+            header.innerHTML = "";
+
+            const mainName = getBookDisplayName(book);
+            const mainSpan = document.createElement("span");
+            mainSpan.className = "chapter-header-main";
+            mainSpan.textContent = mainName;
+            header.appendChild(mainSpan);
+
+            // 次要版本全名
+            const secondary = window.Bible.secondaryVersions || [];
+            if (secondary.length > 0) {
+                const secField = getFieldForVersion(secondary[0]);
+                const currentField = getBookNameField();
+                if (secField && secField !== currentField) {
+                    const secBucket = book[secField];
+                    if (secBucket && secBucket.name && secBucket.name !== mainName) {
+                        const subSpan = document.createElement("span");
+                        subSpan.className = "chapter-header-sub";
+                        subSpan.textContent = secBucket.name;
+                        header.appendChild(subSpan);
+                    }
+                }
+            }
+        }
         // 更新 title 属性
         document.querySelectorAll(".book-item").forEach(el => {
             const bid = Number(el.dataset.bookId);
@@ -311,22 +394,40 @@ function updateBookPanelLanguage() {
     if (book) updateTopTitle(book, Bible.chapter);
 }
 
-/* ---------- 更新 Tab 文字（旧约/新约 → 跟随语言）---------- */
+/* ---------- 更新 Tab 文字（双语：英文 + 中文小字）---------- */
 function updateTabLabels() {
     const field = getBookNameField();   // "en" | "zh_cath" | "zh_prot"
     const cats = window._bookCategories || [];
+
+    // 获取次要版本对应的字段
+    const secondary = window.Bible.secondaryVersions || [];
+    const secField = secondary.length > 0 ? getFieldForVersion(secondary[0]) : null;
 
     document.querySelectorAll(".book-tab").forEach(tab => {
         const testament = tab.dataset.testament;   // "old_testament" | "new_testament"
         const cat = cats.find(c => c.key === testament);
         if (!cat) return;
 
-        const bucket = cat[field];
-        if (bucket && bucket.name) {
-            tab.textContent = bucket.name;
-        } else {
-            // 兜底
-            tab.textContent = testament === "old_testament" ? "旧约" : "新约";
+        // 清空后重建（支持双语）
+        tab.innerHTML = "";
+
+        // 主要版本名称
+        const mainBucket = cat[field];
+        const mainName = (mainBucket && mainBucket.name) ? mainBucket.name : (testament === "old_testament" ? "Old Testament" : "New Testament");
+        const mainSpan = document.createElement("span");
+        mainSpan.className = "tab-main";
+        mainSpan.textContent = mainName;
+        tab.appendChild(mainSpan);
+
+        // 次要版本名称（小字）
+        if (secField && secField !== field) {
+            const secBucket = cat[secField];
+            if (secBucket && secBucket.name && secBucket.name !== mainName) {
+                const subSpan = document.createElement("span");
+                subSpan.className = "tab-sub";
+                subSpan.textContent = secBucket.name;
+                tab.appendChild(subSpan);
+            }
         }
     });
 }

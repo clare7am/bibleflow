@@ -51,7 +51,6 @@ body {
     gap: 4px;
 }
 
-/* 左右箭头 */
 .top-nav-btn {
     width: 40px; height: 40px;
     border: none; background: none;
@@ -65,7 +64,6 @@ body {
 .top-nav-btn:active { background: var(--tap); }
 .top-nav-btn:focus  { outline: none; }
 
-/* 居中标题 */
 .top-title {
     flex: 0 1 auto;
     border: none; background: none;
@@ -94,7 +92,6 @@ body {
     transform: rotate(180deg);
 }
 
-/* 顶栏右侧按钮组（地球 + 搜索） */
 .top-icon-btn {
     width: 40px; height: 40px;
     border: none; background: none;
@@ -108,13 +105,12 @@ body {
 .top-icon-btn:active { background: var(--tap); }
 .top-icon-btn:focus  { outline: none; }
 
-/* 按钮顺序：地球在搜索左边 */
 #version-toggle { margin-right: 0; order: 3; }
 #search-toggle  { margin-left: 0; order: 4; }
 
 
 /* ============================================================
-   版本选择面板（左侧拉 — 与书卷面板完全统一风格）
+   版本选择面板（从右侧滑入）
    ============================================================ */
 .version-overlay {
     position: fixed; inset: 0;
@@ -126,15 +122,15 @@ body {
 .version-overlay.open { opacity: 1; pointer-events: auto; }
 
 .version-panel {
-    position: fixed; top: 0; left: 0;
+    position: fixed; top: 0; right: 0;
     width: 88%; max-width: 360px; height: 100%;
     background: var(--bg);
     z-index: 1300;
-    transform: translateX(-100%);
+    transform: translateX(100%);
     transition: transform 0.3s cubic-bezier(.4,0,.2,1);
     display: flex; flex-direction: column;
-    border-right: 1px solid var(--line);
-    box-shadow: 2px 0 20px rgba(0,0,0,0.06);
+    border-left: 1px solid var(--line);
+    box-shadow: -2px 0 20px rgba(0,0,0,0.06);
 }
 .version-panel.open { transform: translateX(0); }
 
@@ -211,7 +207,6 @@ body {
 }
 .version-item.disabled:active { background: transparent; }
 
-/* 单选圆点 */
 .version-radio {
     width: 16px; height: 16px;
     border: 2px solid var(--ink-3);
@@ -228,7 +223,6 @@ body {
     background: radial-gradient(circle, var(--ink) 35%, transparent 40%);
 }
 
-/* 复选框 */
 .version-checkbox {
     width: 16px; height: 16px;
     border: 2px solid var(--ink-3);
@@ -257,9 +251,7 @@ body {
     color: var(--ink);
 }
 
-.version-label-text {
-    flex: 1;
-}
+.version-label-text { flex: 1; }
 
 .version-badge {
     font-size: 10px;
@@ -277,7 +269,7 @@ body {
 
 
 /* ============================================================
-   搜索侧边栏
+   搜索侧边栏（从右侧滑入，与版本面板统一）
    ============================================================ */
 .search-overlay {
     position: fixed; inset: 0;
@@ -297,6 +289,7 @@ body {
     transition: transform 0.3s cubic-bezier(.4,0,.2,1);
     display: flex; flex-direction: column;
     border-left: 1px solid var(--line);
+    box-shadow: -2px 0 16px rgba(0,0,0,0.05);
 }
 .search-sidebar.open { transform: translateX(0); }
 
@@ -317,13 +310,9 @@ body {
     color: var(--ink);
     transition: border-color var(--transition);
 }
-.search-sidebar-header input::placeholder {
-    color: var(--ink-3);
-}
-.search-sidebar-header input:focus {
-    outline: none;
-    border-bottom-color: var(--ink);
-}
+.search-sidebar-header input::placeholder { color: var(--ink-3); }
+.search-sidebar-header input:focus { outline: none; border-bottom-color: var(--ink); }
+
 .search-close-btn {
     width: 30px; height: 30px;
     border: none; background: transparent;
@@ -352,8 +341,7 @@ body {
 .search-sidebar-body li:active { background: var(--tap); }
 .search-sidebar-body b { color: var(--ink); font-weight: 600; }
 
-.search-loading,
-.search-empty {
+.search-loading, .search-empty {
     padding: 20px 18px;
     font-size: 14px;
     color: var(--ink-3);
@@ -370,22 +358,14 @@ body {
     border-bottom: 1px solid var(--line-2);
     margin-bottom: 2px;
 }
-
-.search-result-list {
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-
+.search-result-list { padding: 0; margin: 0; list-style: none; }
 .search-result-item {
     cursor: pointer;
     padding: 12px 18px;
     border-bottom: 1px solid var(--line-2);
     line-height: 1.55;
     transition: background var(--transition);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: flex; flex-direction: column; gap: 4px;
 }
 .search-result-item:hover  { background: var(--hover-bg); }
 .search-result-item:active { background: var(--tap); }
@@ -395,12 +375,8 @@ body {
     font-weight: 600;
     color: var(--ink-3);
     letter-spacing: 0.3px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: flex; align-items: center; gap: 6px;
 }
-
-/* 搜索结果中的版本标签 */
 .search-result-tag {
     display: inline-block;
     font-size: 10px;
@@ -411,7 +387,6 @@ body {
     border-radius: 3px;
     letter-spacing: 0.3px;
 }
-
 .search-result-text {
     font-size: 15px;
     color: var(--ink);
@@ -420,7 +395,7 @@ body {
 
 
 /* ============================================================
-   书卷 + 章节 并排侧拉面板（与版本面板完全统一）
+   书卷 + 章节 并排侧拉面板（从左侧滑入）
    ============================================================ */
 .book-overlay {
     position: fixed; inset: 0;
@@ -450,9 +425,7 @@ body {
     padding-top: calc(12px + env(safe-area-inset-top));
     border-bottom: 1px solid var(--line);
 }
-.book-panel-title {
-    font-size: 17px; font-weight: 700; color: var(--ink);
-}
+.book-panel-title { font-size: 17px; font-weight: 700; color: var(--ink); }
 .book-panel-close {
     width: 30px; height: 30px;
     border: none; background: transparent;
@@ -482,20 +455,16 @@ body {
     transition: all var(--transition);
     font-family: inherit;
 }
-.book-tab.active {
-    background: var(--ink);
-    color: var(--active-ink);
-    border-color: var(--ink);
-}
+.book-tab.active { background: var(--ink); color: var(--active-ink); border-color: var(--ink); }
 .book-tab:not(.active):active { background: var(--hover-bg); }
 
+/* Tab 双语 */
+.tab-main { display: block; font-size: 14px; font-weight: 500; line-height: 1.2; }
+.tab-sub  { display: block; font-size: 10px; font-weight: 400; opacity: 0.6; margin-top: 1px; line-height: 1.1; }
+.book-tab.active .tab-sub { color: rgba(255,255,255,0.65); opacity: 1; }
+
 /* 并排双区 */
-.book-split {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-    min-height: 0;
-}
+.book-split { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
 /* 左侧书卷区 */
 .book-list-wrap {
@@ -505,84 +474,71 @@ body {
     padding: 6px 12px 24px;
     padding-bottom: calc(24px + env(safe-area-inset-bottom));
     box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
 }
+.book-list-wrap::-webkit-scrollbar { width: 4px; }
+.book-list-wrap::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
 
 /* 右侧章节区 */
-.chapter-list-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-width: 0;
-}
+.chapter-list-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 .chapter-list-header {
     padding: 10px 14px 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink-3);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
+    font-size: 13px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 0.6px;
     border-bottom: 1px solid var(--line-2);
     flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 2px; line-height: 1.3;
 }
+.chapter-header-main { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+.chapter-header-sub  { font-size: 11px; font-weight: 400; color: var(--ink-3); text-transform: none; letter-spacing: 0; }
+
 .chapter-list {
     flex: 1;
     overflow-y: auto;
     padding: 8px 10px 24px;
     padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
 }
-.chapter-empty {
-    padding: 20px 10px;
-    font-size: 14px;
-    color: var(--ink-3);
-    text-align: center;
-}
+.chapter-list::-webkit-scrollbar { width: 4px; }
+.chapter-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+.chapter-empty { padding: 20px 10px; font-size: 14px; color: var(--ink-3); text-align: center; }
 
-/* 分类标题（左侧） */
+/* 分类标题 */
 .book-cat-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--ink-3);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin: 14px 0 5px;
-    padding-left: 2px;
+    font-size: 11px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin: 14px 0 5px; padding-left: 2px;
 }
 .book-cat-title:first-child { margin-top: 4px; }
 
-/* 书卷网格（左侧 3 列） */
-.book-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-}
+/* 书卷网格 */
+.book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
 
 /* 书卷按钮 */
 .book-item {
     appearance: none; border: none; background: transparent;
-    padding: 10px 2px;
+    padding: 8px 2px;
     font-size: 15px; font-weight: 400;
     color: var(--ink);
     cursor: pointer;
     border-radius: 5px;
     transition: background var(--transition), color var(--transition);
     font-family: inherit;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     position: relative;
+    line-height: 1.2;
+    min-height: 40px;
 }
 .book-item:active { background: var(--tap); }
-.book-item.active {
-    background: var(--ink);
-    color: var(--active-ink);
-    font-weight: 500;
-}
+.book-item.active { background: var(--ink); color: var(--active-ink); font-weight: 500; }
+.book-item-sub { font-size: 10px; font-weight: 400; color: var(--ink-3); margin-top: 1px; line-height: 1.1; white-space: nowrap; }
+.book-item.active .book-item-sub { color: rgba(255,255,255,0.7); }
 
-/* 章节网格（右侧 5 列） */
-.chapter-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 3px 2px;
-}
+/* 章节网格 */
+.chapter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px 2px; }
 
 /* 章节按钮 */
 .chapter-item {
@@ -598,29 +554,36 @@ body {
     display: flex; align-items: center; justify-content: center;
 }
 .chapter-item:active { background: var(--tap); }
-.chapter-item.active {
-    background: var(--ink);
-    color: var(--active-ink);
-    font-weight: 600;
-}
+.chapter-item.active { background: var(--ink); color: var(--active-ink); font-weight: 600; }
 .chapter-item.active:active { background: #333; }
 
 
 /* ============================================================
-   经文容器
+   经文容器（核心：恢复大小/颜色层级 + 防截断）
    ============================================================ */
+
+/* 外层容器 */
 .verses-container {
     max-width: 640px;
     margin: 0 auto;
     padding: 14px 18px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: hidden;
+    min-width: 0;
 }
 
+/* 每个经节块 */
 .verse-block {
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--line-2);
     scroll-margin-top: calc(var(--top-h) + 8px + env(safe-area-inset-top));
+    min-width: 0;
+    overflow-wrap: break-word;
 }
+
+/* 节号 */
 .verse-num {
     font-weight: 700;
     font-size: 12px;
@@ -628,16 +591,23 @@ body {
     margin-bottom: 3px;
 }
 
-/* 主要经文（大黑字） */
-.verse-primary {
+/* ===== 主要经文（英文大黑字）===== */
+/* verse.js 渲染结构：.verse-block > .verse-text > .word spans */
+.verse-text {
     font-size: 16px;
     color: var(--ink);
     line-height: 1.75;
     margin-bottom: 5px;
-    word-wrap: break-word;
+    /* ✅ 防截断 */
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
+    white-space: normal !important;
+    min-width: 0;
+    display: block;
 }
 
-/* 次要经文（小灰字，无版本标签前缀） */
+/* ===== 次要经文（中文小灰字）===== */
 .verse-secondary {
     font-size: 14px;
     color: var(--ink-2);
@@ -645,36 +615,39 @@ body {
     margin-bottom: 3px;
     padding-left: 6px;
     border-left: 2px solid var(--line);
-    word-wrap: break-word;
-}
-.verse-secondary.verse-missing {
-    opacity: 0.35;
-    font-style: italic;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
+    white-space: normal !important;
+    min-width: 0;
 }
 
-/* token 类型样式 */
-.word {
-    white-space: pre-wrap;
+/* ===== 分词 span — 关键防截断点 ===== */
+/* verse.js 把每个英文单词渲染成 <span class="word"> */
+.verse-text .word {
+    display: inline !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
+    white-space: normal !important;
 }
-.space {
-    white-space: pre;
+
+/* 空格 span */
+.verse-text .space {
+    display: inline !important;
+    white-space: pre-wrap !important;
 }
-.punctuation {
+
+/* 标点符号 */
+.verse-text .punctuation {
     color: var(--ink-2);
+    display: inline !important;
 }
 
-.entity {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-.word.active {
-    background-color: #fff3a0;
-    border-radius: 2px;
-}
-.verse-highlight {
-    background-color: #fafafa;
-    transition: background 0.6s ease;
-}
+/* 高亮 / 实体 */
+.entity { text-decoration: underline; text-underline-offset: 3px; }
+.word.active { background-color: #fff3a0; border-radius: 2px; }
+.verse-highlight { background-color: #fafafa; transition: background 0.6s ease; }
 
 
 /* ============================================================
@@ -713,11 +686,9 @@ body {
 .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .icon-svg { fill: currentColor; width: 100%; height: 100%; }
-
 .prev-chapter, .next-chapter { width: 24px; height: 24px; }
 .play-large { width: 38px; height: 38px; }
 
-/* 进度条 */
 #progress {
     flex: 1; height: 3px;
     border-radius: 2px;
@@ -726,19 +697,8 @@ body {
     padding: 12px 0;
     box-sizing: border-box;
 }
-#progress::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: var(--ink);
-    border: none;
-}
-#progress::-moz-range-thumb {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: var(--ink);
-    border: none;
-}
+#progress::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); border: none; }
+#progress::-moz-range-thumb     { width: 14px; height: 14px; border-radius: 50%; background: var(--ink); border: none; }
 #progress:disabled { opacity: 0.3; cursor: not-allowed; }
 
 
@@ -760,17 +720,48 @@ body {
         width: 100%;
         border-right: none;
         border-bottom: 1px solid var(--line);
-        max-height: 45%;
+        max-height: 42%;
         padding: 4px 12px 12px;
     }
     .chapter-list-wrap { flex: 1; min-height: 0; }
 
     .book-grid { grid-template-columns: repeat(5, 1fr); gap: 3px 2px; }
-    .book-item { font-size: 15px; padding: 9px 2px; }
+    .book-item { font-size: 14px; padding: 7px 2px; min-height: 36px; }
+    .book-item-sub { font-size: 9px; }
 
     .chapter-list-header { padding: 8px 12px 6px; }
-    .chapter-list { padding: 6px 8px 16px; }
+    .chapter-list { padding: 6px 8px 16px; overflow-y: auto; }
 
+    .verses-container {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 72px;
+    }
+
+    /* 手机端：主要经文稍小一点，但仍明显大于次要经文 */
+    .verse-text {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+    .verse-secondary {
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    /* 防截断 */
+    .verse-text, .verse-secondary {
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        hyphens: none !important;
+        white-space: normal !important;
+    }
+    .verse-text .word {
+        display: inline !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+    }
+
+    /* 播放器 */
     .player {
         flex-direction: column-reverse;
         height: auto;
@@ -782,38 +773,33 @@ body {
     .player-controls-custom { gap: 28px; }
     .play-large { width: 36px; height: 36px; }
     .prev-chapter, .next-chapter { width: 22px; height: 22px; }
-
-    .verses-container { padding-bottom: 72px; }
 }
 
-/* 搜索侧边栏手机端：从底部弹出 */
+/* ============================================================
+   搜索 / 版本面板手机端统一：全部从右侧滑入
+   ============================================================ */
 @media (max-width: 767px) {
     .search-sidebar {
-        top: auto; bottom: 0; left: 0; right: 0;
-        width: 100%; max-width: 100%;
-        height: 60vh;
+        top: 0; bottom: auto; left: auto; right: 0;
+        width: 88%; max-width: 380px;
+        height: 100%;
         border-top-left-radius: 0;
         border-top-right-radius: 0;
-        border-left: none;
-        border-top: 1px solid var(--line);
-        transform: translateY(100%);
+        border-left: 1px solid var(--line);
+        border-top: none;
+        transform: translateX(100%);
     }
     .search-sidebar.open {
-        transform: translateY(0);
-        box-shadow: 0 -2px 16px rgba(0,0,0,0.05);
+        transform: translateX(0);
+        box-shadow: -2px 0 16px rgba(0,0,0,0.05);
     }
     .search-sidebar-header {
         padding: 12px 16px;
         padding-top: calc(12px + env(safe-area-inset-top));
     }
-    .search-sidebar-header input {
-        font-size: 16px;
-        padding: 6px 2px;
-    }
-    .search-sidebar-body {
-        padding: 4px 0 24px;
-    }
-    .search-sidebar-body li {
-        padding: 12px 18px;
-    }
+    .search-sidebar-header input { font-size: 16px; padding: 6px 2px; }
+    .search-sidebar-body { padding: 4px 0 24px; }
+    .search-sidebar-body li { padding: 12px 18px; }
+
+    .version-panel { width: 80%; max-width: none; }
 }
