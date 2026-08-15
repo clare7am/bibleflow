@@ -1,0 +1,16 @@
+All rights reserved.
+
+No license is granted to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of this software, nor to create derivative
+works based on this software, in whole or in part.
+
+The source code in this repository is made publicly visible solely for
+informational and witnessing purposes. It does NOT constitute permission
+for reuse, reference, or redistribution in any form.
+
+For any permission to use this software, written authorization from the
+copyright holder must be obtained in advance.
+
+Contact: [clare.7am@gmail.com]
+
+© 2026 [Clare]

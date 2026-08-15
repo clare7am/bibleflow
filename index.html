@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+    <title>BibleFlow</title>
+
+    <link rel="icon" href="https://bibleflow.oss-cn-hangzhou.aliyuncs.com/static/alpha_omega_2.png">
+    <link rel="apple-touch-icon" href="https://bibleflow.oss-cn-hangzhou.aliyuncs.com/static/alpha_omega_2.png">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" href="./static/css/style.css">
+</head>
+<body>
+
+<!-- ===== 顶栏 ===== -->
+<div class="top-bar">
+    <!-- 上一章 -->
+    <button id="top-prev" class="top-nav-btn" aria-label="上一章">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+    </button>
+
+    <!-- 居中标题（点开侧栏） -->
+    <button id="book-btn" class="top-title" aria-label="选择书卷与章节">
+        <span id="book-btn-text">Genesis 1</span>
+        <svg class="top-title-caret" width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+            <path d="M2 4l4 4 4-4z"/>
+        </svg>
+    </button>
+
+    <!-- 下一章 -->
+    <button id="top-next" class="top-nav-btn" aria-label="下一章">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+        </svg>
+    </button>
+
+    <!-- 版本切换按钮（地球图标，搜索左边） -->
+    <button id="version-toggle" class="top-icon-btn" aria-label="切换版本" title="版本设置">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <path d="M12 3a14 14 0 0 1 0 18"/>
+            <path d="M12 3a14 14 0 0 0 0 18"/>
+        </svg>
+    </button>
+
+    <!-- 搜索按钮 -->
+    <button id="search-toggle" class="top-icon-btn" aria-label="搜索">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+    </button>
+</div>
+
+<!-- ===== 版本选择面板（左侧拉，与书卷面板同风格） ===== -->
+<div id="version-overlay" class="version-overlay"></div>
+<div id="version-panel" class="version-panel">
+    <div class="version-panel-header">
+        <span class="version-panel-title">版本设置</span>
+        <button class="version-panel-close" id="version-panel-close" aria-label="关闭">&times;</button>
+    </div>
+    <div class="version-list" id="version-list"></div>
+</div>
+
+<!-- ===== 搜索遮罩 + 侧边栏 ===== -->
+<div id="search-overlay" class="search-overlay"></div>
+
+<div id="search-sidebar" class="search-sidebar">
+    <div class="search-sidebar-header">
+        <input
+            id="search-input"
+            type="text"
+            placeholder="输入关键词搜索经文"
+            autocomplete="off"
+        />
+        <button id="search-close" class="search-close-btn">&times;</button>
+    </div>
+    <div id="search-results" class="search-sidebar-body"></div>
+</div>
+
+<!-- ===== 书卷+章节 侧拉面板 ===== -->
+<div id="book-overlay" class="book-overlay"></div>
+
+<div id="book-panel" class="book-panel">
+    <!-- 头部 -->
+    <div class="book-panel-header">
+        <span class="book-panel-title" id="book-panel-title">圣经</span>
+        <button class="book-panel-close" id="book-panel-close" aria-label="关闭">&times;</button>
+    </div>
+
+    <!-- Tab 栏（文字由 JS 动态设置） -->
+    <div class="book-tab-bar">
+        <button class="book-tab active" data-testament="old_testament">Old Testament</button>
+        <button class="book-tab" data-testament="new_testament">New Testament</button>
+    </div>
+
+    <!-- 并排双区 -->
+    <div class="book-split">
+        <!-- 左：书卷 -->
+        <div class="book-list-wrap">
+            <div class="book-list" id="book-list"></div>
+        </div>
+        <!-- 右：章节 -->
+        <div class="chapter-list-wrap">
+            <div class="chapter-list-header" id="chapter-list-header">选择书卷</div>
+            <div class="chapter-list" id="chapter-list">
+                <div class="chapter-empty">← 选择左侧书卷</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 经文内容 ===== -->
+<div id="verses" class="verses-container"></div>
+
+<!-- ===== 底部播放器 ===== -->
+<div class="player">
+    <div class="player-controls-custom">
+        <button id="prev-chapter-audio" class="ctrl-btn prev-chapter" onclick="prevChapterAudio()" aria-label="上一章">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M6 6v12h2V6H6zm3.5 6l8.5-6v12l-8.5-6z"/>
+            </svg>
+        </button>
+
+        <button id="play-pause" class="ctrl-btn play-large" onclick="togglePlay()" aria-label="播放 / 暂停">
+            <svg id="icon-play-big" class="icon-svg" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg id="icon-pause-big" class="icon-svg" viewBox="0 0 24 24" style="display:none;">
+                <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+            </svg>
+        </button>
+
+        <button id="next-chapter-audio" class="ctrl-btn next-chapter" onclick="nextChapterAudio()" aria-label="下一章">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M8 6l8.5 6L8 18V6zm10 0h2v12h-2V6z"/>
+            </svg>
+        </button>
+    </div>
+
+    <input id="progress" type="range" min="0" max="100" value="0" step="0.1">
+</div>
+
+<audio id="audio-player" preload="none"></audio>
+
+<!-- ===== JS ===== -->
+<script src="./static/js/config.js"></script>
+
+<script src="./static/js/search.js"></script>
+<script src="./static/js/highlight.js"></script>
+<script src="./static/js/player.js"></script>
+
+<script src="./static/js/book.js"></script>
+<script src="./static/js/chapter.js"></script>
+<script src="./static/js/verse.js"></script>
+
+<script src="./static/js/entity.js"></script>
+<script src="./static/js/main.js"></script>
+
+</body>
+</html>
