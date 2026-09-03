@@ -467,7 +467,7 @@ body {
     flex: 1;
     padding: 10px 0;
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--bg);
     font-size: 15px; font-weight: 500;
     color: var(--ink-2);
@@ -480,8 +480,8 @@ body {
 
 /* Tab 双语 */
 .tab-main { display: block; font-size: 15px; font-weight: 500; line-height: 1.3; }
-.tab-sub  { display: block; font-size: 11px; font-weight: 400; opacity: 0.6; margin-top: 2px; line-height: 1.2; }
-.book-tab.active .tab-sub { color: rgba(255,255,255,0.65); opacity: 1; }
+.tab-sub  { display: block; font-size: 13px; font-weight: 400; opacity: 0.7; margin-top: 2px; line-height: 1.2; }
+.book-tab.active .tab-sub { color: rgba(255,255,255,0.8); opacity: 1; }
 
 /* 并排双区 */
 .book-split { flex: 1; display: flex; overflow: hidden; min-height: 0; }
@@ -534,7 +534,8 @@ body {
 .book-cat-title:first-child { margin-top: 6px; }
 
 /* 书卷网格 */
-.book-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.book-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+.book-grid .book-item { border: 1px solid var(--line-2); margin-left: -1px; margin-top: -1px; }
 
 /* 书卷按钮 */
 .book-item {
@@ -543,7 +544,7 @@ body {
     font-size: 19px; font-weight: 500;
     color: var(--ink);
     cursor: pointer;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     transition: background var(--transition), color var(--transition);
     font-family: inherit;
     display: flex; flex-direction: column;
@@ -554,12 +555,13 @@ body {
     min-height: 0;
 }
 .book-item:active { background: var(--tap); }
-.book-item.active { background: var(--active-bg); color: var(--active-ink); font-weight: 600; }
-.book-item-sub { font-size: 11px; font-weight: 400; color: var(--ink-3); margin-top: 2px; line-height: 1.2; white-space: nowrap; }
-.book-item.active .book-item-sub { color: rgba(255,255,255,0.7); }
+.book-item.active { background: var(--active-bg); color: var(--active-ink); font-weight: 600; border-color: var(--active-bg); }
+.book-item-sub { font-size: 14px; font-weight: 400; color: var(--ink-3); margin-top: 3px; line-height: 1.2; white-space: nowrap; }
+.book-item.active .book-item-sub { color: rgba(255,255,255,0.85); }
 
 /* 章节网格 */
-.chapter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.chapter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+.chapter-grid .chapter-item { border: 1px solid var(--line-2); margin-left: -1px; margin-top: -1px; }
 
 /* 章节按钮 */
 .chapter-item {
@@ -568,14 +570,14 @@ body {
     font-size: 16px; font-weight: 400;
     color: var(--ink);
     cursor: pointer;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     font-family: var(--mono);
     transition: background var(--transition), color var(--transition);
     text-align: center;
     display: flex; align-items: center; justify-content: center;
 }
 .chapter-item:active { background: var(--tap); }
-.chapter-item.active { background: var(--active-bg); color: var(--active-ink); font-weight: 600; }
+.chapter-item.active { background: var(--active-bg); color: var(--active-ink); font-weight: 600; border-color: var(--active-bg); }
 .chapter-item.active:active { background: color-mix(in srgb, var(--active-bg) 85%, black); }
 
 
