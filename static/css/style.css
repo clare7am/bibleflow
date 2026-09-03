@@ -456,29 +456,14 @@ body {
 }
 .book-panel.open { transform: translateX(0); }
 
-.book-panel-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px 14px;
-    padding-top: calc(16px + env(safe-area-inset-top));
-    border-bottom: 1px solid var(--line);
-}
-.book-panel-title { font-size: 17px; font-weight: 600; color: var(--ink); }
-.book-panel-close {
-    width: 32px; height: 32px;
-    border: none; background: transparent;
-    font-size: 20px; color: var(--ink-3);
-    cursor: pointer; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    line-height: 1;
-}
-.book-panel-close:active { background: var(--tap); }
-
 /* Tab 栏 */
 .book-tab-bar {
     display: flex;
     padding: 0;
     gap: 0;
     border-bottom: 1px solid var(--line);
+    height: var(--top-h);
+    align-items: center;
 }
 .book-tab {
     flex: 1;
