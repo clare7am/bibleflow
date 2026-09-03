@@ -2,9 +2,8 @@
    BibleFlow — 主题系统
    ============================================================ */
 
-/* ===== 主题 1: Apple 蓝白风格 (默认) ===== */
-:root,
-[data-theme="apple"] {
+/* ===== Design Tokens — Apple 蓝白风格 ===== */
+:root {
     --bg:            #ffffff;
     --bg-alt:        #f5f5f7;
     --bg-card:       #ffffff;
@@ -32,37 +31,6 @@
     --player-h:      60px;
     --blur:          blur(20px);
     --blur-header:   blur(16px);
-}
-
-/* ===== 主题 2: 极简黑白风格 (原有风格) ===== */
-[data-theme="mono"] {
-    --bg:            #ffffff;
-    --bg-alt:        #fafafa;
-    --bg-card:       #ffffff;
-    --ink:           #111111;
-    --ink-2:         #555555;
-    --ink-3:         #999999;
-    --line:          #ebebeb;
-    --line-2:        #f0f0f0;
-    --accent:        #111111;
-    --accent-light:  rgba(0,0,0,0.04);
-    --active-bg:     #111111;
-    --active-ink:    #ffffff;
-    --hover-bg:      #f5f5f5;
-    --tap:           rgba(0,0,0,0.04);
-    --shadow-sm:     none;
-    --shadow-md:     none;
-    --radius:        6px;
-    --radius-sm:     6px;
-    --radius-lg:     6px;
-    --font:          -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-                     "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
-    --mono:          "SF Mono", "Menlo", "Consolas", monospace;
-    --transition:    0.15s ease;
-    --top-h:         48px;
-    --player-h:      60px;
-    --blur:          none;
-    --blur-header:   none;
 }
 
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; padding: 0; }
@@ -160,27 +128,6 @@ body {
 }
 .top-icon-btn:active { background: var(--tap); }
 .top-icon-btn:focus  { outline: none; }
-
-/* 主题切换按钮 */
-.theme-toggle {
-    width: 40px; height: 40px;
-    border: none; background: none;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--ink-2);
-    border-radius: 50%;
-    transition: background var(--transition);
-    flex-shrink: 0;
-}
-.theme-toggle:active { background: var(--tap); }
-.theme-toggle:focus  { outline: none; }
-.theme-toggle svg { transition: transform 0.4s ease; }
-.theme-toggle:hover svg { transform: rotate(20deg); }
-
-#version-toggle { margin-right: 0; order: 3; }
-#search-toggle  { margin-left: 0; order: 4; }
-#theme-toggle   { order: 5; }
-
 
 /* ============================================================
    版本选择面板（从右侧滑入）
@@ -780,7 +727,6 @@ body {
     .top-title { font-size: 16px; padding: 6px 6px; }
     .top-nav-btn { width: 36px; height: 36px; }
     .top-icon-btn { width: 36px; height: 36px; }
-    .theme-toggle { width: 36px; height: 36px; }
 
     .version-panel { width: 80%; max-width: none; }
 
