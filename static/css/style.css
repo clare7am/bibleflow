@@ -660,7 +660,7 @@ body {
 
 /* 高亮 / 实体 */
 .entity { text-decoration: underline; text-underline-offset: 3px; }
-.word.active { background-color: var(--accent-light); border-radius: 2px; }
+.word.active { background-color: #fff3a0; border-radius: 2px; }
 .verse-highlight { background-color: var(--accent-light); transition: background 0.6s ease; }
 
 
