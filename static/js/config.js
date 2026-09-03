@@ -48,12 +48,12 @@
                 available: true
             },
             {
-                key: "zh_hehe",
+                key: "zh_cuv2010",
                 label: "和合本",
                 language: "zh",
                 has_audio: false,
                 has_tokens: false,
-                available: false
+                available: true
             }
         ]
     };
