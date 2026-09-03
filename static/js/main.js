@@ -1,184 +1,217 @@
 /**
- * main.js — 版本选择面板（侧拉式）+ 初始化
+ * main.js — 版本选择面板（侧拉式）+ 统一初始化入口
+ *
+ * 依赖：config.js, utils.js, book.js, verse.js, player.js
  */
 
-/* ========= 渲染版本选择面板 ========= */
-function renderVersionPanel() {
-    const container = document.getElementById("version-list");
-    if (!container) return;
+(function () {
+    "use strict";
 
-    container.innerHTML = "";
+    var state = window.BibleFlow.state;
+    var cfg = window.BibleFlow.config;
+    var utils = window.BibleFlow.utils;
 
-    const primary = window.Bible.primaryVersion;
-    const secondary = window.Bible.secondaryVersions || [];
+    /* ========= 渲染版本选择面板 ========= */
+    function renderVersionPanel() {
+        const container = document.getElementById("version-list");
+        if (!container) return;
 
-    // ---- 主要经文（单选）----
-    const priTitle = document.createElement("div");
-    priTitle.className = "version-section-title";
-    priTitle.textContent = "主要经文（单选）";
-    container.appendChild(priTitle);
+        container.innerHTML = "";
 
-    window.BIBLE_VERSIONS.forEach(ver => {
-        const isPrimary = ver.key === primary;
-        const isUnavailable = !ver.available;
+        const primary = state.primaryVersion;
+        const secondary = state.secondaryVersions || [];
 
-        const btn = document.createElement("button");
-        btn.className = "version-item";
-        if (isPrimary) btn.classList.add("active");
-        if (isUnavailable) btn.classList.add("disabled");
-        btn.dataset.version = ver.key;
+        // ---- 主要经文（单选）----
+        const priTitle = document.createElement("div");
+        priTitle.className = "version-section-title";
+        priTitle.textContent = "主要经文（单选）";
+        container.appendChild(priTitle);
 
-        btn.innerHTML = `
-            <span class="version-radio ${isPrimary ? 'on' : ''}"></span>
-            <span class="version-label-text">${ver.label}</span>
-            ${isUnavailable ? '<span class="version-badge">待更新</span>' : ''}
-        `;
+        cfg.versions.forEach(ver => {
+            const isPrimary = ver.key === primary;
+            const isUnavailable = !ver.available;
 
-        btn.addEventListener("click", () => {
-            if (isUnavailable || isPrimary) return;
-            selectPrimaryVersion(ver.key);
+            const btn = document.createElement("button");
+            btn.className = "version-item";
+            if (isPrimary) btn.classList.add("active");
+            if (isUnavailable) btn.classList.add("disabled");
+            btn.dataset.version = ver.key;
+
+            btn.innerHTML = `
+                <span class="version-radio ${isPrimary ? 'on' : ''}"></span>
+                <span class="version-label-text">${ver.label}</span>
+                ${isUnavailable ? '<span class="version-badge">待更新</span>' : ''}
+            `;
+
+            btn.addEventListener("click", () => {
+                if (isUnavailable || isPrimary) return;
+                selectPrimaryVersion(ver.key);
+            });
+            container.appendChild(btn);
         });
-        container.appendChild(btn);
-    });
 
-    // ---- 分隔线 ----
-    const divider = document.createElement("div");
-    divider.className = "version-divider";
-    container.appendChild(divider);
+        // ---- 分隔线 ----
+        const divider = document.createElement("div");
+        divider.className = "version-divider";
+        container.appendChild(divider);
 
-    // ---- 次要经文（多选）----
-    const secTitle = document.createElement("div");
-    secTitle.className = "version-section-title";
-    secTitle.textContent = "次要经文（多选）";
-    container.appendChild(secTitle);
+        // ---- 次要经文（多选）----
+        const secTitle = document.createElement("div");
+        secTitle.className = "version-section-title";
+        secTitle.textContent = "次要经文（多选）";
+        container.appendChild(secTitle);
 
-    window.BIBLE_VERSIONS.forEach(ver => {
-        const isSecondary = secondary.includes(ver.key);
-        const isUnavailable = !ver.available;
-        const isThePrimary = ver.key === primary;
+        cfg.versions.forEach(ver => {
+            const isSecondary = secondary.includes(ver.key);
+            const isUnavailable = !ver.available;
+            const isThePrimary = ver.key === primary;
 
-        const btn = document.createElement("button");
-        btn.className = "version-item";
-        if (isSecondary) btn.classList.add("active");
-        if (isUnavailable || isThePrimary) btn.classList.add("disabled");
-        btn.dataset.version = ver.key;
+            const btn = document.createElement("button");
+            btn.className = "version-item";
+            if (isSecondary) btn.classList.add("active");
+            if (isUnavailable || isThePrimary) btn.classList.add("disabled");
+            btn.dataset.version = ver.key;
 
-        btn.innerHTML = `
-            <span class="version-checkbox ${isSecondary ? 'on' : ''}"></span>
-            <span class="version-label-text">${ver.label}</span>
-            ${isUnavailable ? '<span class="version-badge">待更新</span>' : ''}
-            ${isThePrimary ? '<span class="version-badge">已设主要</span>' : ''}
-        `;
+            btn.innerHTML = `
+                <span class="version-checkbox ${isSecondary ? 'on' : ''}"></span>
+                <span class="version-label-text">${ver.label}</span>
+                ${isUnavailable ? '<span class="version-badge">待更新</span>' : ''}
+                ${isThePrimary ? '<span class="version-badge">已设主要</span>' : ''}
+            `;
 
-        btn.addEventListener("click", () => {
-            if (isUnavailable || isThePrimary) return;
-            toggleSecondaryVersion(ver.key);
+            btn.addEventListener("click", () => {
+                if (isUnavailable || isThePrimary) return;
+                toggleSecondaryVersion(ver.key);
+            });
+            container.appendChild(btn);
         });
-        container.appendChild(btn);
-    });
-}
-
-/* ========= 选择主要经文（完整流程）========= */
-function selectPrimaryVersion(versionKey) {
-    if (versionKey === window.Bible.primaryVersion) return;
-
-    // 如果新主要已在次要里，先从次要移除
-    window.Bible.secondaryVersions = (window.Bible.secondaryVersions || [])
-        .filter(k => k !== versionKey);
-
-    window.Bible.primaryVersion = versionKey;
-
-    console.log(`🔄 主要经文 → ${versionKey}`);
-
-    renderVersionPanel();
-    updateVersionButtonLabel();
-    // 关键：刷新书卷面板所有文字（书卷名、分类名、Tab名、顶栏标题）
-    updateBookPanelLanguage();
-    closeVersionPanel();
-
-    loadVersesMulti();
-    updateAudio();
-}
-
-/* ========= 静默切换主要经文（搜索跳转用）========= */
-function selectPrimaryVersionSilent(versionKey) {
-    if (versionKey === window.Bible.primaryVersion) return;
-
-    window.Bible.secondaryVersions = (window.Bible.secondaryVersions || [])
-        .filter(k => k !== versionKey);
-
-    window.Bible.primaryVersion = versionKey;
-
-    renderVersionPanel();
-    updateVersionButtonLabel();
-    updateBookPanelLanguage();
-
-    loadVersesMulti();
-    updateAudio();
-}
-
-/* ========= 切换次要经文 ========= */
-function toggleSecondaryVersion(versionKey) {
-    const list = window.Bible.secondaryVersions || [];
-    const idx = list.indexOf(versionKey);
-
-    if (idx >= 0) {
-        list.splice(idx, 1);
-    } else {
-        list.push(versionKey);
     }
 
-    window.Bible.secondaryVersions = list;
-    console.log(`🔄 次要经文 → [${list.join(', ')}]`);
+    /* ========= 选择主要经文（完整流程）========= */
+    function selectPrimaryVersion(versionKey) {
+        if (versionKey === state.primaryVersion) return;
 
-    renderVersionPanel();
-    closeVersionPanel();
+        // 如果新主要已在次要里，先从次要移除
+        state.secondaryVersions = (state.secondaryVersions || [])
+            .filter(k => k !== versionKey);
 
-    loadVersesMulti();
-}
+        state.primaryVersion = versionKey;
 
-/* ========= 更新顶栏版本标签 ========= */
-function updateVersionButtonLabel() {
-    const labelEl = document.getElementById("version-label");
-    if (!labelEl) return;
+        console.log(`🔄 主要经文 → ${versionKey}`);
 
-    const pri = getVersionConfig(window.Bible.primaryVersion);
-    const sec = (window.Bible.secondaryVersions || []).map(k => getVersionConfig(k)).filter(Boolean);
+        renderVersionPanel();
+        updateVersionButtonLabel();
+        // 关键：刷新书卷面板所有文字（书卷名、分类名、Tab名、顶栏标题）
+        window.updateBookPanelLanguage();
+        closeVersionPanel();
 
-    let text = pri ? pri.label : "";
-    if (sec.length > 0) {
-        text += " + " + sec.map(s => s.label).join("/");
+        window.loadVersesMulti();
+        window.updateAudio();
     }
-    labelEl.textContent = text;
-}
 
-/* ========= 打开 / 关闭版本面板 ========= */
-function openVersionPanel() {
-    renderVersionPanel();
-    const overlay = document.getElementById("version-overlay");
-    const panel = document.getElementById("version-panel");
-    if (overlay) overlay.classList.add("open");
-    if (panel) panel.classList.add("open");
-}
+    /* ========= 静默切换主要经文（搜索跳转用）========= */
+    function selectPrimaryVersionSilent(versionKey) {
+        if (versionKey === state.primaryVersion) return;
 
-function closeVersionPanel() {
-    const overlay = document.getElementById("version-overlay");
-    const panel = document.getElementById("version-panel");
-    if (overlay) overlay.classList.remove("open");
-    if (panel) panel.classList.remove("open");
-}
+        state.secondaryVersions = (state.secondaryVersions || [])
+            .filter(k => k !== versionKey);
 
-/* ========= 页面加载完成后初始化 ========= */
-window.addEventListener("DOMContentLoaded", () => {
-    updateVersionButtonLabel();
+        state.primaryVersion = versionKey;
 
-    const verToggle = document.getElementById("version-toggle");
-    const verClose = document.getElementById("version-panel-close");
-    const verOverlay = document.getElementById("version-overlay");
+        renderVersionPanel();
+        updateVersionButtonLabel();
+        window.updateBookPanelLanguage();
 
-    if (verToggle) verToggle.addEventListener("click", openVersionPanel);
-    if (verClose) verClose.addEventListener("click", closeVersionPanel);
-    if (verOverlay) verOverlay.addEventListener("click", closeVersionPanel);
+        window.loadVersesMulti();
+        window.updateAudio();
+    }
 
-    initBookSelector();
-});
+    /* ========= 切换次要经文 ========= */
+    function toggleSecondaryVersion(versionKey) {
+        const list = state.secondaryVersions || [];
+        const idx = list.indexOf(versionKey);
+
+        if (idx >= 0) {
+            list.splice(idx, 1);
+        } else {
+            list.push(versionKey);
+        }
+
+        state.secondaryVersions = list;
+        console.log(`🔄 次要经文 → [${list.join(', ')}]`);
+
+        renderVersionPanel();
+        closeVersionPanel();
+
+        window.loadVersesMulti();
+    }
+
+    /* ========= 更新顶栏版本标签 ========= */
+    function updateVersionButtonLabel() {
+        const labelEl = document.getElementById("version-label");
+        if (!labelEl) return;
+
+        const pri = utils.getVersionConfig(state.primaryVersion);
+        const sec = (state.secondaryVersions || []).map(k => utils.getVersionConfig(k)).filter(Boolean);
+
+        let text = pri ? pri.label : "";
+        if (sec.length > 0) {
+            text += " + " + sec.map(s => s.label).join("/");
+        }
+        labelEl.textContent = text;
+    }
+
+    /* ========= 打开 / 关闭版本面板 ========= */
+    function openVersionPanel() {
+        renderVersionPanel();
+        const overlay = document.getElementById("version-overlay");
+        const panel = document.getElementById("version-panel");
+        if (overlay) overlay.classList.add("open");
+        if (panel) panel.classList.add("open");
+    }
+
+    function closeVersionPanel() {
+        const overlay = document.getElementById("version-overlay");
+        const panel = document.getElementById("version-panel");
+        if (overlay) overlay.classList.remove("open");
+        if (panel) panel.classList.remove("open");
+    }
+
+    /* ============================================================
+       统一初始化入口
+       ============================================================ */
+
+    function init() {
+        // 1. 版本面板标签
+        updateVersionButtonLabel();
+
+        // 2. 版本面板事件绑定
+        const verToggle = document.getElementById("version-toggle");
+        const verClose = document.getElementById("version-panel-close");
+        const verOverlay = document.getElementById("version-overlay");
+
+        if (verToggle) verToggle.addEventListener("click", openVersionPanel);
+        if (verClose) verClose.addEventListener("click", closeVersionPanel);
+        if (verOverlay) verOverlay.addEventListener("click", closeVersionPanel);
+
+        // 3. 书卷 + 章节面板初始化
+        window.initBookSelector();
+    }
+
+    // 页面加载完成后初始化
+    window.addEventListener("DOMContentLoaded", init);
+
+    /* ============================================================
+       导出到全局
+       ============================================================ */
+
+    window.renderVersionPanel = renderVersionPanel;
+    window.selectPrimaryVersion = selectPrimaryVersion;
+    window.selectPrimaryVersionSilent = selectPrimaryVersionSilent;
+    window.toggleSecondaryVersion = toggleSecondaryVersion;
+    window.updateVersionButtonLabel = updateVersionButtonLabel;
+    window.openVersionPanel = openVersionPanel;
+    window.closeVersionPanel = closeVersionPanel;
+    window.init = init;
+
+})();

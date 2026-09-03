@@ -1,182 +1,213 @@
-const audio = document.getElementById('audio-player');
-const progress = document.getElementById('progress');
-const playPauseBtn = document.getElementById('play-pause');
+/* ========= 音频播放器 ========= */
+/*
+ * 依赖：config.js, utils.js, verse.js (getAudioUrlFor), chapter.js (prevChapter, nextChapter)
+ * 导出到全局的函数：
+ *   updateAudio, togglePlay, prevChapterAudio, nextChapterAudio
+ */
 
-const iconPlay = document.getElementById('icon-play-big');
-const iconPause = document.getElementById('icon-pause-big');
+(function () {
+    "use strict";
 
-let shouldAutoPlay = false;
+    var state = window.BibleFlow.state;
+    var utils = window.BibleFlow.utils;
 
-/* =========================
-   更新音频源（跟随主要经文版本）
-   ========================= */
-function updateAudio() {
-    const version = window.Bible.primaryVersion || "en_nrsvce";
-    const ver = getVersionConfig(version);
+    const audio = document.getElementById('audio-player');
+    const progress = document.getElementById('progress');
+    const playPauseBtn = document.getElementById('play-pause');
 
-    if (!ver || !ver.has_audio) {
-        disablePlayer();
-        return;
-    }
+    const iconPlay = document.getElementById('icon-play-big');
+    const iconPause = document.getElementById('icon-pause-big');
 
-    const url = getAudioUrlFor(version, Bible.book, Bible.chapter);
+    let shouldAutoPlay = false;
 
-    if (!url) {
-        disablePlayer();
-        return;
-    }
+    /* =========================
+       更新音频源（跟随主要经文版本）
+       ========================= */
+    function updateAudio() {
+        const version = state.primaryVersion || "en_nrsvce";
+        const ver = utils.getVersionConfig(version);
 
-    if (audio.src === url) return;
+        if (!ver || !ver.has_audio) {
+            disablePlayer();
+            return;
+        }
 
-    progress.value = 0;
-    clearWordHighlight();
+        const url = utils.getAudioUrlFor(version, state.book, state.chapter);
 
-    audio.pause();
-    audio.currentTime = 0;
-    audio.removeAttribute('src');
-    audio.load();
+        if (!url) {
+            disablePlayer();
+            return;
+        }
 
-    audio._pendingUrl = url;
-    enablePlayer();
+        if (audio.src === url) return;
 
-    iconPlay.style.display = 'block';
-    iconPause.style.display = 'none';
+        progress.value = 0;
+        window.clearWordHighlight();
 
-    if (shouldAutoPlay) {
-        audio.src = url;
+        audio.pause();
+        audio.currentTime = 0;
+        audio.removeAttribute('src');
         audio.load();
-        audio.play().catch(() => {
-            syncPlayButtonIcon();
-        });
-        shouldAutoPlay = false;
-    }
-}
 
-/* =========================
-   播放 / 暂停
-   ========================= */
-function togglePlay() {
-    if (playPauseBtn.disabled) return;
+        audio._pendingUrl = url;
+        enablePlayer();
 
-    if (!audio.src && audio._pendingUrl) {
-        audio.src = audio._pendingUrl;
-        audio.load();
-    }
-
-    shouldAutoPlay = false;
-    audio.paused ? audio.play() : audio.pause();
-}
-
-/* =========================
-   上一章 / 下一章（音频触发）
-   ========================= */
-function prevChapterAudio() {
-    shouldAutoPlay = true;
-    prevChapter();
-}
-
-function nextChapterAudio() {
-    shouldAutoPlay = true;
-    nextChapter();
-}
-
-/* =========================
-   UI 同步
-   ========================= */
-function syncPlayButtonIcon() {
-    if (!iconPlay || !iconPause) return;
-
-    if (audio.paused || audio.ended) {
         iconPlay.style.display = 'block';
         iconPause.style.display = 'none';
-    } else {
-        iconPlay.style.display = 'none';
-        iconPause.style.display = 'block';
+
+        if (shouldAutoPlay) {
+            audio.src = url;
+            audio.load();
+            audio.play().catch(() => {
+                syncPlayButtonIcon();
+            });
+            shouldAutoPlay = false;
+        }
     }
-}
 
-function enablePlayer() {
-    playPauseBtn.disabled = false;
-    progress.disabled = false;
-    playPauseBtn.classList.remove('disabled');
-}
+    /* =========================
+       播放 / 暂停
+       ========================= */
+    function togglePlay() {
+        if (playPauseBtn.disabled) return;
 
-function disablePlayer() {
-    playPauseBtn.disabled = true;
-    progress.disabled = true;
-    playPauseBtn.classList.add('disabled');
+        if (!audio.src && audio._pendingUrl) {
+            audio.src = audio._pendingUrl;
+            audio.load();
+        }
 
-    audio.pause();
-    audio.removeAttribute('src');
-    audio.load();
-}
-
-/* =========================
-   事件监听
-   ========================= */
-progress.addEventListener('input', () => {
-    if (!audio.duration) return;
-    audio.currentTime = (progress.value / 100) * audio.duration;
-});
-
-audio.addEventListener('timeupdate', () => {
-    if (audio.duration) {
-        progress.value = (audio.currentTime / audio.duration) * 100;
+        shouldAutoPlay = false;
+        audio.paused ? audio.play() : audio.pause();
     }
-    highlightWordAt(Math.floor(audio.currentTime * 1000));
-});
 
-audio.addEventListener('play', syncPlayButtonIcon);
-audio.addEventListener('pause', syncPlayButtonIcon);
-audio.addEventListener('ended', () => {
-    audio.currentTime = 0;
-    progress.value = 0;
-    syncPlayButtonIcon();
-    shouldAutoPlay = true;
-    nextChapter();
-});
+    /* =========================
+       上一章 / 下一章（音频触发）
+       ========================= */
+    function prevChapterAudio() {
+        shouldAutoPlay = true;
+        window.prevChapter();
+    }
 
-/* =========================
-   空格键控制播放 / 暂停
-   ========================= */
-document.addEventListener('keydown', (e) => {
-    if (e.code !== 'Space' && e.key !== ' ') return;
+    function nextChapterAudio() {
+        shouldAutoPlay = true;
+        window.nextChapter();
+    }
 
-    const tag = e.target.tagName;
-    const isEditable =
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
-        e.target.isContentEditable;
+    /* =========================
+       UI 同步
+       ========================= */
+    function syncPlayButtonIcon() {
+        if (!iconPlay || !iconPause) return;
 
-    if (isEditable) return;
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
+        if (audio.paused || audio.ended) {
+            iconPlay.style.display = 'block';
+            iconPause.style.display = 'none';
+        } else {
+            iconPlay.style.display = 'none';
+            iconPause.style.display = 'block';
+        }
+    }
 
-    e.preventDefault();
-    togglePlay();
-});
+    function enablePlayer() {
+        playPauseBtn.disabled = false;
+        progress.disabled = false;
+        playPauseBtn.classList.remove('disabled');
+    }
 
-/* =========================
-   左右箭头快进 / 快退
-   ========================= */
-const SKIP_SECONDS = 15;
+    function disablePlayer() {
+        playPauseBtn.disabled = true;
+        progress.disabled = true;
+        playPauseBtn.classList.add('disabled');
 
-document.addEventListener('keydown', (e) => {
-    const tag = e.target.tagName;
-    const isEditable =
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
-        e.target.isContentEditable;
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+    }
 
-    if (isEditable) return;
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    /* =========================
+       事件监听
+       ========================= */
+    progress.addEventListener('input', () => {
+        if (!audio.duration) return;
+        audio.currentTime = (progress.value / 100) * audio.duration;
+    });
 
-    if (e.key === 'ArrowLeft') {
+    audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+            progress.value = (audio.currentTime / audio.duration) * 100;
+        }
+        window.highlightWordAt(Math.floor(audio.currentTime * 1000));
+    });
+
+    audio.addEventListener('play', syncPlayButtonIcon);
+    audio.addEventListener('pause', syncPlayButtonIcon);
+    audio.addEventListener('ended', () => {
+        audio.currentTime = 0;
+        progress.value = 0;
+        syncPlayButtonIcon();
+        shouldAutoPlay = true;
+        window.nextChapter();
+    });
+
+    /* =========================
+       空格键控制播放 / 暂停
+       ========================= */
+    document.addEventListener('keydown', (e) => {
+        if (e.code !== 'Space' && e.key !== ' ') return;
+
+        const tag = e.target.tagName;
+        const isEditable =
+            tag === 'INPUT' ||
+            tag === 'TEXTAREA' ||
+            e.target.isContentEditable;
+
+        if (isEditable) return;
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+
         e.preventDefault();
-        audio.currentTime = Math.max(0, audio.currentTime - SKIP_SECONDS);
-    }
+        togglePlay();
+    });
 
-    if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        audio.currentTime = Math.min(audio.duration || Infinity, audio.currentTime + SKIP_SECONDS);
-    }
-});
+    /* =========================
+       左右箭头快进 / 快退
+       ========================= */
+    const SKIP_SECONDS = 15;
+
+    document.addEventListener('keydown', (e) => {
+        const tag = e.target.tagName;
+        const isEditable =
+            tag === 'INPUT' ||
+            tag === 'TEXTAREA' ||
+            e.target.isContentEditable;
+
+        if (isEditable) return;
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            audio.currentTime = Math.max(0, audio.currentTime - SKIP_SECONDS);
+        }
+
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            audio.currentTime = Math.min(audio.duration || Infinity, audio.currentTime + SKIP_SECONDS);
+        }
+    });
+
+    /* ============================================================
+       导出到全局
+       ============================================================ */
+
+    window.updateAudio = updateAudio;
+    window.togglePlay = togglePlay;
+    window.prevChapterAudio = prevChapterAudio;
+    window.nextChapterAudio = nextChapterAudio;
+    window.shouldAutoPlay = shouldAutoPlay;  // chapter.js 需要读写
+
+    // 提供 getter/setter 让 chapter.js 能读写 shouldAutoPlay
+    Object.defineProperty(window, 'shouldAutoPlay', {
+        get: function () { return shouldAutoPlay; },
+        set: function (v) { shouldAutoPlay = v; }
+    });
+
+})();
