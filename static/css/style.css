@@ -1,35 +1,89 @@
-/* ===== Design Tokens — 极简黑白 ===== */
-:root {
-    --bg:        #ffffff;
-    --bg-alt:    #fafafa;
-    --ink:        #111111;
-    --ink-2:      #555555;
-    --ink-3:      #999999;
-    --line:       #ebebeb;
-    --line-2:     #f0f0f0;
-    --active-bg:   #111111;
-    --active-ink:  #ffffff;
-    --hover-bg:    #f5f5f5;
-    --tap:        rgba(0,0,0,0.04);
+/* ============================================================
+   BibleFlow — 主题系统
+   ============================================================ */
 
-    --top-h:        48px;
-    --player-h:     60px;
-    --radius:       6px;
-    --transition:    0.15s ease;
+/* ===== 主题 1: Apple 蓝白风格 (默认) ===== */
+:root,
+[data-theme="apple"] {
+    --bg:            #ffffff;
+    --bg-alt:        #f5f5f7;
+    --bg-card:       #ffffff;
+    --ink:           #1d1d1f;
+    --ink-2:         #6e6e73;
+    --ink-3:         #86868b;
+    --line:          #d2d2d7;
+    --line-2:        #e8e8ed;
+    --accent:        #007aff;
+    --accent-light:  rgba(0,122,255,0.08);
+    --active-bg:     #007aff;
+    --active-ink:    #ffffff;
+    --hover-bg:      #f0f0f5;
+    --tap:           rgba(0,0,0,0.04);
+    --shadow-sm:     0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-md:     0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+    --radius:        10px;
+    --radius-sm:     6px;
+    --radius-lg:     14px;
+    --font:          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                     "Helvetica Neue", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    --mono:          "SF Mono", "Menlo", "Consolas", monospace;
+    --transition:    0.2s ease;
+    --top-h:         52px;
+    --player-h:      60px;
+    --blur:          blur(20px);
+    --blur-header:   blur(16px);
 }
 
-* { -webkit-tap-highlight-color: transparent; }
+/* ===== 主题 2: 极简黑白风格 (原有风格) ===== */
+[data-theme="mono"] {
+    --bg:            #ffffff;
+    --bg-alt:        #fafafa;
+    --bg-card:       #ffffff;
+    --ink:           #111111;
+    --ink-2:         #555555;
+    --ink-3:         #999999;
+    --line:          #ebebeb;
+    --line-2:        #f0f0f0;
+    --accent:        #111111;
+    --accent-light:  rgba(0,0,0,0.04);
+    --active-bg:     #111111;
+    --active-ink:    #ffffff;
+    --hover-bg:      #f5f5f5;
+    --tap:           rgba(0,0,0,0.04);
+    --shadow-sm:     none;
+    --shadow-md:     none;
+    --radius:        6px;
+    --radius-sm:     6px;
+    --radius-lg:     6px;
+    --font:          -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+                     "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    --mono:          "SF Mono", "Menlo", "Consolas", monospace;
+    --transition:    0.15s ease;
+    --top-h:         48px;
+    --player-h:      60px;
+    --blur:          none;
+    --blur-header:   none;
+}
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-                 "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
-    background: var(--bg);
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    height: 100%;
+    font-family: var(--font);
+    background: var(--bg-alt);
     color: var(--ink);
     line-height: 1.65;
-    margin: 0;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     padding-top:    calc(var(--top-h) + env(safe-area-inset-top));
     padding-bottom: calc(var(--player-h) + env(safe-area-inset-bottom));
-    -webkit-font-smoothing: antialiased;
 }
 
 
@@ -40,15 +94,16 @@ body {
     position: fixed;
     top: 0; left: 0; right: 0;
     height: calc(var(--top-h) + env(safe-area-inset-top));
-    background: var(--bg);
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: var(--blur-header);
+    -webkit-backdrop-filter: var(--blur-header);
     border-bottom: 1px solid var(--line);
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: env(safe-area-inset-top) 8px 0;
-    box-sizing: border-box;
-    gap: 4px;
+    padding: env(safe-area-inset-top) 16px 0;
+    gap: 8px;
 }
 
 .top-nav-btn {
@@ -76,7 +131,7 @@ body {
     align-items: center;
     gap: 3px;
     padding: 6px 10px;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     transition: opacity var(--transition);
     font-family: inherit;
     white-space: nowrap;
@@ -101,12 +156,30 @@ body {
     border-radius: 50%;
     transition: background var(--transition);
     flex-shrink: 0;
+    position: relative;
 }
 .top-icon-btn:active { background: var(--tap); }
 .top-icon-btn:focus  { outline: none; }
 
+/* 主题切换按钮 */
+.theme-toggle {
+    width: 40px; height: 40px;
+    border: none; background: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-2);
+    border-radius: 50%;
+    transition: background var(--transition);
+    flex-shrink: 0;
+}
+.theme-toggle:active { background: var(--tap); }
+.theme-toggle:focus  { outline: none; }
+.theme-toggle svg { transition: transform 0.4s ease; }
+.theme-toggle:hover svg { transform: rotate(20deg); }
+
 #version-toggle { margin-right: 0; order: 3; }
 #search-toggle  { margin-left: 0; order: 4; }
+#theme-toggle   { order: 5; }
 
 
 /* ============================================================
@@ -197,7 +270,7 @@ body {
 }
 .version-item:active { background: var(--tap); }
 .version-item.active {
-    background: var(--ink);
+    background: var(--active-bg);
     color: var(--active-ink);
     font-weight: 600;
 }
@@ -219,36 +292,8 @@ body {
     background: radial-gradient(circle, var(--active-ink) 35%, transparent 40%);
 }
 .version-radio.on {
-    border-color: var(--ink);
-    background: radial-gradient(circle, var(--ink) 35%, transparent 40%);
-}
-
-.version-checkbox {
-    width: 16px; height: 16px;
-    border: 2px solid var(--ink-3);
-    border-radius: 3px;
-    flex-shrink: 0;
-    transition: all var(--transition);
-    position: relative;
-}
-.version-checkbox.on {
-    border-color: var(--ink);
-    background: var(--ink);
-}
-.version-checkbox.on::after {
-    content: "✓";
-    position: absolute;
-    top: -1px; left: 2px;
-    font-size: 12px;
-    color: var(--active-ink);
-    font-weight: 700;
-}
-.version-item.active .version-checkbox.on {
-    border-color: var(--active-ink);
-    background: var(--active-ink);
-}
-.version-item.active .version-checkbox.on::after {
-    color: var(--ink);
+    border-color: var(--accent);
+    background: radial-gradient(circle, var(--accent) 35%, transparent 40%);
 }
 
 .version-label-text { flex: 1; }
@@ -265,6 +310,34 @@ body {
 .version-item.active .version-badge {
     background: rgba(255,255,255,0.2);
     color: var(--active-ink);
+}
+
+.version-checkbox {
+    width: 16px; height: 16px;
+    border: 2px solid var(--ink-3);
+    border-radius: 3px;
+    flex-shrink: 0;
+    transition: all var(--transition);
+    position: relative;
+}
+.version-checkbox.on {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+.version-checkbox.on::after {
+    content: "\2713";
+    position: absolute;
+    top: -1px; left: 2px;
+    font-size: 12px;
+    color: var(--active-ink);
+    font-weight: 700;
+}
+.version-item.active .version-checkbox.on {
+    border-color: var(--active-ink);
+    background: var(--active-ink);
+}
+.version-item.active .version-checkbox.on::after {
+    color: var(--ink);
 }
 
 
@@ -311,7 +384,7 @@ body {
     transition: border-color var(--transition);
 }
 .search-sidebar-header input::placeholder { color: var(--ink-3); }
-.search-sidebar-header input:focus { outline: none; border-bottom-color: var(--ink); }
+.search-sidebar-header input:focus { outline: none; border-bottom-color: var(--accent); }
 
 .search-close-btn {
     width: 30px; height: 30px;
@@ -445,7 +518,7 @@ body {
 }
 .book-tab {
     flex: 1;
-    padding: 6px 0;
+    padding: 8px 0;
     border: 1px solid var(--line);
     border-radius: 999px;
     background: var(--bg);
@@ -455,7 +528,7 @@ body {
     transition: all var(--transition);
     font-family: inherit;
 }
-.book-tab.active { background: var(--ink); color: var(--active-ink); border-color: var(--ink); }
+.book-tab.active { background: var(--active-bg); color: var(--active-ink); border-color: var(--active-bg); }
 .book-tab:not(.active):active { background: var(--hover-bg); }
 
 /* Tab 双语 */
@@ -523,7 +596,7 @@ body {
     font-size: 15px; font-weight: 400;
     color: var(--ink);
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     transition: background var(--transition), color var(--transition);
     font-family: inherit;
     display: flex; flex-direction: column;
@@ -533,7 +606,7 @@ body {
     min-height: 40px;
 }
 .book-item:active { background: var(--tap); }
-.book-item.active { background: var(--ink); color: var(--active-ink); font-weight: 500; }
+.book-item.active { background: var(--active-bg); color: var(--active-ink); font-weight: 500; }
 .book-item-sub { font-size: 10px; font-weight: 400; color: var(--ink-3); margin-top: 1px; line-height: 1.1; white-space: nowrap; }
 .book-item.active .book-item-sub { color: rgba(255,255,255,0.7); }
 
@@ -547,19 +620,19 @@ body {
     font-size: 14px; font-weight: 400;
     color: var(--ink);
     cursor: pointer;
-    border-radius: 5px;
-    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
     transition: background var(--transition), color var(--transition);
     text-align: center;
     display: flex; align-items: center; justify-content: center;
 }
 .chapter-item:active { background: var(--tap); }
-.chapter-item.active { background: var(--ink); color: var(--active-ink); font-weight: 600; }
-.chapter-item.active:active { background: #333; }
+.chapter-item.active { background: var(--active-bg); color: var(--active-ink); font-weight: 600; }
+.chapter-item.active:active { background: color-mix(in srgb, var(--active-bg) 85%, black); }
 
 
 /* ============================================================
-   经文容器（核心：恢复大小/颜色层级 + 防截断）
+   经文容器
    ============================================================ */
 
 /* 外层容器 */
@@ -571,6 +644,7 @@ body {
     width: 100%;
     overflow-x: hidden;
     min-width: 0;
+    background: var(--bg);
 }
 
 /* 每个经节块 */
@@ -591,14 +665,12 @@ body {
     margin-bottom: 3px;
 }
 
-/* ===== 主要经文（英文大黑字）===== */
-/* verse.js 渲染结构：.verse-block > .verse-text > .word spans */
+/* 主要经文 */
 .verse-text {
     font-size: 16px;
     color: var(--ink);
     line-height: 1.75;
     margin-bottom: 5px;
-    /* ✅ 防截断 */
     word-break: normal !important;
     overflow-wrap: break-word !important;
     hyphens: none !important;
@@ -607,7 +679,7 @@ body {
     display: block;
 }
 
-/* ===== 次要经文（中文小灰字）===== */
+/* 次要经文 */
 .verse-secondary {
     font-size: 14px;
     color: var(--ink-2);
@@ -622,8 +694,7 @@ body {
     min-width: 0;
 }
 
-/* ===== 分词 span — 关键防截断点 ===== */
-/* verse.js 把每个英文单词渲染成 <span class="word"> */
+/* 分词 span */
 .verse-text .word {
     display: inline !important;
     word-break: normal !important;
@@ -631,14 +702,10 @@ body {
     hyphens: none !important;
     white-space: normal !important;
 }
-
-/* 空格 span */
 .verse-text .space {
     display: inline !important;
     white-space: pre-wrap !important;
 }
-
-/* 标点符号 */
 .verse-text .punctuation {
     color: var(--ink-2);
     display: inline !important;
@@ -646,8 +713,8 @@ body {
 
 /* 高亮 / 实体 */
 .entity { text-decoration: underline; text-underline-offset: 3px; }
-.word.active { background-color: #fff3a0; border-radius: 2px; }
-.verse-highlight { background-color: #fafafa; transition: background 0.6s ease; }
+.word.active { background-color: var(--accent-light); border-radius: 2px; }
+.verse-highlight { background-color: var(--accent-light); transition: background 0.6s ease; }
 
 
 /* ============================================================
@@ -657,7 +724,9 @@ body {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: calc(var(--player-h) + env(safe-area-inset-bottom));
-    background: var(--bg);
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
     border-top: 1px solid var(--line);
     z-index: 1000;
     display: flex;
@@ -692,13 +761,13 @@ body {
 #progress {
     flex: 1; height: 3px;
     border-radius: 2px;
-    accent-color: var(--ink);
+    accent-color: var(--accent);
     cursor: pointer;
     padding: 12px 0;
     box-sizing: border-box;
 }
-#progress::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); border: none; }
-#progress::-moz-range-thumb     { width: 14px; height: 14px; border-radius: 50%; background: var(--ink); border: none; }
+#progress::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: none; }
+#progress::-moz-range-thumb     { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: none; }
 #progress:disabled { opacity: 0.3; cursor: not-allowed; }
 
 
@@ -707,9 +776,11 @@ body {
    ============================================================ */
 @media (max-width: 600px) {
 
+    .top-bar { padding: env(safe-area-inset-top) 8px 0; gap: 4px; }
     .top-title { font-size: 16px; padding: 6px 6px; }
     .top-nav-btn { width: 36px; height: 36px; }
     .top-icon-btn { width: 36px; height: 36px; }
+    .theme-toggle { width: 36px; height: 36px; }
 
     .version-panel { width: 80%; max-width: none; }
 
@@ -738,17 +809,9 @@ body {
         padding-bottom: 72px;
     }
 
-    /* 手机端：主要经文稍小一点，但仍明显大于次要经文 */
-    .verse-text {
-        font-size: 15px;
-        line-height: 1.7;
-    }
-    .verse-secondary {
-        font-size: 13px;
-        line-height: 1.65;
-    }
+    .verse-text { font-size: 15px; line-height: 1.7; }
+    .verse-secondary { font-size: 13px; line-height: 1.65; }
 
-    /* 防截断 */
     .verse-text, .verse-secondary {
         word-break: normal !important;
         overflow-wrap: break-word !important;
@@ -761,7 +824,6 @@ body {
         overflow-wrap: break-word !important;
     }
 
-    /* 播放器 */
     .player {
         flex-direction: column-reverse;
         height: auto;
@@ -775,9 +837,6 @@ body {
     .prev-chapter, .next-chapter { width: 22px; height: 22px; }
 }
 
-/* ============================================================
-   搜索 / 版本面板手机端统一：全部从右侧滑入
-   ============================================================ */
 @media (max-width: 767px) {
     .search-sidebar {
         top: 0; bottom: auto; left: auto; right: 0;
