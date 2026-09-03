@@ -106,16 +106,21 @@
         const cats = data.bookCategories || [];
         // 找到当前 testament 的顶层分类对象
         const testamentCat = cats.find(c => c.key === testament) || null;
+        const testamentBookIds = testamentCat ? (testamentCat.book_ids || []) : [];
 
-        if (!testamentCat) {
+        if (!testamentCat || testamentBookIds.length === 0) {
             // 没有分类信息，显示全部
             const grid = document.createElement("div");
             grid.className = "book-grid";
             appendBookButtons(data.allBooks, grid);
             list.appendChild(grid);
         } else {
-            // 子分类数组（可能叫 "categories" 或直接在顶层）
-            const subCats = testamentCat.categories || [];
+            // 找出属于当前 testament 的所有子分类（通过 book_ids 匹配）
+            const subCats = cats.filter(c => {
+                if (c.key === testament) return false; // 排除顶层自身
+                const ids = c.book_ids || [];
+                return ids.length > 0 && ids.every(id => testamentBookIds.includes(id));
+            });
 
             if (subCats.length > 0) {
                 // 按子分类分组渲染
@@ -136,8 +141,7 @@
                 });
             } else {
                 // 无子分类，按 testament 的 book_ids 直接列出
-                const bookIds = testamentCat.book_ids || [];
-                const books = data.allBooks.filter(b => bookIds.includes(b.id));
+                const books = data.allBooks.filter(b => testamentBookIds.includes(b.id));
                 const grid = document.createElement("div");
                 grid.className = "book-grid";
                 appendBookButtons(books, grid);
