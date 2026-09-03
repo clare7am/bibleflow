@@ -6,8 +6,8 @@
           content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <title>BibleFlow</title>
 
-    <link rel="icon" href="https://bibleflow.oss-cn-hangzhou.aliyuncs.com/static/alpha_omega_2.png">
-    <link rel="apple-touch-icon" href="https://bibleflow.oss-cn-hangzhou.aliyuncs.com/static/alpha_omega_2.png">
+    <link rel="icon" href="https://bibleflow.oss-cn-hangzhou.aliyuncs.com/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://bibleflow.oss-cn-hangzhou.aliyuncs.com/images/favicon.png">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -150,18 +150,30 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<!-- ===== JS ===== -->
+<!-- ===== JS（按依赖顺序加载）===== -->
+<!-- 1. 配置 + 状态 -->
 <script src="./static/js/config.js"></script>
+<!-- 2. 工具函数（依赖 config） -->
+<script src="./static/js/utils.js"></script>
 
-<script src="./static/js/search.js"></script>
+<!-- 3. 无外部依赖的基础模块 -->
+<script src="./static/js/entity.js"></script>
 <script src="./static/js/highlight.js"></script>
-<script src="./static/js/player.js"></script>
 
-<script src="./static/js/book.js"></script>
-<script src="./static/js/chapter.js"></script>
+<!-- 4. 经文渲染（依赖 config, utils, entity） -->
 <script src="./static/js/verse.js"></script>
 
-<script src="./static/js/entity.js"></script>
+<!-- 5. 书卷/章节（依赖 config, utils, verse） -->
+<script src="./static/js/book.js"></script>
+<script src="./static/js/chapter.js"></script>
+
+<!-- 6. 播放器（依赖 config, utils, verse, chapter, highlight） -->
+<script src="./static/js/player.js"></script>
+
+<!-- 7. 搜索（依赖 config, utils, book, verse） -->
+<script src="./static/js/search.js"></script>
+
+<!-- 8. 主入口 + 版本面板（依赖 config, utils, book, verse, player） -->
 <script src="./static/js/main.js"></script>
 
 </body>
