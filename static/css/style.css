@@ -428,7 +428,7 @@ body {
 
 .book-panel {
     position: fixed; top: 0; left: 0;
-    width: 90%; max-width: 520px; height: 100%;
+    width: 90%; max-width: 680px; height: 100%;
     background: var(--bg);
     z-index: 1300;
     transform: translateX(-100%);
@@ -534,7 +534,7 @@ body {
 .book-cat-title:first-child { margin-top: 4px; }
 
 /* 书卷网格 */
-.book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.book-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px 2px; }
 
 /* 书卷按钮 */
 .book-item {
