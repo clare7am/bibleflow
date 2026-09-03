@@ -1,107 +1,129 @@
 /**
  * chapter.js — 章节切换逻辑
+ *
+ * 依赖：config.js, utils.js, book.js (loadChaptersForBook), verse.js (loadVersesMulti, updateAudio)
  */
 
-function onChapterChange(chapter, onReady) {
-    if (!chapter) return;
+(function () {
+    "use strict";
 
-    const wasPlaying = !audio.paused && !audio.ended;
+    var state = window.BibleFlow.state;
+    var data = window.BibleFlow.data;
+    var utils = window.BibleFlow.utils;
 
-    Bible.chapter = chapter;
+    function onChapterChange(chapter, onReady) {
+        if (!chapter) return;
 
-    const book = window._allBooks?.find(b => b.id === Bible.book);
-    if (book) {
-        const span = document.getElementById("book-btn-text");
-        if (span) span.textContent = `${getBookDisplayName(book)} ${chapter}`;
-    }
+        const audio = document.getElementById('audio-player');
+        const wasPlaying = audio && !audio.paused && !audio.ended;
 
-    loadVersesMulti(onReady);
-    updateAudio();
+        state.chapter = chapter;
 
-    if (wasPlaying) {
-        shouldAutoPlay = true;
-    }
-}
+        const book = data.allBooks?.find(b => b.id === state.book);
+        if (book) {
+            const span = document.getElementById("book-btn-text");
+            if (span) span.textContent = `${utils.getBookDisplayName(book)} ${chapter}`;
+        }
 
-function getCurrentChapters() {
-    return window._currentChapters || [];
-}
+        window.loadVersesMulti(onReady);
+        window.updateAudio();
 
-async function prevChapter() {
-    shouldAutoPlay = false;
-
-    const chapters = getCurrentChapters();
-    const bookIndex = window._allBooks.findIndex(b => b.id === Bible.book);
-    const currentCh = Number(Bible.chapter) || 1;
-
-    if (chapters.length === 0) {
-        console.warn("prevChapter: 章节未加载，重新加载当前书卷");
-        await loadChaptersForCurrentBook(currentCh);
-        return;
-    }
-
-    const chIndex = chapters.findIndex(c => Number(c.chapter) === currentCh);
-
-    if (chIndex > 0) {
-        const target = chapters[chIndex - 1].chapter;
-        Bible.chapter = target;
-        onChapterChange(target);
-        return;
-    }
-
-    // 跨书卷：上一卷最后一章
-    if (bookIndex > 0) {
-        const prevBook = window._allBooks[bookIndex - 1];
-        Bible.book = prevBook.id;
-        try {
-            const chs = await loadChaptersForBook(prevBook.id, null);
-            const lastCh = chs[chs.length - 1].chapter;
-            Bible.chapter = lastCh;
-            onChapterChange(lastCh);
-        } catch (e) {
-            console.error("跨卷 prev 失败:", e);
+        if (wasPlaying) {
+            window.shouldAutoPlay = true;
         }
     }
-}
 
-async function nextChapter() {
-    shouldAutoPlay = false;
-
-    const chapters = getCurrentChapters();
-    const bookIndex = window._allBooks.findIndex(b => b.id === Bible.book);
-    const currentCh = Number(Bible.chapter) || 1;
-
-    if (chapters.length === 0) {
-        console.warn("nextChapter: 章节未加载，重新加载当前书卷");
-        await loadChaptersForCurrentBook(currentCh);
-        return;
+    function getCurrentChapters() {
+        return data.currentChapters || [];
     }
 
-    const chIndex = chapters.findIndex(c => Number(c.chapter) === currentCh);
+    async function prevChapter() {
+        window.shouldAutoPlay = false;
 
-    if (chIndex >= 0 && chIndex < chapters.length - 1) {
-        const target = chapters[chIndex + 1].chapter;
-        Bible.chapter = target;
-        onChapterChange(target);
-        return;
-    }
+        let chapters = getCurrentChapters();
+        const bookIndex = data.allBooks.findIndex(b => b.id === state.book);
+        const currentCh = Number(state.chapter) || 1;
 
-    // 跨书卷：下一卷第一章
-    if (bookIndex >= 0 && bookIndex < window._allBooks.length - 1) {
-        const nextBook = window._allBooks[bookIndex + 1];
-        Bible.book = nextBook.id;
-        try {
-            const chs = await loadChaptersForBook(nextBook.id, null);
-            const firstCh = chs[0].chapter;
-            Bible.chapter = firstCh;
-            onChapterChange(firstCh);
-        } catch (e) {
-            console.error("跨卷 next 失败:", e);
+        // 如果章节未加载，先加载再继续
+        if (chapters.length === 0) {
+            await loadChaptersForCurrentBook(currentCh);
+            chapters = getCurrentChapters();
+        }
+
+        const chIndex = chapters.findIndex(c => Number(c.chapter) === currentCh);
+
+        if (chIndex > 0) {
+            const target = chapters[chIndex - 1].chapter;
+            state.chapter = target;
+            onChapterChange(target);
+            return;
+        }
+
+        // 跨书卷：上一卷最后一章
+        if (bookIndex > 0) {
+            const prevBook = data.allBooks[bookIndex - 1];
+            state.book = prevBook.id;
+            try {
+                const chs = await window.loadChaptersForBook(prevBook.id, null);
+                const lastCh = chs[chs.length - 1].chapter;
+                state.chapter = lastCh;
+                onChapterChange(lastCh);
+            } catch (e) {
+                console.error("跨卷 prev 失败:", e);
+            }
         }
     }
-}
 
-async function loadChaptersForCurrentBook(fallbackChapter) {
-    const target = fallbackChapter || Bible.chapter || 1;
-    return loadChaptersForBook(Bible.book, target);
-}
+    async function nextChapter() {
+        window.shouldAutoPlay = false;
+
+        let chapters = getCurrentChapters();
+        const bookIndex = data.allBooks.findIndex(b => b.id === state.book);
+        const currentCh = Number(state.chapter) || 1;
+
+        // 如果章节未加载，先加载再继续
+        if (chapters.length === 0) {
+            await loadChaptersForCurrentBook(currentCh);
+            chapters = getCurrentChapters();
+        }
+
+        const chIndex = chapters.findIndex(c => Number(c.chapter) === currentCh);
+
+        if (chIndex >= 0 && chIndex < chapters.length - 1) {
+            const target = chapters[chIndex + 1].chapter;
+            state.chapter = target;
+            onChapterChange(target);
+            return;
+        }
+
+        // 跨书卷：下一卷第一章
+        if (bookIndex >= 0 && bookIndex < data.allBooks.length - 1) {
+            const nextBook = data.allBooks[bookIndex + 1];
+            state.book = nextBook.id;
+            try {
+                const chs = await window.loadChaptersForBook(nextBook.id, null);
+                const firstCh = chs[0].chapter;
+                state.chapter = firstCh;
+                onChapterChange(firstCh);
+            } catch (e) {
+                console.error("跨卷 next 失败:", e);
+            }
+        }
+    }
+
+    async function loadChaptersForCurrentBook(fallbackChapter) {
+        const target = fallbackChapter || state.chapter || 1;
+        return window.loadChaptersForBook(state.book, target);
+    }
+
+    /* ============================================================
+       导出到全局
+       ============================================================ */
+
+    window.onChapterChange = onChapterChange;
+    window.getCurrentChapters = getCurrentChapters;
+    window.prevChapter = prevChapter;
+    window.nextChapter = nextChapter;
+    window.loadChaptersForCurrentBook = loadChaptersForCurrentBook;
+
+})();
