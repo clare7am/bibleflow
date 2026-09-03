@@ -34,7 +34,7 @@
     async function initBookSelector() {
         try {
             const [booksResp, catResp] = await Promise.all([
-                fetch(`/test/books.json?v=${cfg.appVersion}`),
+                fetch(`${cfg.ossJsonBase}/_global/books.json?v=${cfg.appVersion}`),
                 fetch(`${cfg.ossJsonBase}/_global/categories.json?v=${cfg.appVersion}`)
             ]);
 
