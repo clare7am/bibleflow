@@ -21,10 +21,10 @@
     let shouldAutoPlay = false;
 
     /* =========================
-       更新音频源（跟随主要经文版本）
+       更新音频源（跟随音频版本设置）
        ========================= */
     function updateAudio() {
-        const version = state.primaryVersion || "en_nrsvce";
+        const version = state.audioVersion || state.primaryVersion || "en_nrsvce";
         const ver = utils.getVersionConfig(version);
 
         if (!ver || !ver.has_audio) {

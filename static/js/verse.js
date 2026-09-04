@@ -68,7 +68,7 @@
             return;
         }
 
-        // 以主要经文（或第一个成功版本）的节号为基准对齐
+        // 以主要经文为基准对齐节号
         const primaryResult = success.find(r => r.ver.key === state.primaryVersion)
             || success[0];
         const primaryVerses = primaryResult.data.verses || [];
@@ -97,48 +97,44 @@
             num.textContent = v.verse_id || "";
             block.appendChild(num);
 
-            // 主要经文正文
-            const priText = document.createElement("div");
-            priText.className = "verse-text verse-primary";
-            priText.dataset.version = primaryVer.key;
+            // 渲染每个版本：有 tokens 就渲染 token span，没有就纯文本
+            const audioVer = state.audioVersion || state.primaryVersion;
 
-            if (primaryVer.has_tokens && v.tokens && v.tokens.length > 0) {
-                v.tokens.forEach(t => {
-                    const span = document.createElement("span");
-                    span.className = t.type || "word";
-                    span.textContent = t.token;
-                    if (t.align_id !== undefined && t.align_id !== "") {
-                        span.dataset.alignId = t.align_id;
-                    }
-                    if (t.start) span.dataset.start = t.start;
-                    if (t.end) span.dataset.end = t.end;
-                    if (t.entity_key) span.dataset.entityKey = t.entity_key;
-                    priText.appendChild(span);
-                });
-            } else {
-                priText.textContent = v.text || "";
-            }
-            block.appendChild(priText);
+            success.forEach(r => {
+                const ver = r.ver;
+                const verData = r.data;
+                const verse = (verData.verses || []).find(vv => vv.verse_id === v.verse_id);
+                if (!verse) return;
 
-            // 次要经文（按勾选顺序，纯文本，无版本标签前缀）
-            const secondary = state.secondaryVersions || [];
-            secondary.forEach(secKey => {
-                const secVer = utils.getVersionConfig(secKey);
-                if (!secVer) return;
-                const secVerse = otherIndex[secKey] && otherIndex[secKey][v.verse_id];
+                const isPrimary = ver.key === primaryVer.key;
+                const isAudio = ver.key === audioVer;
 
-                const secDiv = document.createElement("div");
-                secDiv.className = "verse-text verse-secondary";
-                secDiv.dataset.version = secKey;
-
-                if (secVerse && secVerse.text) {
-                    secDiv.textContent = secVerse.text;
+                const textDiv = document.createElement("div");
+                // 主要版本 + 音频版本都支持高亮
+                if (isPrimary || isAudio) {
+                    textDiv.className = "verse-text verse-primary" + (isAudio && !isPrimary ? " verse-audio-target" : "");
                 } else {
-                    secDiv.textContent = "—";
-                    secDiv.classList.add("verse-missing");
+                    textDiv.className = "verse-text verse-secondary";
                 }
+                textDiv.dataset.version = ver.key;
 
-                block.appendChild(secDiv);
+                if (ver.has_tokens && verse.tokens && verse.tokens.length > 0) {
+                    verse.tokens.forEach(t => {
+                        const span = document.createElement("span");
+                        span.className = t.type || "word";
+                        span.textContent = t.token;
+                        if (t.align_id !== undefined && t.align_id !== "") {
+                            span.dataset.alignId = t.align_id;
+                        }
+                        if (t.start) span.dataset.start = t.start;
+                        if (t.end) span.dataset.end = t.end;
+                        if (t.entity_key) span.dataset.entityKey = t.entity_key;
+                        textDiv.appendChild(span);
+                    });
+                } else {
+                    textDiv.textContent = verse.text || "";
+                }
+                block.appendChild(textDiv);
             });
 
             frag.appendChild(block);

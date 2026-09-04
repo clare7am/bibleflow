@@ -194,71 +194,83 @@ body {
     font-size: 13px;
     font-weight: 600;
     color: var(--ink-3);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.02em;
     padding: 16px 20px 8px;
 }
 
-.version-divider {
-    height: 0.5px;
-    background: var(--line);
-    margin: 4px 20px;
+/* 可拖拽列表容器 */
+.version-sortable-list {
+    min-height: 40px;
+    padding: 4px 0;
+    transition: background 0.15s ease;
+    border-radius: 8px;
+    margin: 0 8px;
+}
+.version-sortable-list.drag-over {
+    background: var(--tap);
 }
 
-.version-item {
+/* 版本项（拖拽模式） */
+.version-item.draggable {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    padding: 12px 16px;
+    margin: 2px 0;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
     width: 100%;
-    appearance: none; border: none; background: transparent;
-    padding: 14px 20px;
-    font-size: 17px;
-    font-weight: 400;
-    color: var(--ink);
-    cursor: pointer;
-    font-family: inherit;
     text-align: left;
-    transition: background var(--transition), color var(--transition);
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--ink);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    transition: background 0.15s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
 }
-.version-item:active { background: var(--tap); }
-.version-item.active {
+.version-item.draggable:active {
+    cursor: grabbing;
+}
+.version-item.draggable.dragging {
+    opacity: 0.4;
+    transform: scale(0.97);
+}
+.version-item.draggable.is-primary {
     background: var(--active-bg);
     color: var(--active-ink);
     font-weight: 500;
 }
-.version-item.disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-.version-item.disabled:active { background: transparent; }
 
-.version-radio {
-    width: 22px; height: 22px;
-    border: 2px solid var(--ink-3);
-    border-radius: 50%;
+/* 拖拽手柄图标 */
+.version-drag-handle {
     flex-shrink: 0;
-    transition: all var(--transition);
-    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    cursor: grab;
 }
-.version-item.active .version-radio {
-    border-color: var(--active-ink);
-    background: transparent;
+.version-item.draggable.is-primary .version-drag-handle {
+    color: var(--accent);
 }
-.version-item.active .version-radio::after {
-    content: '';
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--active-ink);
+
+/* 主要版本标记 */
+.version-primary-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: rgba(0, 122, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
 }
-.version-radio.on {
-    border-color: var(--accent);
-    background: transparent;
-}
-.version-radio.on::after {
-    content: '';
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
+.version-item.draggable.is-primary .version-primary-badge {
+    color: var(--active-ink);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .version-label-text { flex: 1; }
@@ -272,37 +284,29 @@ body {
     border-radius: 4px;
     flex-shrink: 0;
 }
-.version-item.active .version-badge {
-    background: rgba(255,255,255,0.2);
-    color: var(--active-ink);
-}
 
-.version-checkbox {
-    width: 22px; height: 22px;
-    border: 2px solid var(--ink-3);
-    border-radius: 5px;
-    flex-shrink: 0;
-    transition: all var(--transition);
-    position: relative;
-}
-.version-checkbox.on {
-    border-color: var(--accent);
-    background: var(--accent);
-}
-.version-checkbox.on::after {
-    content: "\2713";
-    position: absolute;
-    top: 1px; left: 4px;
-    font-size: 13px;
-    color: #fff;
-    font-weight: 600;
-}
-.version-item.active .version-checkbox.on {
-    border-color: var(--active-ink);
-    background: var(--active-ink);
-}
-.version-item.active .version-checkbox.on::after {
+/* 音频版本选择 */
+.version-audio-select {
+    width: calc(100% - 40px);
+    margin: 8px 20px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: inherit;
     color: var(--ink);
+    background: var(--bg-secondary, #f5f5f5);
+    border: 1px solid var(--line, #ddd);
+    border-radius: 8px;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+.version-audio-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 
@@ -658,6 +662,21 @@ body {
 
 /* 主要经文 */
 .verse-text {
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 6px;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
+    white-space: normal !important;
+    min-width: 0;
+    display: block;
+    letter-spacing: -0.01em;
+}
+
+/* 音频目标经文（有 tokens，支持高亮，但不是主要版本） */
+.verse-audio-target {
     font-size: 17px;
     color: var(--ink);
     line-height: 1.6;

@@ -12,7 +12,7 @@
      * 清除所有单词高亮
      */
     function clearWordHighlight() {
-        document.querySelectorAll('.verse-primary .word.active')
+        document.querySelectorAll('.verse-primary .word.active, .verse-audio-target .word.active')
             .forEach(el => el.classList.remove('active'));
     }
 
@@ -24,7 +24,8 @@
 
         let activeAlignId = null;
 
-        document.querySelectorAll('.verse-primary .word[data-align-id]').forEach(el => {
+        // 高亮主要经文和音频目标的 tokens
+        document.querySelectorAll('.verse-primary .word[data-align-id], .verse-audio-target .word[data-align-id]').forEach(el => {
             const start = Number(el.dataset.start);
             const end = Number(el.dataset.end);
 
