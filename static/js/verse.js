@@ -33,8 +33,13 @@
         }
 
         // 逐个加载所有启用版本
-        const promises = versions.map(ver =>
-            fetch(utils.getVerseUrl(ver.key, bookId, chapter))
+        const promises = versions.map(ver => {
+            const url = utils.getVerseUrl(ver.key, bookId, chapter);
+            if (!url) {
+                // 此版本无此书（如 Deutero 书的 Protestant 版本）
+                return Promise.resolve({ ver, data: null, error: "此版本无此卷" });
+            }
+            return fetch(url)
                 .then(res => {
                     if (!res.ok) throw new Error(`${ver.key} HTTP ${res.status}`);
                     return res.json().then(data => ({ ver, data }));
@@ -42,8 +47,8 @@
                 .catch(err => {
                     console.warn(`⚠️ ${ver.key} 加载失败:`, err.message);
                     return { ver, data: null, error: err.message };
-                })
-        );
+                });
+        });
 
         Promise.all(promises).then(results => {
             renderMultiVersion(results, container, onReady);

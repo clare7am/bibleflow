@@ -134,11 +134,36 @@
         return ABBR_MAP[bookId] || "";
     }
 
+    /* ---- 版本判断 ---- */
+
+    /** 判断是否为 Protestant（新教）版本 */
+    function isProtestantVersion(version) {
+        return version === "zh_cuv2010" || version === "en_kjv" || version === "en_niv";
+    }
+
+    /** 根据 bookId 获取 books.json 中的书卷对象 */
+    function getBookById(bookId) {
+        return (data().allBooks || []).find(function (b) { return b.id === bookId; }) || null;
+    }
+
     /* ---- URL 构建工具 ---- */
 
     /** 获取经文 JSON 的 OSS URL */
     function getVerseUrl(version, bookId, chapter) {
-        var bookStr = String(bookId).padStart(2, "0");
+        var effectiveId = bookId;
+
+        // Protestant 版本：若书卷有 prot_id 映射，使用之
+        if (isProtestantVersion(version)) {
+            var book = getBookById(bookId);
+            if (book && book.prot_id) {
+                effectiveId = book.prot_id;
+            } else if (book && book.prot_id === null && book.zh_prot === null) {
+                // Deutero 书，Protestant 版本不存在
+                return null;
+            }
+        }
+
+        var bookStr = String(effectiveId).padStart(2, "0");
         var chapterStr = String(chapter).padStart(3, "0");
         return cfg().ossJsonBase + "/" + version + "/" + bookStr + "_" + chapterStr + ".json?v=" + cfg().appVersion;
     }
@@ -180,6 +205,8 @@
         getBookAbbr: getBookAbbr,
         getCategoryLabel: getCategoryLabel,
         getAbbr: getAbbr,
+        isProtestantVersion: isProtestantVersion,
+        getBookById: getBookById,
         getVerseUrl: getVerseUrl,
         getAudioUrlFor: getAudioUrlFor,
         escapeHtml: escapeHtml,
@@ -196,6 +223,8 @@
     window.getBookAbbr = getBookAbbr;
     window.getCategoryLabel = getCategoryLabel;
     window.getAbbr = getAbbr;
+    window.isProtestantVersion = isProtestantVersion;
+    window.getBookById = getBookById;
     window.getVerseUrl = getVerseUrl;
     window.getAudioUrlFor = getAudioUrlFor;
     window.escapeHtml = escapeHtml;
