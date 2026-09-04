@@ -62,8 +62,8 @@
     window.BibleFlow.state = {
         book: null,
         chapter: null,
-        primaryVersion: "en_nrsvce",
-        secondaryVersions: ["zh_sigao"],
+        primaryVersion: "zh_sigao",
+        secondaryVersions: ["en_nrsvce"],
         audioVersion: "en_nrsvce"
     };
 

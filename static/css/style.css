@@ -163,10 +163,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px 14px;
-    padding-top: calc(16px + env(safe-area-inset-top));
+    padding: 0 20px;
+    height: var(--top-h);
+    padding-top: env(safe-area-inset-top);
+    box-sizing: border-box;
     border-bottom: 1px solid var(--line);
     flex-shrink: 0;
+    background: var(--bg);
 }
 .version-panel-title {
     font-size: 17px;
@@ -337,9 +340,12 @@ body {
 
 .search-sidebar-header {
     display: flex; align-items: center; gap: 10px;
-    padding: 14px 18px;
-    padding-top: calc(14px + env(safe-area-inset-top));
+    padding: 0 18px;
+    height: var(--top-h);
+    padding-top: env(safe-area-inset-top);
+    box-sizing: border-box;
     border-bottom: 1px solid var(--line);
+    background: var(--bg);
 }
 .search-sidebar-header input {
     flex: 1; padding: 10px 6px;
