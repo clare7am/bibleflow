@@ -110,11 +110,11 @@
                 const isAudio = ver.key === audioVer;
 
                 const textDiv = document.createElement("div");
-                // 主要版本 + 音频版本都支持高亮
-                if (isPrimary || isAudio) {
-                    textDiv.className = "verse-text verse-primary" + (isAudio && !isPrimary ? " verse-audio-target" : "");
+                if (isPrimary) {
+                    textDiv.className = "verse-text verse-primary";
                 } else {
-                    textDiv.className = "verse-text verse-secondary";
+                    // 次要版本：小灰字，但如果是音频版本，加 .verse-audio-target 支持高亮
+                    textDiv.className = "verse-text verse-secondary" + (isAudio ? " verse-audio-target" : "");
                 }
                 textDiv.dataset.version = ver.key;
 
