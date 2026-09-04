@@ -168,15 +168,24 @@
 
         // 使用索引快速搜索
         hasIndexVersions.forEach(({ ver, index }) => {
+            const isProt = utils.isProtestantVersion(ver.key);
             index.forEach(entry => {
                 const text = entry.t || "";
                 if (norm(text).includes(target)) {
-                    const book = (data.allBooks || []).find(b => b.id === entry.b);
+                    // 搜索索引里的 book ID 可能是 Protestant ID，需要映射到 Catholic ID
+                    let catholicId = entry.b;
+                    if (isProt) {
+                        // 反查：找到 prot_id === entry.b 的 Catholic ID
+                        const match = (data.allBooks || []).find(b => b.prot_id === entry.b);
+                        if (match) catholicId = match.id;
+                    }
+
+                    const book = (data.allBooks || []).find(b => b.id === catholicId);
                     allHits.push({
                         versionKey: ver.key,
                         versionLabel: ver.label,
-                        bookId: entry.b,
-                        bookName: book ? utils.getBookDisplayName(book) : `卷${entry.b}`,
+                        bookId: catholicId,
+                        bookName: book ? utils.getBookDisplayName(book) : `卷${catholicId}`,
                         chapter: entry.c,
                         verse: entry.v,
                         text: text
