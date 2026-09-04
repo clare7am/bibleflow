@@ -113,7 +113,6 @@
                 if (isPrimary) {
                     textDiv.className = "verse-text verse-primary";
                 } else {
-                    // 次要版本：小灰字，但如果是音频版本，加 .verse-audio-target 支持高亮
                     textDiv.className = "verse-text verse-secondary" + (isAudio ? " verse-audio-target" : "");
                 }
                 textDiv.dataset.version = ver.key;

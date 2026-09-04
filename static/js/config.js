@@ -43,7 +43,7 @@
                 key: "zh_sigao",
                 label: "思高",
                 language: "zh",
-                has_audio: false,
+                has_audio: true,
                 has_tokens: false,
                 available: true
             },
