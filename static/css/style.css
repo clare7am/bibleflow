@@ -666,10 +666,11 @@ body {
     margin-bottom: 4px;
 }
 
-/* 主要经文 */
+/* 主要经文（大、黑色） */
 .verse-text {
-    font-size: 17px;
+    font-size: 18px;
     color: var(--ink);
+    font-weight: 500;
     line-height: 1.6;
     margin-bottom: 6px;
     word-break: normal !important;
@@ -681,10 +682,11 @@ body {
     letter-spacing: -0.01em;
 }
 
-/* 音频目标经文（有 tokens，支持高亮，但不是主要版本） */
+/* 音频目标经文（有 tokens，支持高亮，视觉同主要） */
 .verse-audio-target {
-    font-size: 17px;
+    font-size: 18px;
     color: var(--ink);
+    font-weight: 500;
     line-height: 1.6;
     margin-bottom: 6px;
     word-break: normal !important;
@@ -696,10 +698,10 @@ body {
     letter-spacing: -0.01em;
 }
 
-/* 次要经文 */
+/* 次要经文（小、灰色） */
 .verse-secondary {
-    font-size: 15px;
-    color: var(--ink-2);
+    font-size: 14px;
+    color: var(--ink-3);
     line-height: 1.55;
     margin-bottom: 4px;
     padding-left: 10px;
