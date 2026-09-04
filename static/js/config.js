@@ -20,7 +20,7 @@
         ossBase: "https://bibleflow.oss-cn-hangzhou.aliyuncs.com",
         get ossJsonBase() { return this.ossBase + "/json"; },
         get ossMp3Base() { return this.ossBase + "/mp3"; },
-        get searchIndexBase() { return this.ossJsonBase + "/_global/search"; },
+        get searchIndexBase() { return this.ossJsonBase + "/_global/search?v=" + this.appVersion; },
 
         versions: [
             {
