@@ -763,8 +763,29 @@ body {
 .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .icon-svg { fill: currentColor; width: 100%; height: 100%; }
+
+/* Material Icons 样式 */
+.material-icons {
+    font-size: inherit;
+    width: 1em;
+    height: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 播放器图标尺寸 */
+.mode-btn .material-icons { font-size: 22px; }
+.skip-btn .material-icons { font-size: 28px; }
+.chapter-btn .material-icons { font-size: 32px; }
+.play-large .material-icons { font-size: 56px; }
+
 .prev-chapter, .next-chapter { width: 24px; height: 24px; }
-.play-large { width: 40px; height: 40px; }
+.play-large { width: 56px; height: 56px; }
+.skip-btn { width: 40px; height: 40px; }
+.chapter-btn { width: 40px; height: 40px; }
+.mode-btn { width: 32px; height: 32px; position: relative; }
+.mode-btn .active-mode { opacity: 1 !important; }
 
 #progress {
     flex: 1; height: 4px;

@@ -13,6 +13,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="stylesheet" href="./static/css/style.css">
+    
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 
@@ -117,25 +120,37 @@
 <!-- ===== 底部播放器 ===== -->
 <div class="player">
     <div class="player-controls-custom">
-        <button id="prev-chapter-audio" class="ctrl-btn prev-chapter" onclick="prevChapterAudio()" aria-label="上一章">
-            <svg class="icon-svg" viewBox="0 0 24 24">
-                <path d="M6 6v12h2V6H6zm3.5 6l8.5-6v12l-8.5-6z"/>
-            </svg>
+        <!-- 播放模式按钮 -->
+        <button id="play-mode" class="ctrl-btn mode-btn" onclick="togglePlayMode()" aria-label="播放模式" title="顺序播放">
+            <span class="material-icons" id="icon-mode-sequential">repeat</span>
+            <span class="material-icons" id="icon-mode-repeat" style="display:none;">repeat_one</span>
+            <span class="material-icons" id="icon-mode-stop" style="display:none;">forward</span>
         </button>
 
+        <!-- 快退 10 秒 -->
+        <button id="rewind-btn" class="ctrl-btn skip-btn" onclick="skipAudio(-10)" aria-label="快退 10 秒">
+            <span class="material-icons">replay_10</span>
+        </button>
+
+        <!-- 上一章 -->
+        <button id="prev-chapter-audio" class="ctrl-btn chapter-btn" onclick="prevChapterAudio()" aria-label="上一章">
+            <span class="material-icons">skip_previous</span>
+        </button>
+
+        <!-- 播放/暂停 -->
         <button id="play-pause" class="ctrl-btn play-large" onclick="togglePlay()" aria-label="播放 / 暂停">
-            <svg id="icon-play-big" class="icon-svg" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-            </svg>
-            <svg id="icon-pause-big" class="icon-svg" viewBox="0 0 24 24" style="display:none;">
-                <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
-            </svg>
+            <span class="material-icons" id="icon-play-big">play_circle_filled</span>
+            <span class="material-icons" id="icon-pause-big" style="display:none;">pause_circle_filled</span>
         </button>
 
-        <button id="next-chapter-audio" class="ctrl-btn next-chapter" onclick="nextChapterAudio()" aria-label="下一章">
-            <svg class="icon-svg" viewBox="0 0 24 24">
-                <path d="M8 6l8.5 6L8 18V6zm10 0h2v12h-2V6z"/>
-            </svg>
+        <!-- 下一章 -->
+        <button id="next-chapter-audio" class="ctrl-btn chapter-btn" onclick="nextChapterAudio()" aria-label="下一章">
+            <span class="material-icons">skip_next</span>
+        </button>
+
+        <!-- 快进 10 秒 -->
+        <button id="forward-btn" class="ctrl-btn skip-btn" onclick="skipAudio(10)" aria-label="快进 10 秒">
+            <span class="material-icons">forward_10</span>
         </button>
     </div>
 

@@ -18,6 +18,9 @@
     const iconPlay = document.getElementById('icon-play-big');
     const iconPause = document.getElementById('icon-pause-big');
 
+    // 播放模式：'sequential'（顺序播放）| 'repeat'（单章循环）| 'stop'（播完暂停）
+    let playMode = 'sequential';
+
     let shouldAutoPlay = false;
 
     /* =========================
@@ -41,6 +44,8 @@
 
         if (audio.src === url) return;
 
+        const isCurrentlyPlaying = !audio.paused && audio.src;
+
         progress.value = 0;
         window.clearWordHighlight();
 
@@ -55,7 +60,7 @@
         iconPlay.style.display = 'block';
         iconPause.style.display = 'none';
 
-        if (shouldAutoPlay) {
+        if (shouldAutoPlay || isCurrentlyPlaying) {
             audio.src = url;
             audio.load();
             audio.play().catch(() => {
@@ -91,6 +96,43 @@
     function nextChapterAudio() {
         shouldAutoPlay = true;
         window.nextChapter();
+    }
+
+    /* =========================
+       快进 / 快退
+       ========================= */
+    function skipAudio(seconds) {
+        if (!audio.duration) return;
+        audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
+    }
+
+    /* =========================
+       播放模式切换
+       ========================= */
+    const modeOrder = ['sequential', 'repeat', 'stop'];
+    const modeTitles = { sequential: '顺序播放', repeat: '单章循环', stop: '播完暂停' };
+    const modeIcons = {
+        sequential: 'icon-mode-sequential',
+        repeat: 'icon-mode-repeat',
+        stop: 'icon-mode-stop'
+    };
+
+    function togglePlayMode() {
+        // 循环切换到下一个模式
+        const idx = modeOrder.indexOf(playMode);
+        playMode = modeOrder[(idx + 1) % modeOrder.length];
+
+        // 更新图标显示
+        Object.keys(modeIcons).forEach(mode => {
+            const el = document.getElementById(modeIcons[mode]);
+            if (el) el.style.display = mode === playMode ? 'inline-flex' : 'none';
+        });
+
+        // 更新按钮 title
+        const btn = document.getElementById('play-mode');
+        if (btn) btn.title = modeTitles[playMode];
+
+        console.log(`🎵 播放模式 → ${modeTitles[playMode]}`);
     }
 
     /* =========================
@@ -145,8 +187,18 @@
         audio.currentTime = 0;
         progress.value = 0;
         syncPlayButtonIcon();
-        shouldAutoPlay = true;
-        window.nextChapter();
+
+        if (playMode === 'repeat') {
+            // 单章循环
+            audio.play().catch(() => { syncPlayButtonIcon(); });
+        } else if (playMode === 'sequential') {
+            // 顺序播放下一章
+            shouldAutoPlay = true;
+            window.nextChapter();
+        } else {
+            // 播完暂停
+            syncPlayButtonIcon();
+        }
     });
 
     /* =========================
@@ -171,7 +223,7 @@
     /* =========================
        左右箭头快进 / 快退
        ========================= */
-    const SKIP_SECONDS = 15;
+    const SKIP_SECONDS = 10;
 
     document.addEventListener('keydown', (e) => {
         const tag = e.target.tagName;
@@ -202,6 +254,8 @@
     window.togglePlay = togglePlay;
     window.prevChapterAudio = prevChapterAudio;
     window.nextChapterAudio = nextChapterAudio;
+    window.skipAudio = skipAudio;
+    window.togglePlayMode = togglePlayMode;
     window.shouldAutoPlay = shouldAutoPlay;  // chapter.js 需要读写
 
     // 提供 getter/setter 让 chapter.js 能读写 shouldAutoPlay

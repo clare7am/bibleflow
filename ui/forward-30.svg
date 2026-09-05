@@ -1,0 +1,7 @@
+<!-- 快进 30 秒 - 微信风格 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M24 8a16 16 0 0 1 13.86 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <polygon points="18,16 18,32 30,24" fill="currentColor"/>
+  <text x="24" y="32" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor" font-family="system-ui, -apple-system, sans-serif">30</text>
+</svg>
