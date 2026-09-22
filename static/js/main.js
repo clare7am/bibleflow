@@ -457,8 +457,33 @@
         // 3. 书卷 + 章节面板初始化
         window.initBookSelector();
 
-        // 4. Material Icons 字体加载完成后显示图标
+        // 4. 阅读模式切换
+        initReadingMode();
+
+        // 5. Material Icons 字体加载完成后显示图标
         initMaterialIcons();
+    }
+
+    /** 初始化阅读模式 */
+    function initReadingMode() {
+        const btn = document.getElementById("reading-toggle");
+        if (!btn) return;
+
+        btn.addEventListener("click", function() {
+            state.readingMode = !state.readingMode;
+            btn.classList.toggle("active", state.readingMode);
+
+            // 更新经文容器类名
+            const container = document.getElementById("verses");
+            if (container) {
+                container.classList.toggle("reading-mode", state.readingMode);
+            }
+
+            // 切换后重新加载经文
+            if (state.book && state.chapter) {
+                window.loadVersesMulti();
+            }
+        });
     }
 
     /** 等待 Material Icons 字体加载完成后显示图标 */

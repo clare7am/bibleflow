@@ -64,7 +64,8 @@
         chapter: null,
         primaryVersion: "zh_sigao",
         secondaryVersions: ["en_nrsvce"],
-        audioVersion: "en_nrsvce"
+        audioVersion: "en_nrsvce",
+        readingMode: false  // 阅读模式开关
     };
 
     /* ========= 数据（运行时加载） ========= */

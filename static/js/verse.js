@@ -59,6 +59,9 @@
     function renderMultiVersion(results, container, onReady) {
         container.innerHTML = "";
 
+        // 更新容器类名（阅读模式）
+        container.classList.toggle("reading-mode", state.readingMode);
+
         const success = results.filter(r => r.data);
         const failed = results.filter(r => !r.data);
 
@@ -109,11 +112,15 @@
                 const isPrimary = ver.key === primaryVer.key;
                 const isAudio = ver.key === audioVer;
 
+                // 阅读模式：次版本默认隐藏，点击展开
+                const isExpanded = state.readingMode && !isPrimary && block.dataset.expanded === ver.key;
+
                 const textDiv = document.createElement("div");
                 if (isPrimary) {
                     textDiv.className = "verse-text verse-primary";
                 } else {
-                    textDiv.className = "verse-text verse-secondary" + (isAudio ? " verse-audio-target" : "");
+                    // 阅读模式下次版本用 verse-secondary + expanded 类控制显示
+                    textDiv.className = "verse-text verse-secondary" + (isAudio ? " verse-audio-target" : "") + (isExpanded ? " expanded" : "");
                 }
                 textDiv.dataset.version = ver.key;
 
@@ -136,6 +143,15 @@
                 block.appendChild(textDiv);
             });
 
+            // 阅读模式：添加点击展开次版本的事件
+            if (state.readingMode) {
+                block.addEventListener("click", function(e) {
+                    // 阻止冒泡到内部链接等
+                    e.stopPropagation();
+                    toggleSecondaryVerse(this, results, primaryVer);
+                });
+            }
+
             frag.appendChild(block);
         });
 
@@ -147,6 +163,30 @@
         }
 
         onReady && onReady();
+    }
+
+    /** 阅读模式：切换次版本展开/收起 */
+    function toggleSecondaryVerse(block, results, primaryVer) {
+        const secondaryTexts = block.querySelectorAll(".verse-text.verse-secondary");
+        if (secondaryTexts.length === 0) return;
+
+        const firstSecondary = secondaryTexts[0];
+        const isExpanded = firstSecondary.classList.contains("expanded");
+
+        if (isExpanded) {
+            // 收起
+            secondaryTexts.forEach(el => {
+                el.classList.remove("expanded");
+            });
+            delete block.dataset.expanded;
+        } else {
+            // 展开
+            secondaryTexts.forEach(el => {
+                el.classList.add("expanded");
+            });
+            const verKeys = [...secondaryTexts].map(el => el.dataset.version).join(",");
+            block.dataset.expanded = verKeys;
+        }
     }
 
     /* ========= 单版本加载（兼容）========= */

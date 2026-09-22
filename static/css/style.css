@@ -750,6 +750,103 @@ body {
 .word.active { background-color: #fff3a0; border-radius: 3px; }
 .verse-highlight { background-color: var(--accent-light); transition: background 0.6s ease; }
 
+/* ============================================================
+   阅读模式
+   ============================================================ */
+
+/* 阅读模式按钮激活状态 */
+#reading-toggle.active {
+    color: var(--accent);
+}
+
+/* 阅读模式：经文容器 */
+.verses-container.reading-mode {
+    padding: 16px 20px;
+    line-height: 1.65;
+}
+
+/* 阅读模式：经节块连续显示，无分割线，不换行 */
+.verses-container.reading-mode .verse-block {
+    display: inline;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* 阅读模式：节号变小上标 */
+.verses-container.reading-mode .verse-num {
+    display: inline;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-3);
+    vertical-align: super;
+    margin: 0 2px 0 0;
+    padding: 0 2px;
+    border-radius: 2px;
+    background: transparent;
+}
+
+/* 阅读模式：主要经文连排 */
+.verses-container.reading-mode .verse-text {
+    display: inline;
+    font-size: 16px;
+    line-height: 1.65;
+    margin-bottom: 0;
+    letter-spacing: -0.01em;
+}
+
+/* 阅读模式：可点击展开次版本 */
+.verses-container.reading-mode .verse-block {
+    cursor: pointer;
+    transition: background var(--transition);
+    border-radius: 4px;
+    padding: 1px 2px;
+    margin: 0 -2px;
+}
+.verses-container.reading-mode .verse-block:hover {
+    background: var(--hover-bg);
+}
+
+/* 阅读模式：展开的次版本经文 */
+.verses-container.reading-mode .verse-secondary.expanded {
+    display: block;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    padding: 10px 14px;
+    background: var(--bg-alt);
+    border-radius: 0;
+    border-left: 3px solid var(--accent);
+}
+
+/* 阅读模式：展开状态的高亮指示 */
+.verses-container.reading-mode .verse-block[data-expanded] {
+    background: var(--accent-light);
+    border-bottom: 2px solid var(--accent);
+    border-radius: 0;
+    margin-bottom: 0;
+    padding-bottom: 2px;
+}
+
+/* 阅读模式：次版本默认隐藏 */
+.verses-container.reading-mode .verse-secondary:not(.expanded) {
+    display: none;
+}
+
+/* 阅读模式：分词 span 保持行内 */
+.verses-container.reading-mode .verse-text .word {
+    display: inline !important;
+}
+.verses-container.reading-mode .verse-text .space {
+    display: inline !important;
+}
+
+/* 普通模式：隐藏展开的次版本 */
+.verse-secondary.expanded {
+    display: none;
+}
+
 
 /* ============================================================
    底部播放器
