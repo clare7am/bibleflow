@@ -16,7 +16,7 @@
 
     /* ========= 配置（静态） ========= */
     window.BibleFlow.config = {
-        appVersion: "6",
+        appVersion: "7",
         ossBase: "https://bibleflow.oss-cn-hangzhou.aliyuncs.com",
         get ossJsonBase() { return this.ossBase + "/json"; },
         get ossMp3Base() { return this.ossBase + "/mp3"; },
