@@ -200,6 +200,18 @@
                 syncPlayButtonIcon();
             });
         }
+
+        // 添加 active 类让进度条变宽
+        this.classList.add('active');
+        setTimeout(() => this.classList.remove('active'), 300);
+    });
+
+    // 触摸支持（手机端）
+    progress.addEventListener('touchstart', function() {
+        this.classList.add('active');
+    });
+    progress.addEventListener('touchend', function() {
+        this.classList.remove('active');
     });
 
     audio.addEventListener('timeupdate', () => {

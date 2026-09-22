@@ -921,6 +921,22 @@ body {
     height: 5px;
 }
 #progress:disabled { opacity: 0.3; cursor: not-allowed; }
+#progress:active,
+#progress.active {
+    height: 5px;
+}
+#progress:active::-webkit-slider-runnable-track,
+#progress.active::-webkit-slider-runnable-track {
+    height: 5px;
+}
+#progress:active::-moz-range-track,
+#progress.active::-moz-range-track {
+    height: 5px;
+}
+#progress:active::-moz-range-progress,
+#progress.active::-moz-range-progress {
+    height: 5px;
+}
 
 /* 按钮区 */
 .player-controls-custom {
