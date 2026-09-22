@@ -2,7 +2,7 @@
 /*
  * 依赖：config.js, utils.js, verse.js (getAudioUrlFor), chapter.js (prevChapter, nextChapter)
  * 导出到全局的函数：
- *   updateAudio, togglePlay, prevChapterAudio, nextChapterAudio
+ *   updateAudio, togglePlay, prevChapterAudio, nextChapterAudio, togglePlaybackRate
  */
 
 (function () {
@@ -20,6 +20,9 @@
 
     // 播放模式：'sequential'（顺序播放）| 'repeat'（单章循环）| 'stop'（播完暂停）
     let playMode = 'sequential';
+
+    // 播放速度
+    let currentRate = 1;
 
     let shouldAutoPlay = false;
 
@@ -174,9 +177,37 @@
         audio.currentTime = (progress.value / 100) * audio.duration;
     });
 
+    // 点击进度条：计算位置，跳转进度，自动播放
+    progress.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const pct = ((e.clientX - rect.left) / rect.width) * 100;
+
+        // 先确保有音频源
+        if (!audio.src && audio._pendingUrl) {
+            audio.src = audio._pendingUrl;
+            audio.load();
+        }
+
+        if (audio.duration) {
+            audio.currentTime = (pct / 100) * audio.duration;
+        }
+
+        // 自动播放
+        if (!playPauseBtn.disabled) {
+            audio.play().then(() => {
+                syncPlayButtonIcon();
+            }).catch(() => {
+                syncPlayButtonIcon();
+            });
+        }
+    });
+
     audio.addEventListener('timeupdate', () => {
         if (audio.duration) {
-            progress.value = (audio.currentTime / audio.duration) * 100;
+            const pct = (audio.currentTime / audio.duration) * 100;
+            progress.value = pct;
+            // 更新 CSS 变量显示进度
+            progress.style.setProperty('--progress', pct + '%');
         }
         window.highlightWordAt(Math.floor(audio.currentTime * 1000));
     });
@@ -247,6 +278,48 @@
     });
 
     /* ============================================================
+       播放速度控制
+       ============================================================ */
+
+    function togglePlaybackRate() {
+        const menu = document.getElementById('rate-menu');
+        if (!menu) return;
+        menu.classList.toggle('open');
+    }
+
+    function setPlaybackRate(rate) {
+        currentRate = rate;
+        audio.playbackRate = rate;
+
+        // 更新菜单 active 状态
+        document.querySelectorAll('.rate-menu-item').forEach(item => {
+            item.classList.toggle('active', parseFloat(item.dataset.rate) === rate);
+        });
+
+        // 关闭菜单
+        const menu = document.getElementById('rate-menu');
+        if (menu) menu.classList.remove('open');
+    }
+
+    // 菜单项点击事件
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.rate-menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                setPlaybackRate(parseFloat(this.dataset.rate));
+            });
+        });
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('rate-menu');
+            const rateBtn = document.getElementById('playback-rate');
+            if (menu && !menu.contains(e.target) && !rateBtn.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    });
+
+    /* ============================================================
        导出到全局
        ============================================================ */
 
@@ -256,9 +329,11 @@
     window.nextChapterAudio = nextChapterAudio;
     window.skipAudio = skipAudio;
     window.togglePlayMode = togglePlayMode;
+    window.togglePlaybackRate = togglePlaybackRate;
+    window.setPlaybackRate = setPlaybackRate;
     window.shouldAutoPlay = shouldAutoPlay;  // chapter.js 需要读写
 
-    // 提供 getter/setter 让 chapter.js 能读写 shouldAutoPlay
+    // 提供 getter/seter 让 chapter.js 能读写 shouldAutoPlay
     Object.defineProperty(window, 'shouldAutoPlay', {
         get: function () { return shouldAutoPlay; },
         set: function (v) { shouldAutoPlay = v; }

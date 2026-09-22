@@ -130,6 +130,10 @@
 
 <!-- ===== 底部播放器 ===== -->
 <div class="player">
+    <!-- 进度条：顶部细线 -->
+    <input id="progress" type="range" min="0" max="100" value="0" step="0.1">
+
+    <!-- 按钮区：水平居中 -->
     <div class="player-controls-custom">
         <!-- 播放模式按钮 -->
         <button id="play-mode" class="ctrl-btn mode-btn" onclick="togglePlayMode()" aria-label="播放模式" title="顺序播放">
@@ -163,9 +167,22 @@
         <button id="forward-btn" class="ctrl-btn skip-btn" onclick="skipAudio(10)" aria-label="快进 10 秒">
             <span class="material-icons">forward_10</span>
         </button>
-    </div>
 
-    <input id="progress" type="range" min="0" max="100" value="0" step="0.1">
+        <!-- 播放速度 -->
+        <button id="playback-rate" class="ctrl-btn rate-btn" onclick="togglePlaybackRate()" aria-label="播放速度" title="播放速度">
+            <span class="material-icons">speed</span>
+        </button>
+    </div>
+</div>
+
+<!-- 播放速度选择菜单 -->
+<div id="rate-menu" class="rate-menu">
+    <div class="rate-menu-item" data-rate="0.5">0.5x</div>
+    <div class="rate-menu-item" data-rate="0.75">0.75x</div>
+    <div class="rate-menu-item active" data-rate="1">1x</div>
+    <div class="rate-menu-item" data-rate="1.25">1.25x</div>
+    <div class="rate-menu-item" data-rate="1.5">1.5x</div>
+    <div class="rate-menu-item" data-rate="2">2x</div>
 </div>
 
 <audio id="audio-player" preload="none"></audio>
