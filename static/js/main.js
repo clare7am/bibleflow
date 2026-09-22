@@ -456,6 +456,29 @@
 
         // 3. 书卷 + 章节面板初始化
         window.initBookSelector();
+
+        // 4. Material Icons 字体加载完成后显示图标
+        initMaterialIcons();
+    }
+
+    /** 等待 Material Icons 字体加载完成后显示图标 */
+    function initMaterialIcons() {
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function() {
+                var icons = document.querySelectorAll(".material-icons");
+                for (var i = 0; i < icons.length; i++) {
+                    icons[i].classList.add("loaded");
+                }
+            });
+        } else {
+            // 降级方案：延迟显示
+            setTimeout(function() {
+                var icons = document.querySelectorAll(".material-icons");
+                for (var i = 0; i < icons.length; i++) {
+                    icons[i].classList.add("loaded");
+                }
+            }, 300);
+        }
     }
 
     // 页面加载完成后初始化

@@ -777,6 +777,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* 字体加载完成前隐藏，避免显示乱码 */
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+.material-icons.loaded {
+    opacity: 1;
 }
 
 /* 播放器图标尺寸 */
