@@ -49,6 +49,14 @@ html, body {
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* 禁用双击缩放 */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+}
+
+/* 禁用双击缩放的额外防护 */
+* {
+    touch-action: manipulation;
 }
 
 body {
