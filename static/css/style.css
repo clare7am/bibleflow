@@ -481,7 +481,7 @@ body {
     gap: 0;
     border-bottom: 0.5px solid var(--line);
     height: var(--top-h);
-    align-items: stretch;
+    align-items: center;
     padding-top: env(safe-area-inset-top);
     box-sizing: border-box;
     background: var(--bg);
@@ -505,11 +505,12 @@ body {
     justify-content: center;
     gap: 2px;
     position: relative;
+    padding-bottom: 4px;
 }
 .book-tab::after {
     content: '';
     position: absolute;
-    bottom: 0; left: 50%; right: 50%;
+    bottom: -4px; left: 50%; right: 50%;
     height: 2px;
     background: var(--accent);
     border-radius: 1px;
@@ -518,6 +519,18 @@ body {
 .book-tab.active { color: var(--accent); }
 .book-tab.active::after { left: 24px; right: 24px; }
 .book-tab:not(.active):active { background: var(--tap); }
+
+/* 书卷面板关闭按钮 */
+.book-panel-close-btn {
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    font-size: 20px; color: var(--ink-3);
+    cursor: pointer; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.book-panel-close-btn:active { background: var(--tap); }
 
 /* Tab 双语 */
 .tab-main { display: block; font-size: 15px; font-weight: 500; line-height: 1.3; }
