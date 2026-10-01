@@ -73,10 +73,7 @@
 
         // ---- 音频设置区域 ----
         const audioSection = document.createElement("div");
-        audioSection.className = "version-section";
-        audioSection.style.marginTop = "16px";
-        audioSection.style.paddingTop = "16px";
-        audioSection.style.borderTop = "1px solid var(--border)";
+        audioSection.className = "version-section version-audio-section";
 
         const audioTitle = document.createElement("div");
         audioTitle.className = "version-section-title";
