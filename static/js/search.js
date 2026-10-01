@@ -734,6 +734,24 @@
         if (overlay) overlay.onclick = () => closeSidebar();
 
         if (input) {
+            // 输入框聚焦时锁定 body 滚动，防止输入法推高网页
+            input.addEventListener('focus', () => {
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+                document.body.style.top = `-${window.scrollY}px`;
+            });
+
+            // 输入框失焦时恢复 body 滚动
+            input.addEventListener('blur', () => {
+                const scrollY = document.body.style.top;
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+                document.body.style.top = '';
+                window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
+            });
+
             input.addEventListener('input', () => {
                 clearTimeout(timer);
                 const kw = input.value.trim();
