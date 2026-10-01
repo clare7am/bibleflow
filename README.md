@@ -26,6 +26,8 @@ A multi‑version Bible reader for **desktop and mobile**, built around the **Ch
 - 基于预构建索引的毫秒级全文搜索
 - 支持所有已启用译本同时搜索
 - 搜索结果按译本显示，书卷名称跟随主要译本
+- **筛选栏**：可按译本范围、书卷、排序模式（穿插/分组）精确过滤搜索结果
+- **复制引用**：选中经文复制时自动添加出处（如 `创世纪 1:1 太初有道`），书卷名与所选译本配套
 
 ### ⌨️ 桌面键盘快捷键
 
@@ -40,6 +42,8 @@ A multi‑version Bible reader for **desktop and mobile**, built around the **Ch
 - 自适应布局，手机 / 平板 / 桌面一致体验
 - 侧拉面板支持触摸拖拽排序
 - 大按钮触控操作，适合朗读与翻阅
+- **进度条触摸拖拽**：手机端可直接拖动进度条跳转
+- **输入法优化**：搜索时输入法弹出不会遮挡内容，面板自动适配
 
 ---
 
@@ -76,16 +80,16 @@ A multi‑version Bible reader for **desktop and mobile**, built around the **Ch
 
 ```
 static/js/
-├── config.js      → 静态配置（译本列表、OSS 地址）
+├── config.js      → 静态配置（译本列表、OSS 地址、版本号）
 ├── state          → 运行时状态（当前书卷、章节、译本）
-├── utils.js       → 工具函数（URL 构建、译本判断、prot_id 映射）
+├── utils.js       → 工具函数（URL 构建、译本判断、prot_id 映射、书卷名）
 ├── entity.js      → 实体样式（人名、地名、神名高亮）
 ├── highlight.js   → 音频逐词高亮
-├── verse.js       → 经文加载与多版本渲染
+├── verse.js       → 经文加载与多版本渲染、复制引用
 ├── book.js        → 书卷面板、章节导航、分类分组
-├── chapter.js     → 章节选择面板
-├── player.js      → 音频播放器
-├── search.js      → 全文搜索（索引 + 实时回退）
+├── chapter.js     → 章节切换逻辑
+├── player.js      → 音频播放器、进度条触摸拖拽
+├── search.js      → 全文搜索（索引 + 实时回退 + 筛选栏）
 └── main.js        → 入口、侧拉面板、版本拖拽排序
 ```
 
