@@ -300,7 +300,7 @@
 
         const header = document.createElement('div');
         header.className = 'search-result-header';
-        const scopeLabel = searchFilters.scope === 'current' ? '当前书卷' : '正本圣经';
+        const scopeLabel = searchFilters.scope === 'current' ? '当前书卷' : '整部圣经';
         let verLabel = '混合译本';
         if (searchFilters.version !== 'all') {
             const ver = utils.getVersionConfig(searchFilters.version);
