@@ -187,20 +187,36 @@
             const verseBlock = node.closest ? node.closest('.verse-block') : findClosestVerseBlock(node);
             if (!verseBlock) return;
 
+            // 查找选中文本具体属于哪个版本的 .verse-text
+            const textNode = findClosestVerseText(node);
+            const versionKey = textNode ? textNode.dataset.version : null;
+
             const bookId = state.book;
             const chapter = state.chapter;
             const verseNum = verseBlock.querySelector('.verse-num')?.textContent?.trim() || '';
             if (!bookId || !chapter || !verseNum) return;
 
             const book = (window.BibleFlow.data.allBooks || []).find(b => b.id === bookId);
-            const bookName = book ? utils.getBookDisplayName(book) : '';
+            if (!book) return;
+
+            // 根据版本获取书卷名称
+            let bookName;
+            if (versionKey) {
+                // 选中的是特定版本的文本，用该版本的书卷名字段
+                const fieldName = utils.getFieldForVersion(versionKey);
+                bookName = book[fieldName]?.name || utils.getBookDisplayName(book);
+            } else {
+                // 选中了节号或其他，用默认书卷名
+                bookName = utils.getBookDisplayName(book);
+            }
+
             if (!bookName) return;
 
             // 获取选中的纯文本
             let selectedText = sel.toString().trim();
             if (!selectedText) return;
 
-            // 如果选中的文本已经在 verse-block 内，添加引用
+            // 如果选中的文本在 verse-block 内，添加引用
             if (verseBlock.contains(node)) {
                 const formatted = `${bookName} ${chapter}:${verseNum} ${selectedText}`;
                 e.clipboardData.setData('text/plain', formatted);
@@ -212,6 +228,14 @@
     function findClosestVerseBlock(node) {
         while (node && node !== document.body) {
             if (node.classList && node.classList.contains('verse-block')) return node;
+            node = node.parentNode;
+        }
+        return null;
+    }
+
+    function findClosestVerseText(node) {
+        while (node && node !== document.body) {
+            if (node.classList && node.classList.contains('verse-text')) return node;
             node = node.parentNode;
         }
         return null;
