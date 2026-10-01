@@ -52,7 +52,7 @@
     /** 根据版本 key 获取书卷名称字段名（用于次要版本标注） */
     function getFieldForVersion(versionKey) {
         if (versionKey === "zh_sigao") return "zh_cath";
-        if (versionKey === "zh_cuv2010") return "zh_cuv2010";
+        if (versionKey === "zh_cuv2010") return "zh_prot";
         return "en";
     }
 
