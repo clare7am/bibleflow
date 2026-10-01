@@ -581,20 +581,16 @@ body {
     pointer-events: none;
 }
 
-/* 手机竖屏：筛选栏换行 */
+/* 手机竖屏：筛选栏保持一行，缩小字号 */
 @media (orientation: portrait) and (max-width: 768px) {
     .search-filters-bar {
-        flex-wrap: wrap;
         padding: 8px 12px;
-        gap: 6px;
-    }
-    .filter-dropdown {
-        min-width: calc(50% - 3px);
+        gap: 5px;
     }
     .filter-trigger {
-        height: 34px;
-        font-size: 12px;
-        padding: 0 10px;
+        height: 32px;
+        font-size: 11px;
+        padding: 0 8px;
         border-radius: 7px;
     }
     .filter-popup {
