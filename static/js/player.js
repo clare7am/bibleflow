@@ -208,12 +208,35 @@
         setTimeout(() => this.classList.remove('active'), 300);
     });
 
-    // 触摸支持（手机端）
-    progress.addEventListener('touchstart', function() {
+    // 触摸支持（手机端拖拽）
+    let touchDragging = false;
+
+    progress.addEventListener('touchstart', function(e) {
         this.classList.add('active');
+        touchDragging = true;
+        // 立即跳转到触摸位置
+        if (audio.duration && e.touches.length === 1) {
+            const rect = this.getBoundingClientRect();
+            const pct = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
+            const clampedPct = Math.max(0, Math.min(100, pct));
+            audio.currentTime = (clampedPct / 100) * audio.duration;
+            this.value = clampedPct;
+        }
     });
+
+    progress.addEventListener('touchmove', function(e) {
+        if (!touchDragging || !audio.duration || e.touches.length === 0) return;
+        e.preventDefault();
+        const rect = this.getBoundingClientRect();
+        const pct = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
+        const clampedPct = Math.max(0, Math.min(100, pct));
+        audio.currentTime = (clampedPct / 100) * audio.duration;
+        this.value = clampedPct;
+    }, { passive: false });
+
     progress.addEventListener('touchend', function() {
         this.classList.remove('active');
+        touchDragging = false;
     });
 
     audio.addEventListener('timeupdate', () => {
