@@ -460,8 +460,30 @@
         // 4. 阅读模式切换
         initReadingMode();
 
-        // 5. Material Icons 字体加载完成后显示图标
+        // 5. 节号显示/隐藏切换
+        initVerseNumToggle();
+
+        // 6. Material Icons 字体加载完成后显示图标
         initMaterialIcons();
+    }
+
+    /** 初始化节号显示/隐藏切换 */
+    function initVerseNumToggle() {
+        const btn = document.getElementById("verse-num-toggle");
+        if (!btn) return;
+
+        // 默认显示节号
+        state.showVerseNum = true;
+
+        btn.addEventListener("click", function() {
+            state.showVerseNum = !state.showVerseNum;
+            btn.classList.toggle("active", !state.showVerseNum);
+
+            const container = document.getElementById("verses");
+            if (container) {
+                container.classList.toggle("verse-num-hidden", !state.showVerseNum);
+            }
+        });
     }
 
     /** 初始化阅读模式 */

@@ -692,6 +692,12 @@ body {
     margin-bottom: 4px;
 }
 
+/* 隐藏节号 */
+.verses-container.verse-num-hidden .verse-num,
+.verses-container.reading-mode.verse-num-hidden .verse-num {
+    display: none !important;
+}
+
 /* 主要经文（大、黑色） */
 .verse-text {
     font-size: 18px;
