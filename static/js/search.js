@@ -280,20 +280,30 @@
 
         // 排序
         const sortMode = searchFilters.sort;
+        // 构建版本优先级映射（按版本设置里的顺序）
+        const versionOrder = {};
+        versionOrder[state.primaryVersion] = 0;
+        (state.secondaryVersions || []).forEach((key, idx) => {
+            versionOrder[key] = idx + 1;
+        });
+
         allHits.sort((a, b) => {
+            if (sortMode === 'grouped') {
+                // 按译本分组：先按版本顺序，再按书卷/章节/节号
+                const aOrder = versionOrder[a.versionKey] !== undefined ? versionOrder[a.versionKey] : 999;
+                const bOrder = versionOrder[b.versionKey] !== undefined ? versionOrder[b.versionKey] : 999;
+                if (aOrder !== bOrder) return aOrder - bOrder;
+            }
             // 先按书卷 ID 排序
             if (a.bookId !== b.bookId) return a.bookId - b.bookId;
             // 再按章节
             if (a.chapter !== b.chapter) return a.chapter - b.chapter;
             // 再按节号
             if (a.verse !== b.verse) return a.verse - b.verse;
-            // 同节经文，按排序模式处理
-            if (sortMode === 'grouped') {
-                // 按译本分组：同一译本的结果紧挨
-                return a.versionKey.localeCompare(b.versionKey);
-            }
-            // interleave: 同节不同译本按版本字母序穿插
-            return a.versionKey.localeCompare(b.versionKey);
+            // 同节经文，按版本设置顺序排序（interleave 模式）
+            const aOrder = versionOrder[a.versionKey] !== undefined ? versionOrder[a.versionKey] : 999;
+            const bOrder = versionOrder[b.versionKey] !== undefined ? versionOrder[b.versionKey] : 999;
+            return aOrder - bOrder;
         });
 
         container.innerHTML = '';
