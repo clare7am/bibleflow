@@ -47,7 +47,8 @@
 
         if (audio.src === url) return;
 
-        const isCurrentlyPlaying = !audio.paused && audio.src;
+        // 在 pause 之前保存播放状态，使用独立变量确保不会被后续操作影响
+        const _wasPlaying = (!audio.paused && audio.src && !audio.ended) ? true : false;
 
         progress.value = 0;
         window.clearWordHighlight();
@@ -63,7 +64,8 @@
         iconPlay.style.display = 'block';
         iconPause.style.display = 'none';
 
-        if (shouldAutoPlay || isCurrentlyPlaying) {
+        // 正在播放中切换章节 → 继续播放；暂停时切换 → 保持暂停
+        if (_wasPlaying || shouldAutoPlay) {
             audio.src = url;
             audio.load();
             audio.play().catch(() => {

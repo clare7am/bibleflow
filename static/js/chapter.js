@@ -14,9 +14,6 @@
     function onChapterChange(chapter, autoPlay) {
         if (!chapter) return;
 
-        const audio = document.getElementById('audio-player');
-        const wasPlaying = audio && !audio.paused && !audio.ended;
-
         state.chapter = chapter;
 
         const book = data.allBooks?.find(b => b.id === state.book);
@@ -25,12 +22,8 @@
             if (span) span.textContent = `${utils.getBookDisplayName(book)} ${chapter}`;
         }
 
-        window.loadVersesMulti(function() {
-            if (autoPlay || wasPlaying) {
-                window.shouldAutoPlay = true;
-            }
-            window.updateAudio();
-        });
+        window.loadVersesMulti();
+        window.updateAudio();
     }
 
     function getCurrentChapters() {
