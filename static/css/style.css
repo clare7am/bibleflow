@@ -415,7 +415,7 @@ body {
 @media (orientation: portrait) and (max-width: 768px) {
     .search-sidebar {
         position: fixed; top: auto; bottom: 0; left: 0; right: 0;
-        width: 100%; max-width: none; height: 55vh;
+        width: 100%; max-width: none; height: 50vh;
         transform: translateY(100%);
         border-left: none;
         border-top: 1px solid var(--line);
