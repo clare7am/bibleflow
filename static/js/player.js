@@ -236,8 +236,7 @@
             audio.play().catch(() => { syncPlayButtonIcon(); });
         } else if (playMode === 'sequential') {
             // 顺序播放下一章
-            shouldAutoPlay = true;
-            window.nextChapter();
+            window.nextChapter(true);
         } else {
             // 播完暂停
             syncPlayButtonIcon();
@@ -302,6 +301,10 @@
     function setPlaybackRate(rate) {
         currentRate = rate;
         audio.playbackRate = rate;
+
+        // 更新按钮文字
+        var label = document.getElementById('playback-rate-label');
+        if (label) label.textContent = rate + 'x';
 
         // 更新菜单 active 状态
         document.querySelectorAll('.rate-menu-item').forEach(item => {

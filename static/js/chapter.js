@@ -11,7 +11,7 @@
     var data = window.BibleFlow.data;
     var utils = window.BibleFlow.utils;
 
-    function onChapterChange(chapter, onReady) {
+    function onChapterChange(chapter, autoPlay) {
         if (!chapter) return;
 
         const audio = document.getElementById('audio-player');
@@ -25,21 +25,19 @@
             if (span) span.textContent = `${utils.getBookDisplayName(book)} ${chapter}`;
         }
 
-        window.loadVersesMulti(onReady);
-        window.updateAudio();
-
-        if (wasPlaying) {
-            window.shouldAutoPlay = true;
-        }
+        window.loadVersesMulti(function() {
+            if (autoPlay || wasPlaying) {
+                window.shouldAutoPlay = true;
+            }
+            window.updateAudio();
+        });
     }
 
     function getCurrentChapters() {
         return data.currentChapters || [];
     }
 
-    async function prevChapter() {
-        window.shouldAutoPlay = false;
-
+    async function prevChapter(autoPlay) {
         let chapters = getCurrentChapters();
         const bookIndex = data.allBooks.findIndex(b => b.id === state.book);
         const currentCh = Number(state.chapter) || 1;
@@ -55,7 +53,7 @@
         if (chIndex > 0) {
             const target = chapters[chIndex - 1].chapter;
             state.chapter = target;
-            onChapterChange(target);
+            onChapterChange(target, autoPlay);
             return;
         }
 
@@ -74,9 +72,7 @@
         }
     }
 
-    async function nextChapter() {
-        window.shouldAutoPlay = false;
-
+    async function nextChapter(autoPlay) {
         let chapters = getCurrentChapters();
         const bookIndex = data.allBooks.findIndex(b => b.id === state.book);
         const currentCh = Number(state.chapter) || 1;
@@ -92,7 +88,7 @@
         if (chIndex >= 0 && chIndex < chapters.length - 1) {
             const target = chapters[chIndex + 1].chapter;
             state.chapter = target;
-            onChapterChange(target);
+            onChapterChange(target, autoPlay);
             return;
         }
 
@@ -104,7 +100,7 @@
                 const chs = await window.loadChaptersForBook(nextBook.id, null);
                 const firstCh = chs[0].chapter;
                 state.chapter = firstCh;
-                onChapterChange(firstCh);
+                onChapterChange(firstCh, autoPlay);
             } catch (e) {
                 console.error("跨卷 next 失败:", e);
             }

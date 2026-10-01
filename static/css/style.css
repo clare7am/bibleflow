@@ -1021,7 +1021,13 @@ body {
 .chapter-btn { width: 36px; height: 36px; }
 .mode-btn { width: 32px; height: 32px; position: relative; }
 .mode-btn .active-mode { opacity: 1 !important; }
-.rate-btn { width: 32px; height: 32px; position: relative; }
+.rate-btn { width: 40px; height: 32px; position: relative; }
+.rate-btn #playback-rate-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: currentColor;
+    line-height: 1;
+}
 
 /* 播放速度菜单 */
 .rate-menu {
