@@ -472,6 +472,7 @@
         // 7. 面板拖拽调整高度
         initPanelDrag("version-drag-handle", "version-panel");
         initPanelDrag("search-drag-handle", "search-sidebar");
+        initPanelDrag("book-drag-handle", "book-panel");
 
         // 8. Material Icons 字体加载完成后显示图标
         initMaterialIcons();

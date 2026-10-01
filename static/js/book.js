@@ -356,7 +356,6 @@
         if (btnEl) btnEl.classList.add("active");
 
         updateTopTitle(book, chapter);
-        closeBookPanel();
 
         window.loadVersesMulti();
         window.updateAudio();

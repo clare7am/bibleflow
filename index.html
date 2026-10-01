@@ -116,10 +116,14 @@
     <div id="search-results" class="search-sidebar-body"></div>
 </div>
 
-<!-- ===== 书卷+章节 侧拉面板 ===== -->
+<!-- ===== 书卷+章节 面板（底部上滑） ===== -->
 <div id="book-overlay" class="book-overlay"></div>
 
 <div id="book-panel" class="book-panel">
+    <!-- 拖拽条 -->
+    <div class="panel-drag-handle" id="book-drag-handle">
+        <div class="panel-drag-indicator"></div>
+    </div>
     <!-- Tab 栏（文字由 JS 动态设置） -->
     <div class="book-tab-bar">
         <button class="book-tab active" data-testament="old_testament">Old Testament</button>
