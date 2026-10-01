@@ -80,9 +80,13 @@
     </button>
 </div>
 
-<!-- ===== 版本选择面板（左侧拉，与书卷面板同风格） ===== -->
+<!-- ===== 版本选择面板（底部上滑） ===== -->
 <div id="version-overlay" class="version-overlay"></div>
 <div id="version-panel" class="version-panel">
+    <!-- 拖拽条 -->
+    <div class="panel-drag-handle" id="version-drag-handle">
+        <div class="panel-drag-indicator"></div>
+    </div>
     <div class="version-panel-header">
         <span class="version-panel-title">版本设置</span>
         <button class="version-panel-close" id="version-panel-close" aria-label="关闭">&times;</button>
@@ -90,10 +94,14 @@
     <div class="version-list" id="version-list"></div>
 </div>
 
-<!-- ===== 搜索遮罩 + 侧边栏 ===== -->
+<!-- ===== 搜索面板（底部上滑） ===== -->
 <div id="search-overlay" class="search-overlay"></div>
 
 <div id="search-sidebar" class="search-sidebar">
+    <!-- 拖拽条 -->
+    <div class="panel-drag-handle" id="search-drag-handle">
+        <div class="panel-drag-indicator"></div>
+    </div>
     <div class="search-sidebar-header">
         <input
             id="search-input"

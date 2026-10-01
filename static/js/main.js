@@ -454,16 +454,29 @@
         if (verClose) verClose.addEventListener("click", closeVersionPanel);
         if (verOverlay) verOverlay.addEventListener("click", closeVersionPanel);
 
-        // 3. 书卷 + 章节面板初始化
+        // 3. 搜索面板事件绑定
+        const searchToggle = document.getElementById("search-toggle");
+        const searchClose = document.getElementById("search-close");
+        const searchOverlay = document.getElementById("search-overlay");
+
+        if (searchToggle) searchToggle.addEventListener("click", openSearchPanel);
+        if (searchClose) searchClose.addEventListener("click", closeSearchPanel);
+        if (searchOverlay) searchOverlay.addEventListener("click", closeSearchPanel);
+
+        // 4. 书卷 + 章节面板初始化
         window.initBookSelector();
 
-        // 4. 阅读模式切换
+        // 5. 阅读模式切换
         initReadingMode();
 
-        // 5. 节号显示/隐藏切换
+        // 6. 节号显示/隐藏切换
         initVerseNumToggle();
 
-        // 6. Material Icons 字体加载完成后显示图标
+        // 7. 面板拖拽调整高度
+        initPanelDrag("version-drag-handle", "version-panel");
+        initPanelDrag("search-drag-handle", "search-sidebar");
+
+        // 8. Material Icons 字体加载完成后显示图标
         initMaterialIcons();
     }
 
@@ -526,6 +539,68 @@
                 }
             }, 300);
         }
+    }
+
+    /** 初始化面板拖拽调整高度 */
+    function initPanelDrag(handleId, panelId) {
+        var handle = document.getElementById(handleId);
+        var panel = document.getElementById(panelId);
+        if (!handle || !panel) return;
+
+        var startY = 0;
+        var startHeight = 0;
+        var isDragging = false;
+
+        function onStart(e) {
+            isDragging = true;
+            startY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+            startHeight = parseInt(panel.style.height) || panel.offsetHeight;
+            panel.style.transition = "none";
+            document.body.style.userSelect = "none";
+            document.body.style.webkitUserSelect = "none";
+        }
+
+        function onMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            var clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+            var deltaY = startY - clientY;
+            var newHeight = Math.max(20, Math.min(90, ((startHeight + deltaY) / window.innerHeight) * 100));
+            panel.style.height = newHeight + "vh";
+        }
+
+        function onEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            panel.style.transition = "";
+            document.body.style.userSelect = "";
+            document.body.style.webkitUserSelect = "";
+        }
+
+        handle.addEventListener("mousedown", onStart);
+        handle.addEventListener("touchstart", onStart, { passive: false });
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("touchmove", onMove, { passive: false });
+        document.addEventListener("mouseup", onEnd);
+        document.addEventListener("touchend", onEnd);
+    }
+
+    /** 打开搜索面板 */
+    function openSearchPanel() {
+        var panel = document.getElementById("search-sidebar");
+        var overlay = document.getElementById("search-overlay");
+        if (panel) panel.classList.add("open");
+        if (overlay) overlay.classList.add("open");
+        var input = document.getElementById("search-input");
+        if (input) setTimeout(function() { input.focus(); }, 300);
+    }
+
+    /** 关闭搜索面板 */
+    function closeSearchPanel() {
+        var panel = document.getElementById("search-sidebar");
+        var overlay = document.getElementById("search-overlay");
+        if (panel) panel.classList.remove("open");
+        if (overlay) overlay.classList.remove("open");
     }
 
     // 页面加载完成后初始化
