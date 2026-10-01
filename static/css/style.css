@@ -415,12 +415,14 @@ body {
 @media (orientation: portrait) and (max-width: 768px) {
     .search-sidebar {
         position: fixed; top: auto; bottom: 0; left: 0; right: 0;
-        width: 100%; max-width: none; height: 40vh;
+        width: 100%; max-width: none; height: 70vh;
         transform: translateY(100%);
         border-left: none;
         border-top: 1px solid var(--line);
         box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
         border-radius: 16px 16px 0 0;
+        /* 输入法弹出时网页不上抬，输入法覆盖在上面 */
+        overflow: hidden;
     }
     .search-sidebar.open { transform: translateY(0); }
 }
