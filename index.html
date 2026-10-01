@@ -113,24 +113,28 @@
         />
         <button id="search-close" class="search-close-btn">&times;</button>
     </div>
-    <!-- 筛选栏 -->
+    <!-- 筛选栏（两行，每行两个，苹果风格） -->
     <div id="search-filters" class="search-filters-bar">
-        <select id="filter-scope" class="filter-select" title="搜索范围">
-            <option value="all">正本圣经</option>
-            <option value="current">当前书卷</option>
-        </select>
-        <select id="filter-version" class="filter-select" title="译本筛选">
-            <option value="all">混合（所有已启用译本）</option>
-            <!-- JS 动态填充：主要译本、次要译本 -->
-        </select>
-        <select id="filter-sort" class="filter-select" title="排序模式">
-            <option value="interleave">穿插显示</option>
-            <option value="grouped">按译本分组</option>
-        </select>
-        <select id="filter-book" class="filter-select filter-book-select" title="筛选书卷">
-            <option value="">全部书卷</option>
-            <!-- JS 动态填充 -->
-        </select>
+        <div class="filter-row">
+            <select id="filter-scope" class="filter-select" title="搜索范围">
+                <option value="all">正本圣经</option>
+                <option value="current">当前书卷</option>
+            </select>
+            <select id="filter-version" class="filter-select" title="译本筛选">
+                <option value="all">混合（所有已启用译本）</option>
+                <!-- JS 动态填充：主要译本、次要译本 -->
+            </select>
+        </div>
+        <div class="filter-row">
+            <select id="filter-sort" class="filter-select" title="排序模式">
+                <option value="interleave">穿插显示</option>
+                <option value="grouped">按译本分组</option>
+            </select>
+            <select id="filter-book" class="filter-select filter-book-select" title="筛选书卷">
+                <option value="">全部书卷</option>
+                <!-- JS 动态填充 -->
+            </select>
+        </div>
     </div>
     <div id="search-results" class="search-sidebar-body"></div>
 </div>
