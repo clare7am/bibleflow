@@ -472,35 +472,42 @@ body {
 }
 .filter-select {
     flex: 1;
-    padding: 8px 12px;
+    height: 36px;
+    padding: 0 32px 0 12px;
     font-size: 14px;
+    font-weight: 500;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-    border: 0.5px solid var(--line);
-    border-radius: 10px;
+    border: none;
+    border-radius: 8px;
     background: var(--bg);
     color: var(--ink);
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238e8e93' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 28px;
-    box-shadow: 0 0.5px 1px rgba(0,0,0,0.04);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    background-position: right 12px center;
+    box-shadow: 0 0.5px 2px rgba(0,0,0,0.08), inset 0 0 0 0.5px rgba(0,0,0,0.06);
+    transition: box-shadow 0.15s;
 }
 .filter-select:hover {
-    border-color: #b0b0b5;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), inset 0 0 0 0.5px rgba(0,0,0,0.08);
+}
+.filter-select:active {
+    box-shadow: 0 0.5px 1px rgba(0,0,0,0.06), inset 0 0 0 0.5px rgba(0,0,0,0.04);
+    background-color: #f0f0f3;
 }
 .filter-select:focus {
-    border-color: var(--accent);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+    box-shadow: 0 0 0 2px var(--accent), 0 0.5px 2px rgba(0,0,0,0.08);
 }
 .filter-select:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+.filter-select option {
+    font-size: 14px;
+    padding: 8px 12px;
 }
 .filter-book-select {
     /* 书卷下拉占满整行宽度 */
@@ -516,11 +523,11 @@ body {
         gap: 6px;
     }
     .filter-select {
+        height: 34px;
         font-size: 13px;
-        padding: 7px 10px;
-        border-radius: 8px;
-        background-position: right 8px center;
-        padding-right: 26px;
+        padding: 0 30px 0 10px;
+        border-radius: 7px;
+        background-position: right 10px center;
     }
 }
 
