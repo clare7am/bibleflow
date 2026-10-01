@@ -50,10 +50,9 @@
 
     /* ===== 筛选状态 ===== */
     var searchFilters = {
-        scope: 'all',       // 'all' | 'current'
+        scope: 'all',       // 'all' | 'current' | 具体书卷 ID
         version: 'all',     // 'all' | 具体版本 key（如 'zh_sigao'）
         sort: 'interleave', // 'interleave' | 'grouped'
-        book: ''            // 书卷 ID 字符串，空=全部
     };
 
     /**
@@ -83,14 +82,15 @@
 
     /** 获取要搜索的书卷列表（根据筛选条件） */
     function getSearchBooks() {
-        // 如果指定了书卷过滤
-        if (searchFilters.book) {
-            const bookId = parseInt(searchFilters.book, 10);
+        const bookFilter = searchFilters.scope;
+        // 如果指定了具体书卷
+        if (bookFilter && bookFilter !== 'all' && bookFilter !== 'current') {
+            const bookId = parseInt(bookFilter, 10);
             const book = (data.allBooks || []).find(b => b.id === bookId);
             return book ? [book] : [];
         }
         // 如果限定当前书卷
-        if (searchFilters.scope === 'current' && state.book) {
+        if (bookFilter === 'current' && state.book) {
             const book = (data.allBooks || []).find(b => b.id === state.book);
             return book ? [book] : [];
         }
@@ -310,7 +310,15 @@
 
         const header = document.createElement('div');
         header.className = 'search-result-header';
-        const scopeLabel = searchFilters.scope === 'current' ? '当前书卷' : '整部圣经';
+        let scopeLabel = '全部书卷';
+        if (searchFilters.scope === 'current') {
+            const currentBook = (data.allBooks || []).find(b => b.id === state.book);
+            scopeLabel = currentBook ? utils.getBookDisplayName(currentBook) : '当前书卷';
+        } else if (searchFilters.scope && searchFilters.scope !== 'all') {
+            const bookId = parseInt(searchFilters.scope, 10);
+            const book = (data.allBooks || []).find(b => b.id === bookId);
+            scopeLabel = book ? utils.getBookDisplayName(book) : '指定书卷';
+        }
         let verLabel = '混合译本';
         if (searchFilters.version !== 'all') {
             const ver = utils.getVersionConfig(searchFilters.version);
@@ -505,7 +513,7 @@
             if (filterKey === 'scope') searchFilters.scope = value;
             else if (filterKey === 'version') searchFilters.version = value;
             else if (filterKey === 'sort') searchFilters.sort = value;
-            else if (filterKey === 'book') searchFilters.book = value;
+            else if (filterKey === 'book') searchFilters.scope = value;
 
             closeAllDropdowns();
 
@@ -605,26 +613,64 @@
             }
         }
 
-        // ===== 初始化书卷选项 =====
+        // ===== 初始化书卷选项（合并范围和书卷） =====
         function initFilterBooks() {
             const container = document.querySelector('#filter-book-dropdown .filter-popup');
             if (!container) return;
+
+            // 保存当前选中的值
+            const currentSelected = container.querySelector('.filter-option.selected');
+            const currentValue = currentSelected ? currentSelected.dataset.value : 'all';
+
             container.innerHTML = '';
 
+            // 全部书卷
             const allOpt = document.createElement('div');
-            allOpt.className = 'filter-option selected';
-            allOpt.dataset.value = '';
+            allOpt.className = 'filter-option' + (currentValue === 'all' ? ' selected' : '');
+            allOpt.dataset.value = 'all';
             allOpt.textContent = '全部书卷';
             container.appendChild(allOpt);
 
+            // 当前书卷
+            if (state.book) {
+                const currentBook = (data.allBooks || []).find(b => b.id === state.book);
+                if (currentBook) {
+                    const opt = document.createElement('div');
+                    opt.className = 'filter-option' + (currentValue === 'current' ? ' selected' : '');
+                    opt.dataset.value = 'current';
+                    opt.textContent = '当前书卷（' + utils.getBookDisplayName(currentBook) + '）';
+                    container.appendChild(opt);
+                }
+            }
+
+            // 分隔线
+            const sep = document.createElement('div');
+            sep.style.cssText = 'height:1px;background:var(--line-2);margin:4px 12px;';
+            container.appendChild(sep);
+
+            // 所有书卷
             const books = data.allBooks || [];
             books.forEach(book => {
                 const opt = document.createElement('div');
-                opt.className = 'filter-option';
+                opt.className = 'filter-option' + (parseInt(currentValue, 10) === book.id ? ' selected' : '');
                 opt.dataset.value = book.id;
                 opt.textContent = utils.getBookDisplayName(book);
                 container.appendChild(opt);
             });
+
+            // 更新按钮显示文字
+            const triggerText = document.querySelector('#filter-book-dropdown .filter-trigger-text');
+            if (triggerText) {
+                if (currentValue === 'all') {
+                    triggerText.textContent = '全部书卷';
+                } else if (currentValue === 'current') {
+                    triggerText.textContent = '当前书卷';
+                } else {
+                    const bookId = parseInt(currentValue, 10);
+                    const book = books.find(b => b.id === bookId);
+                    triggerText.textContent = book ? utils.getBookDisplayName(book) : '全部书卷';
+                }
+            }
         }
 
         // 搜索后更新译本选项的可用状态
