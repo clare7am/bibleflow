@@ -101,7 +101,7 @@
     /**
      * 实时搜索某个版本（回退方案）
      */
-    async function searchVersionRealtime(ver, target, norm) {
+    async function searchVersionRealtime(ver, targets, norm) {
         const hits = [];
 
         for (const book of (data.allBooks || [])) {
@@ -111,7 +111,10 @@
                 if (!verses) continue;
                 for (const v of verses) {
                     const text = v.text || "";
-                    if (norm(text).includes(target)) {
+                    const normText = norm(text);
+                    // AND 匹配：所有关键词都必须出现
+                    const matchAll = targets.every(t => normText.includes(t));
+                    if (matchAll) {
                         hits.push({
                             versionKey: ver.key,
                             versionLabel: ver.label,
@@ -149,7 +152,10 @@
             return;
         }
 
-        const target = utils.normalizeText(kw);
+        // 按空格拆分关键词，AND 匹配（所有词都必须出现）
+        const keywords = kw.split(/\s+/).filter(Boolean);
+        const targets = keywords.map(k => utils.normalizeText(k));
+
         const norm = s => utils.normalizeText(s);
 
         // 并行加载所有版本的索引
@@ -171,7 +177,10 @@
             const isProt = utils.isProtestantVersion(ver.key);
             index.forEach(entry => {
                 const text = entry.t || "";
-                if (norm(text).includes(target)) {
+                const normText = norm(text);
+                // AND 匹配：所有关键词都必须出现
+                const matchAll = targets.every(t => normText.includes(t));
+                if (matchAll) {
                     // 搜索索引里的 book ID 可能是 Protestant ID，需要映射到 Catholic ID
                     let catholicId = entry.b;
                     if (isProt) {
@@ -199,7 +208,7 @@
             if (container.isConnected) {
                 container.innerHTML = `<div class="search-loading">正在搜索 ${ver.label}（实时）…</div>`;
             }
-            const rtHits = await searchVersionRealtime(ver, target, norm);
+            const rtHits = await searchVersionRealtime(ver, targets, norm);
             allHits.push(...rtHits);
         }
 
@@ -222,23 +231,26 @@
         ul.className = 'search-result-list';
         container.appendChild(ul);
 
-        // 高亮关键词
-        function highlight(text, keyword) {
+        // 高亮关键词（支持多词高亮）
+        function highlight(text, kwArr) {
             const escaped = utils.escapeHtml(text);
-            let kwEscaped = utils.escapeHtml(keyword).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            let result = escaped.replace(new RegExp(kwEscaped, 'gi'), m => `<b>${m}</b>`);
-            if (!result.includes('<b>')) {
-                const normText = utils.normalizeText(text);
-                const normKw = utils.normalizeText(keyword);
-                if (normKw) {
-                    const idx = normText.indexOf(normKw);
-                    if (idx >= 0) {
-                        const original = text.substring(idx, idx + normKw.length);
-                        const origEscaped = utils.escapeHtml(original).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        result = escaped.replace(new RegExp(origEscaped, 'gi'), m => `<b>${m}</b>`);
+            let result = escaped;
+            kwArr.forEach(keyword => {
+                let kwEscaped = utils.escapeHtml(keyword).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                result = result.replace(new RegExp(kwEscaped, 'gi'), m => `<b>${m}</b>`);
+                if (!result.includes('<b>')) {
+                    const normText = utils.normalizeText(text);
+                    const normKw = utils.normalizeText(keyword);
+                    if (normKw) {
+                        const idx = normText.indexOf(normKw);
+                        if (idx >= 0) {
+                            const original = text.substring(idx, idx + normKw.length);
+                            const origEscaped = utils.escapeHtml(original).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            result = result.replace(new RegExp(origEscaped, 'gi'), m => `<b>${m}</b>`);
+                        }
                     }
                 }
-            }
+            });
             return result;
         }
 
@@ -265,7 +277,7 @@
 
                 const textLine = document.createElement('span');
                 textLine.className = 'search-result-text';
-                textLine.innerHTML = highlight(r.text, kw);
+                textLine.innerHTML = highlight(r.text, keywords);
 
                 li.appendChild(refLine);
                 li.appendChild(textLine);
