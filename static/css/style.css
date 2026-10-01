@@ -457,6 +457,48 @@ body {
 }
 .search-close-btn:active { background: var(--tap); }
 
+/* ===== 搜索筛选栏 ===== */
+.search-filters-bar {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-secondary, var(--bg));
+    align-items: center;
+}
+.filter-select {
+    padding: 4px 8px;
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    cursor: pointer;
+    max-width: 140px;
+    appearance: auto;
+}
+.filter-select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.filter-book-select {
+    flex: 1;
+    max-width: none;
+    min-width: 100px;
+}
+
+/* 手机竖屏：筛选栏紧凑排列 */
+@media (orientation: portrait) and (max-width: 768px) {
+    .search-filters-bar {
+        padding: 6px 12px;
+        gap: 4px;
+    }
+    .filter-select {
+        font-size: 12px;
+        padding: 3px 6px;
+        max-width: 120px;
+    }
+}
+
 .search-sidebar-body {
     flex: 1; overflow-y: auto;
     padding: 8px 0 32px;

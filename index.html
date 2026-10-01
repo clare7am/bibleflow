@@ -113,6 +113,25 @@
         />
         <button id="search-close" class="search-close-btn">&times;</button>
     </div>
+    <!-- 筛选栏 -->
+    <div id="search-filters" class="search-filters-bar">
+        <select id="filter-scope" class="filter-select" title="搜索范围">
+            <option value="all">正本圣经</option>
+            <option value="current">当前书卷</option>
+        </select>
+        <select id="filter-version" class="filter-select" title="译本筛选">
+            <option value="screen">屏幕显示译本</option>
+            <option value="primary">主要译本</option>
+        </select>
+        <select id="filter-sort" class="filter-select" title="排序模式">
+            <option value="interleave">穿插显示</option>
+            <option value="grouped">按译本分组</option>
+        </select>
+        <select id="filter-book" class="filter-select filter-book-select" title="筛选书卷">
+            <option value="">全部书卷</option>
+            <!-- JS 动态填充 -->
+        </select>
+    </div>
     <div id="search-results" class="search-sidebar-body"></div>
 </div>
 

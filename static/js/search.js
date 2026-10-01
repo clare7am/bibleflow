@@ -27,8 +27,16 @@
     const searchIndexCache = {};
     const searchIndexLoaded = {};
 
+    /* ===== 筛选状态 ===== */
+    var searchFilters = {
+        scope: 'all',       // 'all' | 'current'
+        version: 'screen',  // 'screen' | 'primary'
+        sort: 'interleave', // 'interleave' | 'grouped'
+        book: ''            // 书卷 ID 字符串，空=全部
+    };
+
     /**
-     * 获取当前要搜索的版本列表（主要 + 次要，去重）
+     * 获取当前要搜索的版本列表（根据筛选条件）
      */
     function getSearchVersions() {
         const list = [];
@@ -40,9 +48,32 @@
             seen.add(k);
             list.push(ver);
         };
-        add(state.primaryVersion);
-        (state.secondaryVersions || []).forEach(add);
+
+        if (searchFilters.version === 'primary') {
+            add(state.primaryVersion);
+        } else {
+            // screen: 当前屏幕显示的所有版本
+            add(state.primaryVersion);
+            (state.secondaryVersions || []).forEach(add);
+        }
         return list;
+    }
+
+    /** 获取要搜索的书卷列表（根据筛选条件） */
+    function getSearchBooks() {
+        // 如果指定了书卷过滤
+        if (searchFilters.book) {
+            const bookId = parseInt(searchFilters.book, 10);
+            const book = (data.allBooks || []).find(b => b.id === bookId);
+            return book ? [book] : [];
+        }
+        // 如果限定当前书卷
+        if (searchFilters.scope === 'current' && state.book) {
+            const book = (data.allBooks || []).find(b => b.id === state.book);
+            return book ? [book] : [];
+        }
+        // 全部书卷
+        return data.allBooks || [];
     }
 
     /**
@@ -103,8 +134,9 @@
      */
     async function searchVersionRealtime(ver, targets, norm) {
         const hits = [];
+        const books = getSearchBooks();
 
-        for (const book of (data.allBooks || [])) {
+        for (const book of books) {
             const maxCh = (book.chapter_count) || 50;
             for (let ch = 1; ch <= maxCh; ch++) {
                 const verses = await ensureChapterLoadedRT(ver.key, book.id, ch);
@@ -171,24 +203,28 @@
         const noIndexVersions = results.filter(r => !r.index || r.index.length === 0);
 
         const allHits = [];
+        const searchBooks = getSearchBooks();
+        const searchBookIds = new Set(searchBooks.map(b => b.id));
 
         // 使用索引快速搜索
         hasIndexVersions.forEach(({ ver, index }) => {
             const isProt = utils.isProtestantVersion(ver.key);
             index.forEach(entry => {
+                // 搜索索引里的 book ID 可能是 Protestant ID，需要映射到 Catholic ID
+                let catholicId = entry.b;
+                if (isProt) {
+                    const match = (data.allBooks || []).find(b => b.prot_id === entry.b);
+                    if (match) catholicId = match.id;
+                }
+
+                // 书卷过滤
+                if (searchBookIds.size > 0 && !searchBookIds.has(catholicId)) return;
+
                 const text = entry.t || "";
                 const normText = norm(text);
                 // AND 匹配：所有关键词都必须出现
                 const matchAll = targets.every(t => normText.includes(t));
                 if (matchAll) {
-                    // 搜索索引里的 book ID 可能是 Protestant ID，需要映射到 Catholic ID
-                    let catholicId = entry.b;
-                    if (isProt) {
-                        // 反查：找到 prot_id === entry.b 的 Catholic ID
-                        const match = (data.allBooks || []).find(b => b.prot_id === entry.b);
-                        if (match) catholicId = match.id;
-                    }
-
                     const book = (data.allBooks || []).find(b => b.id === catholicId);
                     allHits.push({
                         versionKey: ver.key,
@@ -220,11 +256,31 @@
             return;
         }
 
+        // 排序
+        const sortMode = searchFilters.sort;
+        allHits.sort((a, b) => {
+            // 先按书卷 ID 排序
+            if (a.bookId !== b.bookId) return a.bookId - b.bookId;
+            // 再按章节
+            if (a.chapter !== b.chapter) return a.chapter - b.chapter;
+            // 再按节号
+            if (a.verse !== b.verse) return a.verse - b.verse;
+            // 同节经文，按排序模式处理
+            if (sortMode === 'grouped') {
+                // 按译本分组：同一译本的结果紧挨
+                return a.versionKey.localeCompare(b.versionKey);
+            }
+            // interleave: 同节不同译本按版本字母序穿插
+            return a.versionKey.localeCompare(b.versionKey);
+        });
+
         container.innerHTML = '';
 
         const header = document.createElement('div');
         header.className = 'search-result-header';
-        header.textContent = `找到 ${allHits.length} 节（${versions.length} 个版本）`;
+        const scopeLabel = searchFilters.scope === 'current' ? '当前书卷' : '正本圣经';
+        const verLabel = searchFilters.version === 'primary' ? '主要译本' : '屏幕显示译本';
+        header.textContent = `找到 ${allHits.length} 节（${scopeLabel} · ${verLabel}）`;
         container.appendChild(header);
 
         const ul = document.createElement('ul');
@@ -367,7 +423,46 @@
         const input = document.getElementById('search-input');
         const results = document.getElementById('search-results');
 
+        // 筛选栏元素
+        const filterScope = document.getElementById('filter-scope');
+        const filterVersion = document.getElementById('filter-version');
+        const filterSort = document.getElementById('filter-sort');
+        const filterBook = document.getElementById('filter-book');
+
         let timer = null;
+
+        // 初始化书卷下拉菜单
+        function initFilterBooks() {
+            if (!filterBook) return;
+            const books = data.allBooks || [];
+            books.forEach(book => {
+                const opt = document.createElement('option');
+                opt.value = book.id;
+                opt.textContent = utils.getBookDisplayName(book);
+                filterBook.appendChild(opt);
+            });
+        }
+
+        // 筛选条件变化 → 重新搜索
+        function onFilterChange() {
+            searchFilters.scope = filterScope ? filterScope.value : 'all';
+            searchFilters.version = filterVersion ? filterVersion.value : 'screen';
+            searchFilters.sort = filterSort ? filterSort.value : 'interleave';
+            searchFilters.book = filterBook ? filterBook.value : '';
+
+            // 如果有当前关键词，重新搜索
+            if (input && input.value.trim()) {
+                clearTimeout(timer);
+                timer = setTimeout(() => doSearch(input.value.trim()), 300);
+            }
+        }
+
+        if (filterScope) filterScope.addEventListener('change', onFilterChange);
+        if (filterVersion) filterVersion.addEventListener('change', onFilterChange);
+        if (filterSort) filterSort.addEventListener('change', onFilterChange);
+        if (filterBook) filterBook.addEventListener('change', onFilterChange);
+
+        initFilterBooks();
 
         function openSidebar() {
             if (overlay) overlay.classList.add('open');
