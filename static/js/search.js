@@ -452,75 +452,175 @@
         const input = document.getElementById('search-input');
         const results = document.getElementById('search-results');
 
-        // 筛选栏元素
-        const filterScope = document.getElementById('filter-scope');
-        const filterVersion = document.getElementById('filter-version');
-        const filterSort = document.getElementById('filter-sort');
-        const filterBook = document.getElementById('filter-book');
-
         let timer = null;
 
-        // 初始化译本下拉菜单
-        function initFilterVersions() {
-            if (!filterVersion) return;
-            // 保留第一个"混合"选项
-            filterVersion.innerHTML = '';
-            const allOpt = document.createElement('option');
-            allOpt.value = 'all';
-            allOpt.textContent = '混合（所有已启用译本）';
-            filterVersion.appendChild(allOpt);
+        // ===== 自定义下拉菜单逻辑 =====
+        let activeDropdown = null;
 
-            // 主要译本
-            const primary = utils.getVersionConfig(state.primaryVersion);
-            if (primary) {
-                const opt = document.createElement('option');
-                opt.value = state.primaryVersion;
-                opt.textContent = '📌 ' + primary.label;
-                filterVersion.appendChild(opt);
-            }
-
-            // 次要译本
-            (state.secondaryVersions || []).forEach(key => {
-                const ver = utils.getVersionConfig(key);
-                if (!ver) return;
-                const opt = document.createElement('option');
-                opt.value = key;
-                opt.textContent = ver.label;
-                filterVersion.appendChild(opt);
-            });
+        function openDropdown(dropdown) {
+            closeAllDropdowns();
+            const popup = dropdown.querySelector('.filter-popup');
+            const trigger = dropdown.querySelector('.filter-trigger');
+            if (!popup || !trigger) return;
+            popup.hidden = false;
+            trigger.classList.add('active');
+            activeDropdown = dropdown;
         }
 
-        // 初始化书卷下拉菜单
-        function initFilterBooks() {
-            if (!filterBook) return;
-            const books = data.allBooks || [];
-            books.forEach(book => {
-                const opt = document.createElement('option');
-                opt.value = book.id;
-                opt.textContent = utils.getBookDisplayName(book);
-                filterBook.appendChild(opt);
+        function closeAllDropdowns() {
+            document.querySelectorAll('.filter-dropdown').forEach(dd => {
+                const popup = dd.querySelector('.filter-popup');
+                const trigger = dd.querySelector('.filter-trigger');
+                if (popup) popup.hidden = true;
+                if (trigger) trigger.classList.remove('active');
             });
+            activeDropdown = null;
         }
 
-        // 筛选条件变化 → 重新搜索
-        function onFilterChange() {
-            searchFilters.scope = filterScope ? filterScope.value : 'all';
-            searchFilters.version = filterVersion ? filterVersion.value : 'all';
-            searchFilters.sort = filterSort ? filterSort.value : 'interleave';
-            searchFilters.book = filterBook ? filterBook.value : '';
+        function selectOption(dropdown, optionEl) {
+            if (optionEl.classList.contains('disabled')) return;
+            const filterKey = dropdown.querySelector('.filter-trigger').dataset.filter;
+            const value = optionEl.dataset.value;
+            const text = optionEl.textContent;
 
-            // 如果有当前关键词，重新搜索
+            // 更新选中状态
+            dropdown.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('selected'));
+            optionEl.classList.add('selected');
+
+            // 更新按钮文字
+            const triggerText = dropdown.querySelector('.filter-trigger-text');
+            if (triggerText) triggerText.textContent = text;
+
+            // 更新筛选状态
+            if (filterKey === 'scope') searchFilters.scope = value;
+            else if (filterKey === 'version') searchFilters.version = value;
+            else if (filterKey === 'sort') searchFilters.sort = value;
+            else if (filterKey === 'book') searchFilters.book = value;
+
+            closeAllDropdowns();
+
+            // 触发重新搜索
             if (input && input.value.trim()) {
                 clearTimeout(timer);
                 timer = setTimeout(() => doSearch(input.value.trim()), 300);
             }
         }
 
-        if (filterScope) filterScope.addEventListener('change', onFilterChange);
-        if (filterVersion) filterVersion.addEventListener('change', onFilterChange);
-        if (filterSort) filterSort.addEventListener('change', onFilterChange);
-        if (filterBook) filterBook.addEventListener('change', onFilterChange);
+        // 绑定所有下拉菜单事件
+        document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+            const trigger = dropdown.querySelector('.filter-trigger');
+            const popup = dropdown.querySelector('.filter-popup');
 
+            if (trigger) {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (activeDropdown === dropdown) {
+                        closeAllDropdowns();
+                    } else {
+                        openDropdown(dropdown);
+                    }
+                });
+            }
+
+            if (popup) {
+                popup.addEventListener('click', (e) => {
+                    const option = e.target.closest('.filter-option');
+                    if (option) selectOption(dropdown, option);
+                });
+            }
+        });
+
+        // 点击外部关闭所有下拉
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.filter-dropdown')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // ESC 关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && activeDropdown) {
+                closeAllDropdowns();
+            }
+        });
+
+        // ===== 初始化译本选项 =====
+        function initFilterVersions() {
+            const container = document.querySelector('#filter-version-dropdown .filter-popup');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // 混合选项
+            const allOpt = document.createElement('div');
+            allOpt.className = 'filter-option selected';
+            allOpt.dataset.value = 'all';
+            allOpt.textContent = '混合（所有已启用译本）';
+            container.appendChild(allOpt);
+
+            // 主要译本
+            const primary = utils.getVersionConfig(state.primaryVersion);
+            if (primary) {
+                const opt = document.createElement('div');
+                opt.className = 'filter-option';
+                opt.dataset.value = state.primaryVersion;
+                opt.textContent = primary.label;
+                opt.dataset.primary = '1';
+                container.appendChild(opt);
+            }
+
+            // 次要译本
+            (state.secondaryVersions || []).forEach(key => {
+                const ver = utils.getVersionConfig(key);
+                if (!ver) return;
+                const opt = document.createElement('div');
+                opt.className = 'filter-option';
+                opt.dataset.value = key;
+                opt.textContent = ver.label;
+                container.appendChild(opt);
+            });
+        }
+
+        // ===== 初始化书卷选项 =====
+        function initFilterBooks() {
+            const container = document.querySelector('#filter-book-dropdown .filter-popup');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const allOpt = document.createElement('div');
+            allOpt.className = 'filter-option selected';
+            allOpt.dataset.value = '';
+            allOpt.textContent = '全部书卷';
+            container.appendChild(allOpt);
+
+            const books = data.allBooks || [];
+            books.forEach(book => {
+                const opt = document.createElement('div');
+                opt.className = 'filter-option';
+                opt.dataset.value = book.id;
+                opt.textContent = utils.getBookDisplayName(book);
+                container.appendChild(opt);
+            });
+        }
+
+        // 搜索后更新译本选项的可用状态
+        function updateFilterVersionAvailability(hits) {
+            const container = document.querySelector('#filter-version-dropdown .filter-popup');
+            if (!container) return;
+            const hitVersionKeys = new Set(hits.map(h => h.versionKey));
+            const opts = container.querySelectorAll('.filter-option');
+            opts.forEach(opt => {
+                if (opt.dataset.value === 'all') return;
+                const hasResult = hitVersionKeys.has(opt.dataset.value);
+                opt.classList.toggle('disabled', !hasResult);
+                if (!hasResult && !opt.textContent.endsWith('（无结果）')) {
+                    opt.textContent += '（无结果）';
+                } else if (hasResult && opt.textContent.endsWith('（无结果）')) {
+                    opt.textContent = opt.textContent.replace('（无结果）', '').trim();
+                }
+            });
+        }
+
+        // 初始化
         initFilterBooks();
         initFilterVersions();
 

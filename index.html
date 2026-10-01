@@ -113,27 +113,51 @@
         />
         <button id="search-close" class="search-close-btn">&times;</button>
     </div>
-    <!-- 筛选栏（两行，每行两个，苹果风格） -->
+    <!-- 筛选栏（两行，每行两个，苹果风格自定义下拉） -->
     <div id="search-filters" class="search-filters-bar">
         <div class="filter-row">
-            <select id="filter-scope" class="filter-select" title="搜索范围">
-                <option value="all">正本圣经</option>
-                <option value="current">当前书卷</option>
-            </select>
-            <select id="filter-version" class="filter-select" title="译本筛选">
-                <option value="all">混合（所有已启用译本）</option>
-                <!-- JS 动态填充：主要译本、次要译本 -->
-            </select>
+            <div class="filter-dropdown" id="filter-scope-dropdown">
+                <button class="filter-trigger" data-filter="scope" type="button">
+                    <span class="filter-trigger-text">正本圣经</span>
+                    <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+                </button>
+                <div class="filter-popup" hidden>
+                    <div class="filter-option selected" data-value="all">正本圣经</div>
+                    <div class="filter-option" data-value="current">当前书卷</div>
+                </div>
+            </div>
+            <div class="filter-dropdown" id="filter-version-dropdown">
+                <button class="filter-trigger" data-filter="version" type="button">
+                    <span class="filter-trigger-text">混合（所有已启用译本）</span>
+                    <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+                </button>
+                <div class="filter-popup" hidden>
+                    <div class="filter-option selected" data-value="all">混合（所有已启用译本）</div>
+                    <!-- JS 动态填充：主要译本、次要译本 -->
+                </div>
+            </div>
         </div>
         <div class="filter-row">
-            <select id="filter-sort" class="filter-select" title="排序模式">
-                <option value="interleave">穿插显示</option>
-                <option value="grouped">按译本分组</option>
-            </select>
-            <select id="filter-book" class="filter-select filter-book-select" title="筛选书卷">
-                <option value="">全部书卷</option>
-                <!-- JS 动态填充 -->
-            </select>
+            <div class="filter-dropdown" id="filter-sort-dropdown">
+                <button class="filter-trigger" data-filter="sort" type="button">
+                    <span class="filter-trigger-text">穿插显示</span>
+                    <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+                </button>
+                <div class="filter-popup" hidden>
+                    <div class="filter-option selected" data-value="interleave">穿插显示</div>
+                    <div class="filter-option" data-value="grouped">按译本分组</div>
+                </div>
+            </div>
+            <div class="filter-dropdown" id="filter-book-dropdown">
+                <button class="filter-trigger" data-filter="book" type="button">
+                    <span class="filter-trigger-text">全部书卷</span>
+                    <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+                </button>
+                <div class="filter-popup" hidden>
+                    <div class="filter-option selected" data-value="">全部书卷</div>
+                    <!-- JS 动态填充 -->
+                </div>
+            </div>
         </div>
     </div>
     <div id="search-results" class="search-sidebar-body"></div>
