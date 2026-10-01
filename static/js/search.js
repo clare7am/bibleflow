@@ -297,18 +297,9 @@
 
     /* ========= 跳转到经文（不修改版本选择）========= */
     function jumpToVerse(bookId, chapter, verse) {
-        // 关闭搜索面板
-        const overlay = document.getElementById('search-overlay');
-        const sidebar = document.getElementById('search-sidebar');
+        // 跳转经文，保留搜索结果
         const input = document.getElementById('search-input');
-        const resultsEl = document.getElementById('search-results');
-        if (overlay) overlay.classList.remove('open');
-        if (sidebar) sidebar.classList.remove('open');
-        if (input) input.value = '';
-        if (resultsEl) {
-            resultsEl.innerHTML = '';
-            resultsEl.style.display = 'none';
-        }
+        if (input) input.blur();
 
         // ✅ 关键：绝不碰 primaryVersion / secondaryVersions
         // 只用当前已选的主要经文版本去加载目标章节

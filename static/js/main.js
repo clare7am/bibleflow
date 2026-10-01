@@ -545,13 +545,21 @@
         if (!handle || !panel) return;
 
         var startY = 0;
-        var startHeight = 0;
+        var startHeightVh = 50; // 默认 50vh
         var isDragging = false;
 
         function onStart(e) {
             isDragging = true;
             startY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
-            startHeight = parseInt(panel.style.height) || panel.offsetHeight;
+
+            // 统一用 vh 计算起始高度
+            var currentStyle = panel.style.height;
+            if (currentStyle && currentStyle.endsWith("vh")) {
+                startHeightVh = parseFloat(currentStyle);
+            } else {
+                startHeightVh = (panel.offsetHeight / window.innerHeight) * 100;
+            }
+
             panel.style.transition = "none";
             document.body.style.userSelect = "none";
             document.body.style.webkitUserSelect = "none";
@@ -562,7 +570,8 @@
             e.preventDefault();
             var clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
             var deltaY = startY - clientY;
-            var newHeight = Math.max(20, Math.min(90, ((startHeight + deltaY) / window.innerHeight) * 100));
+            var deltaYVh = (deltaY / window.innerHeight) * 100;
+            var newHeight = Math.max(20, Math.min(100, startHeightVh + deltaYVh));
             panel.style.height = newHeight + "vh";
         }
 
