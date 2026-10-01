@@ -572,7 +572,13 @@
             var clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
             var deltaY = startY - clientY;
             var deltaYVh = (deltaY / window.innerHeight) * 100;
-            var newHeight = Math.max(20, Math.min(100, startHeightVh + deltaYVh));
+            var newHeight = startHeightVh + deltaYVh;
+
+            // 最小 20vh，最大为可视区域减去安全边距（留出拖拽把手可见区域）
+            var minH = 20;
+            var maxH = ((window.innerHeight - 60) / window.innerHeight) * 100;
+            newHeight = Math.max(minH, Math.min(maxH, newHeight));
+
             panel.style.height = newHeight + "vh";
         }
 
