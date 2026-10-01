@@ -94,12 +94,10 @@
        上一章 / 下一章（音频触发）
        ========================= */
     function prevChapterAudio() {
-        shouldAutoPlay = true;
         window.prevChapter();
     }
 
     function nextChapterAudio() {
-        shouldAutoPlay = true;
         window.nextChapter();
     }
 
