@@ -158,11 +158,63 @@
         container.appendChild(frag);
 
         // 应用实体样式
-        if (typeof window.applyEntityStyles === "function") {
-            window.applyEntityStyles();
-        }
+        window.applyEntityStyles(container);
+
+        // 经节号显示/隐藏
+        container.classList.toggle("verse-num-hidden", !state.showVerseNum);
 
         onReady && onReady();
+
+        // 初始化经文复制功能
+        initVerseCopy();
+    }
+
+    /* ========= 经文复制功能 ========= */
+    let _copyInitialized = false;
+    function initVerseCopy() {
+        if (_copyInitialized) return;
+        _copyInitialized = true;
+
+        document.addEventListener('copy', function(e) {
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed || !sel.rangeCount) return;
+
+            const range = sel.getRangeAt(0);
+            let node = range.commonAncestorContainer;
+            if (node.nodeType === Node.TEXT_NODE) node = node.parentNode;
+
+            // 向上查找最近的 .verse-block
+            const verseBlock = node.closest ? node.closest('.verse-block') : findClosestVerseBlock(node);
+            if (!verseBlock) return;
+
+            const bookId = state.book;
+            const chapter = state.chapter;
+            const verseNum = verseBlock.querySelector('.verse-num')?.textContent?.trim() || '';
+            if (!bookId || !chapter || !verseNum) return;
+
+            const book = (window.BibleFlow.data.allBooks || []).find(b => b.id === bookId);
+            const bookName = book ? utils.getBookDisplayName(book) : '';
+            if (!bookName) return;
+
+            // 获取选中的纯文本
+            let selectedText = sel.toString().trim();
+            if (!selectedText) return;
+
+            // 如果选中的文本已经在 verse-block 内，添加引用
+            if (verseBlock.contains(node)) {
+                const formatted = `${bookName} ${chapter}:${verseNum} ${selectedText}`;
+                e.clipboardData.setData('text/plain', formatted);
+                e.preventDefault();
+            }
+        });
+    }
+
+    function findClosestVerseBlock(node) {
+        while (node && node !== document.body) {
+            if (node.classList && node.classList.contains('verse-block')) return node;
+            node = node.parentNode;
+        }
+        return null;
     }
 
     /** 阅读模式：切换次版本展开/收起 */
