@@ -327,6 +327,9 @@
         state.primaryVersion = newPrimary;
         state.secondaryVersions = newSecondary;
 
+        // 通知搜索面板刷新译本选项
+        document.dispatchEvent(new CustomEvent('versionsChanged'));
+
         console.log(`🔄 版本顺序 → 主要: ${oldPrimary} → ${newPrimary}, 次要: [${newSecondary.join(", ")}]`);
         console.log(`   state.primaryVersion 现在是: ${state.primaryVersion}`);
 

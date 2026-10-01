@@ -558,11 +558,16 @@
         function initFilterVersions() {
             const container = document.querySelector('#filter-version-dropdown .filter-popup');
             if (!container) return;
+
+            // 保存当前选中的值
+            const currentSelected = container.querySelector('.filter-option.selected');
+            const currentValue = currentSelected ? currentSelected.dataset.value : 'all';
+
             container.innerHTML = '';
 
             // 混合选项
             const allOpt = document.createElement('div');
-            allOpt.className = 'filter-option selected';
+            allOpt.className = 'filter-option' + (currentValue === 'all' ? ' selected' : '');
             allOpt.dataset.value = 'all';
             allOpt.textContent = '混合（所有已启用译本）';
             container.appendChild(allOpt);
@@ -571,10 +576,9 @@
             const primary = utils.getVersionConfig(state.primaryVersion);
             if (primary) {
                 const opt = document.createElement('div');
-                opt.className = 'filter-option';
+                opt.className = 'filter-option' + (currentValue === state.primaryVersion ? ' selected' : '');
                 opt.dataset.value = state.primaryVersion;
                 opt.textContent = primary.label;
-                opt.dataset.primary = '1';
                 container.appendChild(opt);
             }
 
@@ -583,11 +587,22 @@
                 const ver = utils.getVersionConfig(key);
                 if (!ver) return;
                 const opt = document.createElement('div');
-                opt.className = 'filter-option';
+                opt.className = 'filter-option' + (currentValue === key ? ' selected' : '');
                 opt.dataset.value = key;
                 opt.textContent = ver.label;
                 container.appendChild(opt);
             });
+
+            // 更新按钮显示文字
+            const triggerText = document.querySelector('#filter-version-dropdown .filter-trigger-text');
+            if (triggerText) {
+                if (currentValue === 'all') {
+                    triggerText.textContent = '混合（所有已启用译本）';
+                } else {
+                    const ver = utils.getVersionConfig(currentValue);
+                    triggerText.textContent = ver ? ver.label : currentValue;
+                }
+            }
         }
 
         // ===== 初始化书卷选项 =====
@@ -634,9 +649,17 @@
         initFilterBooks();
         initFilterVersions();
 
+        // 监听版本变化事件
+        document.addEventListener('versionsChanged', () => {
+            initFilterVersions();
+        });
+
         function openSidebar() {
             if (overlay) overlay.classList.add('open');
             if (sidebar) sidebar.classList.add('open');
+            // 每次打开时重新初始化译本和书卷选项
+            initFilterVersions();
+            initFilterBooks();
             if (input) input.focus();
         }
 
