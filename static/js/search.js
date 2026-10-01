@@ -573,11 +573,11 @@
 
             container.innerHTML = '';
 
-            // 第一个选项：在全部已启用译本中搜索
+            // 第一个选项：全部已启用译本
             const allOpt = document.createElement('div');
             allOpt.className = 'filter-option' + (currentValue === 'all' ? ' selected' : '');
             allOpt.dataset.value = 'all';
-            allOpt.textContent = '在全部已启用译本中搜索';
+            allOpt.textContent = '全部已启用译本';
             container.appendChild(allOpt);
 
             // 分隔线
@@ -616,7 +616,7 @@
             const triggerText = document.querySelector('#filter-version-dropdown .filter-trigger-text');
             if (triggerText) {
                 if (currentValue === 'all') {
-                    triggerText.textContent = '在全部已启用译本中搜索';
+                    triggerText.textContent = '全部已启用译本';
                 } else {
                     const ver = utils.getVersionConfig(currentValue);
                     triggerText.textContent = ver ? ver.label : currentValue;

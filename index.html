@@ -116,16 +116,18 @@
     <!-- 筛选栏（一行三个，苹果风格自定义下拉） -->
     <div id="search-filters" class="search-filters-bar">
         <div class="filter-dropdown" id="filter-version-dropdown">
+            <span class="filter-label">搜索范围：</span>
             <button class="filter-trigger" data-filter="version" type="button">
-                <span class="filter-trigger-text">在全部已启用译本中搜索</span>
+                <span class="filter-trigger-text">全部已启用译本</span>
                 <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
             </button>
             <div class="filter-popup" hidden>
-                <div class="filter-option selected" data-value="all">在全部已启用译本中搜索</div>
+                <div class="filter-option selected" data-value="all">全部已启用译本</div>
                 <!-- 分隔线 + "仅在以下译本中搜索"标题 + 主要/次要译本，JS 动态填充 -->
             </div>
         </div>
         <div class="filter-dropdown" id="filter-sort-dropdown" style="display:none;">
+            <span class="filter-label">排序：</span>
             <button class="filter-trigger" data-filter="sort" type="button">
                 <span class="filter-trigger-text">穿插显示</span>
                 <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
@@ -136,6 +138,7 @@
             </div>
         </div>
         <div class="filter-dropdown" id="filter-book-dropdown">
+            <span class="filter-label">书卷：</span>
             <button class="filter-trigger" data-filter="book" type="button">
                 <span class="filter-trigger-text">全部书卷</span>
                 <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>

@@ -470,6 +470,18 @@ body {
 .filter-dropdown {
     flex: 1;
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 标签文字 */
+.filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3, #999);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* 触发按钮 */
@@ -593,13 +605,16 @@ body {
 /* 手机竖屏：筛选栏保持一行，缩小字号 */
 @media (orientation: portrait) and (max-width: 768px) {
     .search-filters-bar {
-        padding: 8px 12px;
-        gap: 5px;
+        padding: 8px 10px;
+        gap: 4px;
+    }
+    .filter-label {
+        font-size: 11px;
     }
     .filter-trigger {
-        height: 32px;
+        height: 30px;
         font-size: 11px;
-        padding: 0 8px;
+        padding: 0 7px;
         border-radius: 7px;
     }
     .filter-popup {
