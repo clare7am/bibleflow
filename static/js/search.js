@@ -27,10 +27,31 @@
     const searchIndexCache = {};
     const searchIndexLoaded = {};
 
+    /** 搜索后更新译本下拉菜单的可用状态（无结果的译本 disabled） */
+    function updateFilterVersionAvailability(hits) {
+        const filterVersion = document.getElementById('filter-version');
+        if (!filterVersion) return;
+        const hitVersionKeys = new Set(hits.map(h => h.versionKey));
+        const opts = filterVersion.querySelectorAll('option');
+        opts.forEach(opt => {
+            if (opt.value === 'all') return; // 混合选项不受影响
+            opt.disabled = !hitVersionKeys.has(opt.value);
+            if (opt.disabled && opt.textContent.indexOf('（无结果）') === -1) {
+                opt.textContent = opt.textContent.replace(/^📌\s*/, '') + '（无结果）';
+            } else if (!opt.disabled) {
+                // 恢复原始标签
+                const ver = utils.getVersionConfig(opt.value);
+                if (ver) {
+                    opt.textContent = (opt.value === state.primaryVersion ? '📌 ' : '') + ver.label;
+                }
+            }
+        });
+    }
+
     /* ===== 筛选状态 ===== */
     var searchFilters = {
         scope: 'all',       // 'all' | 'current'
-        version: 'screen',  // 'screen' | 'primary'
+        version: 'all',     // 'all' | 具体版本 key（如 'zh_sigao'）
         sort: 'interleave', // 'interleave' | 'grouped'
         book: ''            // 书卷 ID 字符串，空=全部
     };
@@ -49,12 +70,13 @@
             list.push(ver);
         };
 
-        if (searchFilters.version === 'primary') {
-            add(state.primaryVersion);
-        } else {
-            // screen: 当前屏幕显示的所有版本
+        if (searchFilters.version === 'all') {
+            // 混合：所有已启用的版本
             add(state.primaryVersion);
             (state.secondaryVersions || []).forEach(add);
+        } else {
+            // 指定某个版本
+            add(searchFilters.version);
         }
         return list;
     }
@@ -279,7 +301,11 @@
         const header = document.createElement('div');
         header.className = 'search-result-header';
         const scopeLabel = searchFilters.scope === 'current' ? '当前书卷' : '正本圣经';
-        const verLabel = searchFilters.version === 'primary' ? '主要译本' : '屏幕显示译本';
+        let verLabel = '混合译本';
+        if (searchFilters.version !== 'all') {
+            const ver = utils.getVersionConfig(searchFilters.version);
+            verLabel = ver ? ver.label : searchFilters.version;
+        }
         header.textContent = `找到 ${allHits.length} 节（${scopeLabel} · ${verLabel}）`;
         container.appendChild(header);
 
@@ -339,8 +365,6 @@
                 li.appendChild(textLine);
 
                 li.onclick = () => {
-                    // ✅ 只传 bookId / chapter / verse，不传版本
-                    // 跳转时绝不修改用户的版本选择
                     jumpToVerse(r.bookId, r.chapter, r.verse);
                 };
                 ul.appendChild(li);
@@ -357,6 +381,11 @@
                 more.className = 'load-more';
                 more.onclick = renderNextBatch;
                 ul.appendChild(more);
+            }
+
+            // 第一批渲染后，更新译本下拉菜单的可用状态
+            if (rendered >= slice.length) {
+                updateFilterVersionAvailability(allHits);
             }
         }
 
@@ -431,6 +460,36 @@
 
         let timer = null;
 
+        // 初始化译本下拉菜单
+        function initFilterVersions() {
+            if (!filterVersion) return;
+            // 保留第一个"混合"选项
+            filterVersion.innerHTML = '';
+            const allOpt = document.createElement('option');
+            allOpt.value = 'all';
+            allOpt.textContent = '混合（所有已启用译本）';
+            filterVersion.appendChild(allOpt);
+
+            // 主要译本
+            const primary = utils.getVersionConfig(state.primaryVersion);
+            if (primary) {
+                const opt = document.createElement('option');
+                opt.value = state.primaryVersion;
+                opt.textContent = '📌 ' + primary.label;
+                filterVersion.appendChild(opt);
+            }
+
+            // 次要译本
+            (state.secondaryVersions || []).forEach(key => {
+                const ver = utils.getVersionConfig(key);
+                if (!ver) return;
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = ver.label;
+                filterVersion.appendChild(opt);
+            });
+        }
+
         // 初始化书卷下拉菜单
         function initFilterBooks() {
             if (!filterBook) return;
@@ -446,7 +505,7 @@
         // 筛选条件变化 → 重新搜索
         function onFilterChange() {
             searchFilters.scope = filterScope ? filterScope.value : 'all';
-            searchFilters.version = filterVersion ? filterVersion.value : 'screen';
+            searchFilters.version = filterVersion ? filterVersion.value : 'all';
             searchFilters.sort = filterSort ? filterSort.value : 'interleave';
             searchFilters.book = filterBook ? filterBook.value : '';
 
@@ -463,6 +522,7 @@
         if (filterBook) filterBook.addEventListener('change', onFilterChange);
 
         initFilterBooks();
+        initFilterVersions();
 
         function openSidebar() {
             if (overlay) overlay.classList.add('open');
