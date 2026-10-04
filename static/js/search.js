@@ -770,15 +770,21 @@
         }
 
         // 初始化（延迟到数据加载完成后重试）
-        function tryInit() {
+        function tryInit(attempts) {
+            if (!attempts) attempts = 0;
             if (data.allBooks && data.allBooks.length > 0) {
+                console.log('[search] initFilterBooks: allBooks loaded, count=', data.allBooks.length);
+                console.log('[search] initFilterBooks: categories=', data.bookCategories ? data.bookCategories.length : 0);
                 initFilterBooks();
                 initFilterVersions();
             } else {
-                setTimeout(tryInit, 200);
+                if (attempts < 50) {
+                    if (attempts % 5 === 0) console.log('[search] waiting for allBooks... attempt', attempts);
+                    setTimeout(function() { tryInit(attempts + 1); }, 200);
+                }
             }
         }
-        tryInit();
+        tryInit(0);
 
         // 监听版本变化事件
         document.addEventListener('versionsChanged', () => {
