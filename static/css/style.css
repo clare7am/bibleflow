@@ -605,8 +605,6 @@ body {
 .chapter-item.active {
     color: var(--accent);
     font-weight: 600;
-    background: var(--accent-light);
-    border-radius: 8px;
 }
 
 /* ============================================================
