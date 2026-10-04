@@ -124,6 +124,7 @@ body {
    ============================================================ */
 .side-panel {
     display: none;
+    order: -1;
 }
 .side-panel.open {
     display: flex;
