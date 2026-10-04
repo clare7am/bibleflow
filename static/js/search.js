@@ -69,7 +69,13 @@
             list.push(ver);
         };
 
-        if (searchFilters.version === 'all') {
+        if (searchFilters.version === 'all_versions') {
+            // 全部译本：所有已收录的版本
+            var allVer = window.BibleFlow.data.allVersions || cfg.versions || [];
+            for (var i = 0; i < allVer.length; i++) {
+                add(allVer[i].key);
+            }
+        } else if (searchFilters.version === 'all') {
             // 混合：所有已启用的版本
             add(state.primaryVersion);
             (state.secondaryVersions || []).forEach(add);
@@ -426,8 +432,16 @@
         const input = document.getElementById('search-input');
         if (input) input.blur();
 
-        // ✅ 关键：绝不碰 primaryVersion / secondaryVersions
-        // 只用当前已选的主要经文版本去加载目标章节
+        // ✅ 如果点击的译本未启用，自动启用为次要译本
+        var hitVersionKey = hit.versionKey;
+        var isVersionEnabled = hitVersionKey === state.primaryVersion ||
+            (state.secondaryVersions || []).indexOf(hitVersionKey) !== -1;
+        if (!isVersionEnabled) {
+            state.secondaryVersions.push(hitVersionKey);
+            if (window.showToast) window.showToast('已启用 ' + (utils.getVersionConfig(hitVersionKey) || {}).label + ' 译本');
+        }
+
+        // ✅ 只用当前已选的主要经文版本去加载目标章节
         state.book = bookId;
         state.chapter = chapter;
 
@@ -574,61 +588,67 @@
 
         // ===== 初始化译本选项 =====
         function initFilterVersions() {
-            const container = document.querySelector('#filter-version-dropdown .filter-popup');
+            var container = document.querySelector('#filter-version-dropdown .filter-popup');
             if (!container) return;
 
             // 保存当前选中的值
-            const currentSelected = container.querySelector('.filter-option.selected');
-            const currentValue = currentSelected ? currentSelected.dataset.value : 'all';
+            var currentSelected = container.querySelector('.filter-option.selected');
+            var currentValue = currentSelected ? currentSelected.dataset.value : 'all';
 
             container.innerHTML = '';
 
-            // 第一个选项：全部已启用译本
-            const allOpt = document.createElement('div');
+            // 1. 全部已启用译本
+            var allOpt = document.createElement('div');
             allOpt.className = 'filter-option' + (currentValue === 'all' ? ' selected' : '');
             allOpt.dataset.value = 'all';
             allOpt.textContent = '全部已启用译本';
             container.appendChild(allOpt);
 
+            // 2. 全部译本（包括未启用）
+            var allVerOpt = document.createElement('div');
+            allVerOpt.className = 'filter-option' + (currentValue === 'all_versions' ? ' selected' : '');
+            allVerOpt.dataset.value = 'all_versions';
+            allVerOpt.textContent = '全部译本';
+            container.appendChild(allVerOpt);
+
             // 分隔线
-            const sep1 = document.createElement('div');
-            sep1.style.cssText = 'height:1px;background:var(--line-2);margin:4px 12px;';
+            var sep1 = document.createElement('div');
+            sep1.style.cssText = 'height:1px;background:var(--line-2);margin:6px 0;';
             container.appendChild(sep1);
 
             // 分组标题
-            const title = document.createElement('div');
+            var title = document.createElement('div');
             title.className = 'filter-group-title';
             title.textContent = '仅在以下译本中搜索';
             container.appendChild(title);
 
-            // 主要译本
-            const primary = utils.getVersionConfig(state.primaryVersion);
-            if (primary) {
-                const opt = document.createElement('div');
-                opt.className = 'filter-option' + (currentValue === state.primaryVersion ? ' selected' : '');
-                opt.dataset.value = state.primaryVersion;
-                opt.textContent = primary.label;
+            // 列出所有译本（从 data.allVersions 或 cfg.versions）
+            var allVersions = window.BibleFlow.data.allVersions || cfg.versions || [];
+            var primaryEnabled = state.primaryVersion;
+            var secondaryEnabled = state.secondaryVersions || [];
+
+            for (var i = 0; i < allVersions.length; i++) {
+                var ver = allVersions[i];
+                if (!ver || !ver.key) continue;
+
+                var isEnabled = ver.key === primaryEnabled || secondaryEnabled.indexOf(ver.key) !== -1;
+                var opt = document.createElement('div');
+                opt.className = 'filter-option' + (currentValue === ver.key ? ' selected' : '');
+                if (!isEnabled) opt.classList.add('disabled');
+                opt.dataset.value = ver.key;
+                opt.textContent = ver.label + (isEnabled ? '' : '（未启用）');
                 container.appendChild(opt);
             }
 
-            // 次要译本
-            (state.secondaryVersions || []).forEach(key => {
-                const ver = utils.getVersionConfig(key);
-                if (!ver) return;
-                const opt = document.createElement('div');
-                opt.className = 'filter-option' + (currentValue === key ? ' selected' : '');
-                opt.dataset.value = key;
-                opt.textContent = ver.label;
-                container.appendChild(opt);
-            });
-
             // 更新按钮显示文字
-            const triggerText = document.querySelector('#filter-version-dropdown .filter-trigger-text');
+            var triggerText = document.querySelector('#filter-version-dropdown .filter-trigger-text');
             if (triggerText) {
                 if (currentValue === 'all') {
                     triggerText.textContent = '全部已启用译本';
+                } else if (currentValue === 'all_versions') {
+                    triggerText.textContent = '全部译本';
                 } else {
-                    const ver = utils.getVersionConfig(currentValue);
+                    var ver = utils.getVersionConfig(currentValue);
                     triggerText.textContent = ver ? ver.label : currentValue;
                 }
             }
