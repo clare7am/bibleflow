@@ -678,6 +678,8 @@
                     container.appendChild(opt);
                 });
             } else {
+                console.log('[search] categories structure:', JSON.stringify(categories.slice(0, 2), null, 2));
+
                 // 递归收集所有书卷 ID
                 function collectBooks(cats, result) {
                     if (!result) result = [];
