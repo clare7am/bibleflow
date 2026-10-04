@@ -82,16 +82,26 @@
 
     /** 获取要搜索的书卷列表（根据筛选条件） */
     function getSearchBooks() {
-        const bookFilter = searchFilters.scope;
+        var bookFilter = searchFilters.scope;
+        // 旧约/新约筛选
+        if (bookFilter && bookFilter.indexOf('canon_') === 0) {
+            var canonKey = bookFilter.replace('canon_', '');
+            var cat = (data.bookCategories || []).find(function(c) { return c.key === canonKey; });
+            if (cat && cat.book_ids) {
+                var books = data.allBooks || [];
+                return cat.book_ids.map(function(id) { return books.find(function(b) { return b.id === id; }); }).filter(function(b) { return b; });
+            }
+            return [];
+        }
         // 如果指定了具体书卷
         if (bookFilter && bookFilter !== 'all' && bookFilter !== 'current') {
-            const bookId = parseInt(bookFilter, 10);
-            const book = (data.allBooks || []).find(b => b.id === bookId);
+            var bookId = parseInt(bookFilter, 10);
+            var book = (data.allBooks || []).find(function(b) { return b.id === bookId; });
             return book ? [book] : [];
         }
         // 如果限定当前书卷
         if (bookFilter === 'current' && state.book) {
-            const book = (data.allBooks || []).find(b => b.id === state.book);
+            var book = (data.allBooks || []).find(function(b) { return b.id === state.book; });
             return book ? [book] : [];
         }
         // 全部书卷
@@ -654,59 +664,36 @@
                 }
             }
 
+            // 3. 旧约 / 新约 筛选
+            var categories = data.bookCategories || [];
+            var field = window.BibleFlow.utils.getBookNameField();
+            for (var ci = 0; ci < categories.length; ci++) {
+                var cat = categories[ci];
+                var catName = cat[field] ? (cat[field].name || cat[field]) : (cat.name || '');
+                if (catName && cat.book_ids && cat.book_ids.length > 0) {
+                    var opt = document.createElement('div');
+                    opt.className = 'filter-option' + (currentValue === 'canon_' + cat.key ? ' selected' : '');
+                    opt.dataset.value = 'canon_' + cat.key;
+                    opt.textContent = catName;
+                    container.appendChild(opt);
+                }
+            }
+
             // 分隔线
             const sep1 = document.createElement('div');
             sep1.style.cssText = 'height:1px;background:var(--line-2);margin:6px 0;';
             container.appendChild(sep1);
 
-            // 3. 按分类列出所有书卷
+            // 4. 所有书卷平铺
             var books = data.allBooks || [];
-            var categories = data.bookCategories || [];
-
-            // 安全兜底：如果书卷数据也未加载，不显示任何书卷
-            if (books.length === 0) {
-                return;
-            }
-
-            // 如果分类数据未加载，直接用书卷列表
-            if (categories.length === 0) {
-                books.forEach(function(book) {
-                    var opt = document.createElement('div');
-                    opt.className = 'filter-option' + (parseInt(currentValue, 10) === book.id ? ' selected' : '');
-                    opt.dataset.value = book.id;
-                    opt.textContent = utils.getBookDisplayName(book);
-                    container.appendChild(opt);
-                });
-            } else {
-                // 渲染分类和书卷
-                var field = window.BibleFlow.utils.getBookNameField();
-
-                for (var i = 0; i < categories.length; i++) {
-                    var cat = categories[i];
-
-                    // 分类标题
-                    var catName = cat[field] ? (cat[field].name || cat[field]) : (cat.name || '');
-                    if (catName) {
-                        var titleDiv = document.createElement('div');
-                        titleDiv.className = 'filter-group-title';
-                        titleDiv.textContent = catName;
-                        container.appendChild(titleDiv);
-                    }
-
-                    // 书卷列表（book_ids 字段）
-                    var bookIds = cat.book_ids || [];
-                    for (var j = 0; j < bookIds.length; j++) {
-                        var bookId = bookIds[j];
-                        var book = books.find(function(b) { return b.id === bookId; });
-                        if (book) {
-                            var opt = document.createElement('div');
-                            opt.className = 'filter-option' + (parseInt(currentValue, 10) === bookId ? ' selected' : '');
-                            opt.dataset.value = bookId;
-                            opt.textContent = utils.getBookDisplayName(book);
-                            container.appendChild(opt);
-                        }
-                    }
-                }
+            for (var bi = 0; bi < books.length; bi++) {
+                var book = books[bi];
+                var isSelected = currentValue === book.id.toString() || parseInt(currentValue, 10) === book.id;
+                var opt = document.createElement('div');
+                opt.className = 'filter-option' + (isSelected ? ' selected' : '');
+                opt.dataset.value = book.id;
+                opt.textContent = utils.getBookDisplayName(book);
+                container.appendChild(opt);
             }
 
             // 更新按钮显示文字
@@ -717,6 +704,12 @@
                 } else if (currentValue === 'current') {
                     const currentBook = books.find(b => b.id === state.book);
                     triggerText.textContent = currentBook ? '当前：' + utils.getBookDisplayName(currentBook) : '当前书卷';
+                } else if (typeof currentValue === 'string' && currentValue.indexOf('canon_') === 0) {
+                    var canonKey = currentValue.replace('canon_', '');
+                    var cat = categories.find(function(c) { return c.key === canonKey; });
+                    var field = window.BibleFlow.utils.getBookNameField();
+                    var catName = cat ? (cat[field] ? (cat[field].name || cat[field]) : (cat.name || '')) : '';
+                    triggerText.textContent = catName || currentValue;
                 } else {
                     const bookId = parseInt(currentValue, 10);
                     const book = books.find(b => b.id === bookId);
