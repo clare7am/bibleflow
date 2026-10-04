@@ -181,7 +181,9 @@ body {
 .side-panel.open[data-active="audio"] {
     position: relative;
     width: 100%;
-    height: var(--audio-h);
+    height: auto;
+    min-height: 120px;
+    max-height: 160px;
     flex-shrink: 0;
     background: var(--bg);
     border-top: 2px solid var(--line);
