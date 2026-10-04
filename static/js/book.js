@@ -33,28 +33,14 @@
     /* ---------- 初始化 ---------- */
     async function initBookSelector() {
         try {
-            // 本地测试模式：如果 localtest/books.json 存在，从本地读取
-            const localBooksUrl = './localtest/books.json';
-            const localBooksResp = await fetch(localBooksUrl);
-            const useLocal = localBooksResp.ok;
-
+            // 从 OSS 加载书卷和分类数据
             const [booksResp, catResp] = await Promise.all([
-                useLocal
-                    ? localBooksResp
-                    : fetch(`${cfg.ossJsonBase}/_global/books.json?v=${cfg.appVersion}`),
+                fetch(`${cfg.ossJsonBase}/_global/books.json?v=${cfg.appVersion}`),
                 fetch(`${cfg.ossJsonBase}/_global/categories.json?v=${cfg.appVersion}`)
             ]);
 
-            if (!booksResp.ok && useLocal) {
-                // 本地文件读取失败，回退到 OSS
-                const ossBooksResp = await fetch(`${cfg.ossJsonBase}/_global/books.json?v=${cfg.appVersion}`);
-                if (!ossBooksResp.ok) throw new Error(`books.json 加载失败: HTTP ${ossBooksResp.status}`);
-                data.allBooks = await ossBooksResp.json();
-            } else if (!booksResp.ok && !useLocal) {
-                throw new Error(`books.json 加载失败: HTTP ${booksResp.status}`);
-            } else {
-                data.allBooks = await booksResp.json();
-            }
+            if (!booksResp.ok) throw new Error(`books.json 加载失败: HTTP ${booksResp.status}`);
+            data.allBooks = await booksResp.json();
 
             if (!catResp.ok) throw new Error(`categories.json 加载失败: HTTP ${catResp.status}`);
             data.bookCategories = await catResp.json();
