@@ -659,55 +659,65 @@
             sep1.style.cssText = 'height:1px;background:var(--line-2);margin:6px 0;';
             container.appendChild(sep1);
 
-            // 3. 按约分组
-            const books = data.allBooks || [];
-            const categories = data.bookCategories || [];
+            // 3. 按分类列出所有书卷
+            var books = data.allBooks || [];
+            var categories = data.bookCategories || [];
 
-            categories.forEach(function(cat) {
-                // 分组标题
-                var titleDiv = document.createElement('div');
-                titleDiv.className = 'filter-group-title';
-                // 根据主要版本语言显示中文名或英文名
-                var field = window.BibleFlow.utils.getBookNameField();
-                var catName = cat[field] ? (cat[field].name || cat[field]) : cat.name;
-                titleDiv.textContent = catName;
-                container.appendChild(titleDiv);
-
-                // 分组内的书卷
-                function addBooksFromCategories(cats) {
-                    cats.forEach(function(c) {
-                        if (c.categories) {
-                            addBooksFromCategories(c.categories);
-                        } else if (c.books) {
-                            c.books.forEach(function(bookId) {
-                                var book = books.find(function(b) { return b.id === bookId; });
-                                if (book) {
-                                    var opt = document.createElement('div');
-                                    opt.className = 'filter-option' + (parseInt(currentValue, 10) === bookId ? ' selected' : '');
-                                    opt.dataset.value = bookId;
-                                    opt.textContent = utils.getBookDisplayName(book);
-                                    container.appendChild(opt);
-                                }
-                            });
+            // 递归收集所有书卷 ID
+            function collectBooks(cats, result) {
+                if (!result) result = [];
+                for (var i = 0; i < cats.length; i++) {
+                    var c = cats[i];
+                    if (c.books) {
+                        for (var j = 0; j < c.books.length; j++) {
+                            if (result.indexOf(c.books[j]) === -1) {
+                                result.push(c.books[j]);
+                            }
                         }
-                    });
+                    }
+                    if (c.categories) {
+                        collectBooks(c.categories, result);
+                    }
                 }
+                return result;
+            }
 
-                if (cat.categories) {
-                    addBooksFromCategories(cat.categories);
-                } else if (cat.books) {
-                    cat.books.forEach(function(bookId) {
-                        var book = books.find(function(b) { return b.id === bookId; });
-                        if (book) {
-                            var opt = document.createElement('div');
-                            opt.className = 'filter-option' + (parseInt(currentValue, 10) === bookId ? ' selected' : '');
-                            opt.dataset.value = bookId;
-                            opt.textContent = utils.getBookDisplayName(book);
-                            container.appendChild(opt);
+            var allBookIds = collectBooks(categories);
+
+            // 显示分类标题和书卷
+            function renderCategories(cats) {
+                for (var i = 0; i < cats.length; i++) {
+                    var c = cats[i];
+                    // 如果有子分类，递归渲染
+                    if (c.categories) {
+                        renderCategories(c.categories);
+                    }
+                    // 如果有书卷，显示标题和书卷
+                    if (c.books && c.books.length > 0) {
+                        var field = window.BibleFlow.utils.getBookNameField();
+                        var catName = c[field] ? (c[field].name || c[field]) : (c.name || '');
+                        if (catName) {
+                            var titleDiv = document.createElement('div');
+                            titleDiv.className = 'filter-group-title';
+                            titleDiv.textContent = catName;
+                            container.appendChild(titleDiv);
                         }
-                    });
+                        for (var j = 0; j < c.books.length; j++) {
+                            var bookId = c.books[j];
+                            var book = books.find(function(b) { return b.id === bookId; });
+                            if (book) {
+                                var opt = document.createElement('div');
+                                opt.className = 'filter-option' + (parseInt(currentValue, 10) === bookId ? ' selected' : '');
+                                opt.dataset.value = bookId;
+                                opt.textContent = utils.getBookDisplayName(book);
+                                container.appendChild(opt);
+                            }
+                        }
+                    }
                 }
-            });
+            }
+
+            renderCategories(categories);
 
             // 更新按钮显示文字
             const triggerText = document.querySelector('#filter-book-dropdown .filter-trigger-text');
