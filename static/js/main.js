@@ -40,8 +40,8 @@
         sidePanel.classList.add("open");
         sidePanel.setAttribute("data-active", type);
 
-        // 搜索/显示/音频面板：移入文档流，在经文区下方
-        if (type === "search" || type === "display" || type === "audio") {
+        // 显示/音频面板：移入文档流，在经文区下方
+        if (type === "display" || type === "audio") {
             sidePanel.style.position = "relative";
             sidePanel.style.top = "";
             sidePanel.style.left = "";

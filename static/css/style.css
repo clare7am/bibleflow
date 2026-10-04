@@ -167,14 +167,15 @@ body {
     border-top: 2px solid var(--line);
 }
 
-/* --- 搜索面板：底部上推 50%（文档流内） --- */
+/* --- 搜索面板：顶部 50%（fixed 紧贴顶栏下方） --- */
 .side-panel.open[data-active="search"] {
-    position: relative;
-    width: 100%;
+    position: fixed;
+    top: calc(var(--top-h) + env(safe-area-inset-top));
+    left: 0; right: 0;
     height: 50%;
-    flex-shrink: 0;
+    z-index: 900;
     background: var(--bg);
-    border-top: 2px solid var(--line);
+    border-bottom: 2px solid var(--line);
 }
 
 /* --- 音频面板：Compact Bar（文档流内，底部栏上方） --- */
