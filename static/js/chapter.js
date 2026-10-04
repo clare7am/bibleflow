@@ -23,7 +23,7 @@
         }
 
         window.loadVersesMulti();
-        window.updateAudio();
+        window.updateAudio(autoPlay);
     }
 
     function getCurrentChapters() {

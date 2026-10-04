@@ -29,7 +29,7 @@
     /* =========================
        更新音频源（跟随音频版本设置）
        ========================= */
-    function updateAudio() {
+    function updateAudio(autoPlay) {
         const version = state.audioVersion || state.primaryVersion || "en_nrsvce";
         const ver = utils.getVersionConfig(version);
 
@@ -73,7 +73,7 @@
         iconPause.style.display = 'none';
 
         // 正在播放中切换章节 → 继续播放；暂停时切换 → 保持暂停
-        if (_wasPlaying || shouldAutoPlay) {
+        if (_wasPlaying || shouldAutoPlay || autoPlay) {
             audio.src = url;
             audio.load();
             audio.play().catch(() => {
@@ -102,11 +102,11 @@
        上一章 / 下一章（音频触发）
        ========================= */
     function prevChapterAudio() {
-        window.prevChapter();
+        window.prevChapter(!audio.paused);
     }
 
     function nextChapterAudio() {
-        window.nextChapter();
+        window.nextChapter(!audio.paused);
     }
 
     /* =========================

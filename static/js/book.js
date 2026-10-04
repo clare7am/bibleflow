@@ -81,8 +81,9 @@
 
         const topPrev = document.getElementById("top-prev");
         const topNext = document.getElementById("top-next");
-        if (topPrev) topPrev.addEventListener("click", window.prevChapter);
-        if (topNext) topNext.addEventListener("click", window.nextChapter);
+        const audio = document.getElementById("audio-player");
+        if (topPrev) topPrev.addEventListener("click", function() { window.prevChapter(audio && !audio.paused); });
+        if (topNext) topNext.addEventListener("click", function() { window.nextChapter(audio && !audio.paused); });
 
         // 默认渲染旧约
         renderBooks(data.currentTestament);
