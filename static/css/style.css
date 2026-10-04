@@ -585,6 +585,7 @@ body {
 }
 .book-item:active { background: var(--tap); }
 .book-item.active { background: var(--active-bg); color: var(--active-ink); font-weight: 600; }
+.book-item.active .book-item-sub { color: rgba(255,255,255,0.75); }
 .book-item-sub { font-size: 12px; font-weight: 400; color: var(--ink-3); margin-top: 2px; }
 
 .chapter-grid { display: grid; grid-template-columns: repeat(5, 1fr); }
