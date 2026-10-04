@@ -151,6 +151,13 @@
         if (valueSpan) {
             valueSpan.textContent = (slider ? slider.value : 18) + "px";
         }
+
+        // Font family select
+        var fontSelect = document.getElementById("font-family-select");
+        if (fontSelect) {
+            fontSelect.value = state.fontFamily || "default";
+            applyFontFamily(state.fontFamily || "default");
+        }
     }
 
     function applyFontSize(px) {
@@ -165,6 +172,22 @@
             var verseSecondary = container.querySelectorAll(".verse-secondary");
             for (var i = 0; i < verseSecondary.length; i++) {
                 verseSecondary[i].style.fontSize = (px - 4) + "px";
+            }
+        }
+    }
+
+    function applyFontFamily(family) {
+        var container = document.getElementById("verses");
+        if (!container) return;
+
+        var classes = ["font-simsun", "font-kaiti", "font-serif"];
+        var verseTexts = container.querySelectorAll(".verse-text, .verse-secondary");
+        for (var i = 0; i < verseTexts.length; i++) {
+            for (var j = 0; j < classes.length; j++) {
+                verseTexts[i].classList.remove(classes[j]);
+            }
+            if (family && family !== "default") {
+                verseTexts[i].classList.add("font-" + family);
             }
         }
     }
@@ -212,6 +235,15 @@
                 if (valueSpan) {
                     valueSpan.textContent = val + "px";
                 }
+            });
+        }
+
+        // Font family select
+        var fontSelect = document.getElementById("font-family-select");
+        if (fontSelect) {
+            fontSelect.addEventListener("change", function () {
+                state.fontFamily = fontSelect.value;
+                applyFontFamily(fontSelect.value);
             });
         }
 
