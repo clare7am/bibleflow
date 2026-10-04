@@ -393,11 +393,16 @@
 
     /* ---------- 更新 Tab 文字（跟随主要版本语言） ---------- */
     function updateTabLabels() {
+        var pv = state.primaryVersion || "";
+        var isEnglish = pv.indexOf("en_") === 0;
+
         var tabs = document.querySelectorAll(".book-tab");
         for (var i = 0; i < tabs.length; i++) {
             (function(tab) {
                 var testament = tab.dataset.testament;
-                tab.textContent = testament === "old_testament" ? "旧约" : "新约";
+                tab.textContent = isEnglish
+                    ? (testament === "old_testament" ? "Old Testament" : "New Testament")
+                    : (testament === "old_testament" ? "旧约" : "新约");
             })(tabs[i]);
         }
     }
