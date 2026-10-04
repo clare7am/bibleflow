@@ -663,8 +663,13 @@
             var books = data.allBooks || [];
             var categories = data.bookCategories || [];
 
+            // 安全兜底：如果书卷数据也未加载，不显示任何书卷
+            if (books.length === 0) {
+                return;
+            }
+
             // 如果分类数据未加载，直接用书卷列表
-            if (categories.length === 0 && books.length > 0) {
+            if (categories.length === 0) {
                 books.forEach(function(book) {
                     var opt = document.createElement('div');
                     opt.className = 'filter-option' + (parseInt(currentValue, 10) === book.id ? ' selected' : '');
@@ -764,9 +769,16 @@
             });
         }
 
-        // 初始化
-        initFilterBooks();
-        initFilterVersions();
+        // 初始化（延迟到数据加载完成后重试）
+        function tryInit() {
+            if (data.allBooks && data.allBooks.length > 0) {
+                initFilterBooks();
+                initFilterVersions();
+            } else {
+                setTimeout(tryInit, 200);
+            }
+        }
+        tryInit();
 
         // 监听版本变化事件
         document.addEventListener('versionsChanged', () => {
