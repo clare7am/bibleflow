@@ -593,9 +593,18 @@ body {
     transition: background var(--transition);
 }
 .audio-version-toggle-btn:active { background: var(--tap); }
+.audio-version-chevron {
+    flex-shrink: 0;
+    color: var(--ink-3);
+    transition: transform 0.2s;
+    width: 12px;
+    height: 12px;
+    margin-left: 4px;
+}
+.audio-version-toggle-btn.open .audio-version-chevron { transform: rotate(180deg); }
 .audio-version-text {
-    flex: 1;
-    text-align: left;
+    flex: 0 1 auto;
+    text-align: center;
     font-weight: 400;
     font-size: 13px;
     color: var(--ink-3);
@@ -607,6 +616,7 @@ body {
     font-size: 12px;
     color: var(--ink-3);
     opacity: 0.7;
+    margin-right: 2px;
 }
 .audio-time {
     font-size: 12px;

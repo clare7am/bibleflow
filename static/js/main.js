@@ -715,12 +715,14 @@
         toggleBtn.addEventListener("click", function () {
             var isOpen = !popup.hidden;
             popup.hidden = isOpen;
+            toggleBtn.classList.toggle("open", !isOpen);
         });
 
         // Close popup when clicking outside
         document.addEventListener("click", function (e) {
             if (!popup.hidden && !toggleBtn.contains(e.target) && !popup.contains(e.target)) {
                 popup.hidden = true;
+                toggleBtn.classList.remove("open");
             }
         });
     }
