@@ -351,9 +351,9 @@ body {
 }
 
 /* 字体族 */
-.verse-text.font-simsun, .verse-secondary.font-simsun { font-family: "SimSun", "宋体", "STSong", serif !important; }
-.verse-text.font-kaiti, .verse-secondary.font-kaiti { font-family: "KaiTi", "楷体", "STKaiti", serif !important; }
-.verse-text.font-serif, .verse-secondary.font-serif { font-family: "Georgia", "Times New Roman", serif !important; }
+.verse-text.font-simsun, .verse-secondary.font-simsun { font-family: "Songti SC", "STSong", "SimSun", "宋体", serif !important; }
+.verse-text.font-kaiti, .verse-secondary.font-kaiti { font-family: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif !important; }
+.verse-text.font-serif, .verse-secondary.font-serif { font-family: "Georgia", "Times New Roman", "Songti SC", serif !important; }
 
 .slider-wrap input[type="range"] {
     flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
