@@ -122,54 +122,50 @@ body {
 /* ============================================================
    统一活动面板
    ============================================================ */
-.side-panel {
+
+/* 顶部面板容器（搜索 — 经文上方） */
+.top-panel {
     display: none;
     order: -1;
 }
-.side-panel.open {
+.top-panel.open {
     display: flex;
     flex-direction: column;
 }
 
-.side-panel .panel-content {
+/* 底部面板容器（书卷/译本/显示/音频 — 经文下方） */
+.bottom-panel {
+    display: none;
+    order: 1;
+}
+.bottom-panel.open {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 面板内容通用样式 */
+.top-panel .panel-content,
+.bottom-panel .panel-content {
     display: none;
     flex-direction: column;
     min-height: 0;
 }
-.side-panel .panel-content.active {
+.top-panel .panel-content.active,
+.bottom-panel .panel-content.active {
     display: flex;
 }
 
-/* --- 书卷面板：全屏覆盖 --- */
-.side-panel.open[data-active="book"] {
-    position: fixed;
-    top: calc(var(--top-h) + env(safe-area-inset-top));
-    left: 0; right: 0; bottom: 0;
-    z-index: 900;
-    background: var(--bg);
-}
-
-/* --- 译本面板：全屏覆盖 --- */
-.side-panel.open[data-active="version"] {
-    position: fixed;
-    top: calc(var(--top-h) + env(safe-area-inset-top));
-    left: 0; right: 0; bottom: 0;
-    z-index: 900;
-    background: var(--bg);
-}
-
-/* --- 显示面板：底部 50%（文档流内） --- */
-.side-panel.open[data-active="display"] {
-    position: relative;
-    width: 100%;
-    height: 50%;
-    flex-shrink: 0;
-    background: var(--bg);
-    border-top: 1px solid var(--line);
+/* 面板内部可滚动区域 */
+.top-panel .panel-content > .search-sidebar-body,
+.bottom-panel .panel-content > .version-list,
+.bottom-panel .panel-content > .display-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 /* --- 搜索面板：顶部 50%（文档流内，经文区上方） --- */
-.side-panel.open[data-active="search"] {
+.top-panel.open[data-active="search"] {
     position: relative;
     width: 100%;
     height: 50%;
@@ -178,8 +174,36 @@ body {
     border-bottom: 1px solid var(--line);
 }
 
+/* --- 书卷面板：全屏覆盖 --- */
+.bottom-panel.open[data-active="book"] {
+    position: fixed;
+    top: calc(var(--top-h) + env(safe-area-inset-top));
+    left: 0; right: 0; bottom: 0;
+    z-index: 900;
+    background: var(--bg);
+}
+
+/* --- 译本面板：全屏覆盖 --- */
+.bottom-panel.open[data-active="version"] {
+    position: fixed;
+    top: calc(var(--top-h) + env(safe-area-inset-top));
+    left: 0; right: 0; bottom: 0;
+    z-index: 900;
+    background: var(--bg);
+}
+
+/* --- 显示面板：底部 50%（文档流内） --- */
+.bottom-panel.open[data-active="display"] {
+    position: relative;
+    width: 100%;
+    height: 50%;
+    flex-shrink: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+}
+
 /* --- 音频面板：Compact Bar（文档流内，底部栏上方） --- */
-.side-panel.open[data-active="audio"] {
+.bottom-panel.open[data-active="audio"] {
     position: relative;
     width: 100%;
     height: auto;
@@ -192,8 +216,10 @@ body {
 
 /* --- 桌面端：右侧分屏 --- */
 @media (min-width: 769px) {
-    .side-panel.open[data-active="book"],
-    .side-panel.open[data-active="version"] {
+    .top-panel.open[data-active="search"],
+    .bottom-panel.open[data-active="book"],
+    .bottom-panel.open[data-active="version"],
+    .bottom-panel.open[data-active="display"] {
         position: fixed;
         top: calc(var(--top-h) + env(safe-area-inset-top));
         right: 0; bottom: 0; left: auto;
@@ -203,9 +229,16 @@ body {
         border-top: none;
         border-left: 1px solid var(--line);
     }
-    /* 桌面端搜索/显示面板也右侧分屏 */
-    .side-panel.open[data-active="search"],
-    .side-panel.open[data-active="display"] {/*marker*/}
+    .bottom-panel.open[data-active="audio"] {
+        position: fixed;
+        top: auto; bottom: 0; left: 0; right: 0;
+        width: 100%%;
+        height: auto;
+        max-height: 160px;
+        border-radius: 0;
+        border-top: 1px solid var(--line);
+    }
+}
         position: fixed;
         top: calc(var(--top-h) + env(safe-area-inset-top));
         right: 0; bottom: 0; left: auto;
@@ -216,7 +249,7 @@ body {
         border-left: 1px solid var(--line);
     }
     /* 桌面端音频面板：底部播放条 */
-    .side-panel.open[data-active="audio"] {/*marker*/}
+    
         position: fixed;
         top: auto; bottom: 0; left: 0; right: 0;
         width: 100%;
@@ -227,9 +260,9 @@ body {
 }
 
 /* 面板内部可滚动区域 */
-.side-panel .panel-content > .version-list,
-.side-panel .panel-content > .search-sidebar-body,
-.side-panel .panel-content > .display-panel-content {
+.bottom-panel .panel-content > .version-list,
+.top-panel .panel-content > .search-sidebar-body,
+.bottom-panel .panel-content > .display-panel-content {
     flex: 1;
     overflow-y: auto;
     min-height: 0;

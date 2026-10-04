@@ -27,39 +27,38 @@
        ============================================================ */
 
     function openPanel(type) {
-        var sidePanel = document.getElementById("side-panel");
-        if (!sidePanel) return;
-
         // If the requested panel is already open, close it (toggle)
         if (state.activePanel === type) {
             closePanel();
             return;
         }
 
-        // Set side-panel open state
-        sidePanel.classList.add("open");
-        sidePanel.setAttribute("data-active", type);
+        // 关闭另一个容器中的面板（互斥）
+        closePanel(true);
+
+        var panel = document.getElementById(type === "search" ? "top-panel" : "bottom-panel");
+        if (!panel) return;
+
+        // Set panel open state
+        panel.classList.add("open");
+        panel.setAttribute("data-active", type);
 
         // 搜索/显示/音频面板：移入文档流
         if (type === "search" || type === "display" || type === "audio") {
-            sidePanel.style.position = "relative";
-            sidePanel.style.top = "";
-            sidePanel.style.left = "";
-            sidePanel.style.right = "";
-            sidePanel.style.bottom = "";
-            sidePanel.style.zIndex = "";
+            panel.style.position = "relative";
+            panel.style.top = "";
+            panel.style.left = "";
+            panel.style.right = "";
+            panel.style.bottom = "";
+            panel.style.zIndex = "";
         } else {
-            sidePanel.style.position = "";
+            panel.style.position = "";
         }
 
-        // Hide all panels, show the requested one
-        var panels = sidePanel.querySelectorAll(".panel-content");
-        for (var i = 0; i < panels.length; i++) {
-            panels[i].classList.remove("active");
-            panels[i].setAttribute("hidden", "");
-        }
+        // Hide all panels in BOTH containers, show the requested one
+        hideAllPanelContents();
 
-        var target = sidePanel.querySelector('.panel-content[data-panel="' + type + '"]');
+        var target = panel.querySelector('.panel-content[data-panel="' + type + '"]');
         if (target) {
             target.classList.add("active");
             target.removeAttribute("hidden");
@@ -83,22 +82,38 @@
         }
     }
 
-    function closePanel() {
-        var sidePanel = document.getElementById("side-panel");
-        if (!sidePanel) return;
+    function closePanel(silent) {
+        var topPanel = document.getElementById("top-panel");
+        var bottomPanel = document.getElementById("bottom-panel");
 
-        sidePanel.classList.remove("open");
-        sidePanel.removeAttribute("data-active");
-        sidePanel.style.position = "";
-
-        var panels = sidePanel.querySelectorAll(".panel-content");
-        for (var i = 0; i < panels.length; i++) {
-            panels[i].classList.remove("active");
-            panels[i].setAttribute("hidden", "");
+        if (topPanel) {
+            topPanel.classList.remove("open");
+            topPanel.removeAttribute("data-active");
+            topPanel.style.position = "";
         }
+        if (bottomPanel) {
+            bottomPanel.classList.remove("open");
+            bottomPanel.removeAttribute("data-active");
+            bottomPanel.style.position = "";
+        }
+
+        hideAllPanelContents();
 
         state.activePanel = null;
         syncTabBarState(null);
+    }
+
+    function hideAllPanelContents() {
+        var containers = ["top-panel", "bottom-panel"];
+        for (var c = 0; c < containers.length; c++) {
+            var container = document.getElementById(containers[c]);
+            if (!container) continue;
+            var panels = container.querySelectorAll(".panel-content");
+            for (var i = 0; i < panels.length; i++) {
+                panels[i].classList.remove("active");
+                panels[i].setAttribute("hidden", "");
+            }
+        }
     }
 
     function syncTabBarState(type) {
