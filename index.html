@@ -152,6 +152,19 @@
 
     <!-- 音频面板 -->
     <div class="panel-content" data-panel="audio" hidden>
+        <!-- 音频版本选择（折叠式） -->
+        <div class="audio-version-selector">
+            <button id="audio-version-toggle" class="audio-version-toggle-btn">
+                <span class="material-icons">headset</span>
+                <span id="audio-version-current">正在播放：—</span>
+                <svg class="audio-version-chevron" width="12" height="8" viewBox="0 0 12 8" fill="currentColor">
+                    <path d="M1 1l5 5 5-5"/>
+                </svg>
+            </button>
+            <div id="audio-version-popup" class="audio-version-popup" hidden>
+                <!-- JS 动态填充版本列表 -->
+            </div>
+        </div>
         <input id="progress" type="range" min="0" max="100" value="0" step="0.1">
         <div class="player-controls-custom">
             <button id="play-mode" class="ctrl-btn mode-btn" onclick="togglePlayMode()" aria-label="播放模式" title="顺序播放">
@@ -183,11 +196,6 @@
             <button id="playback-rate" class="ctrl-btn rate-btn" onclick="togglePlaybackRate()" aria-label="播放速度" title="播放速度">
                 <span id="playback-rate-label">1x</span>
             </button>
-        </div>
-        <!-- 音频版本选择 -->
-        <div class="audio-version-section">
-            <div class="audio-version-title">音频版本</div>
-            <div class="audio-version-list" id="audio-version-list"></div>
         </div>
     </div>
 </div>

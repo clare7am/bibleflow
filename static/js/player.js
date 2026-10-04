@@ -61,6 +61,14 @@
         audio._pendingUrl = url;
         enablePlayer();
 
+        // 中文录音默认 1.25 倍速
+        if (version.indexOf("zh_") === 0 && (!state.playbackRate || state.playbackRate === 1)) {
+            state.playbackRate = 1.25;
+        }
+        if (state.playbackRate && state.playbackRate !== 1) {
+            audio.playbackRate = state.playbackRate;
+        }
+
         iconPlay.style.display = 'block';
         iconPause.style.display = 'none';
 

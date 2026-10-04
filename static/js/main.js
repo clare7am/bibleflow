@@ -77,6 +77,7 @@
             syncDisplayPanel();
         } else if (type === "audio") {
             renderAudioVersionList();
+            initAudioVersionToggle();
         } else if (type === "search") {
             focusSearchInput();
         }
@@ -621,40 +622,90 @@
        ============================================================ */
 
     function renderAudioVersionList() {
-        var container = document.getElementById("audio-version-list");
-        if (!container) return;
+        var popup = document.getElementById("audio-version-popup");
+        var currentEl = document.getElementById("audio-version-current");
+        if (!popup) return;
 
-        container.innerHTML = "";
+        popup.innerHTML = "";
 
         var currentAudio = state.audioVersion || "en_nrsvce";
+        var currentLabel = "—";
 
         for (var i = 0; i < cfg.versions.length; i++) {
             var ver = cfg.versions[i];
             if (!ver.has_audio) continue;
 
+            if (ver.key === currentAudio) currentLabel = ver.label;
+
             var row = document.createElement("div");
-            row.className = "audio-version-item" + (ver.key === currentAudio ? " active" : "");
+            row.className = "audio-version-popup-item" + (ver.key === currentAudio ? " active" : "");
             row.setAttribute("data-version", ver.key);
 
+            if (ver.key === currentAudio) {
+                var check = document.createElement("span");
+                check.className = "check-icon";
+                check.textContent = "✓";
+                row.appendChild(check);
+            }
+
             var label = document.createElement("span");
-            label.className = "audio-version-label";
             label.textContent = ver.label;
             row.appendChild(label);
 
-            (function (key) {
+            (function (key, lbl) {
                 row.addEventListener("click", function () {
                     state.audioVersion = key;
-                    // Update active state
-                    var items = container.querySelectorAll(".audio-version-item");
+                    if (currentEl) currentEl.textContent = "正在播放：" + lbl;
+                    // Update active state in popup
+                    var items = popup.querySelectorAll(".audio-version-popup-item");
                     for (var m = 0; m < items.length; m++) {
                         items[m].classList.toggle("active", items[m].getAttribute("data-version") === key);
+                        // Remove check icons
+                        var oldCheck = items[m].querySelector(".check-icon");
+                        if (oldCheck) oldCheck.remove();
+                        if (items[m].getAttribute("data-version") === key) {
+                            var check = document.createElement("span");
+                            check.className = "check-icon";
+                            check.textContent = "✓";
+                            items[m].insertBefore(check, items[m].firstChild);
+                        }
                     }
+                    // Close popup
+                    var toggleBtn = document.getElementById("audio-version-toggle");
+                    if (toggleBtn) toggleBtn.classList.remove("open");
+                    popup.hidden = true;
+
                     window.updateAudio();
                 });
-            })(ver.key);
+            })(ver.key, ver.label);
 
-            container.appendChild(row);
+            popup.appendChild(row);
         }
+
+        if (currentEl) {
+            var curVer = cfg.versions.find(function(v) { return v.key === currentAudio; });
+            currentEl.textContent = "正在播放：" + (curVer ? curVer.label : currentAudio);
+        }
+    }
+
+    function initAudioVersionToggle() {
+        var toggleBtn = document.getElementById("audio-version-toggle");
+        var popup = document.getElementById("audio-version-popup");
+        if (!toggleBtn || !popup) return;
+
+        toggleBtn.addEventListener("click", function () {
+            var isOpen = !popup.hidden;
+            popup.hidden = isOpen;
+            toggleBtn.classList.toggle("open", !isOpen);
+        });
+
+        // Close popup when clicking outside
+        document.addEventListener("click", function (e) {
+            if (!popup.hidden && !toggleBtn.contains(e.target) && !popup.contains(e.target)) {
+                popup.hidden = true;
+                toggleBtn.classList.remove("open");
+            }
+        });
     }
 
     /* ============================================================
