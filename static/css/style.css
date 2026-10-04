@@ -167,13 +167,12 @@ body {
     border-top: 1px solid var(--line);
 }
 
-/* --- 搜索面板：顶部 50%（fixed 紧贴顶栏下方） --- */
+/* --- 搜索面板：顶部 50%（文档流内，经文区上方） --- */
 .side-panel.open[data-active="search"] {
-    position: fixed;
-    top: calc(var(--top-h) + env(safe-area-inset-top));
-    left: 0; right: 0;
+    position: relative;
+    width: 100%;
     height: 50%;
-    z-index: 900;
+    flex-shrink: 0;
     background: var(--bg);
     border-bottom: 1px solid var(--line);
 }
