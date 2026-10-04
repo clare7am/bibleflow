@@ -176,18 +176,22 @@
         }
     }
 
-    function applyFontFamily(family) {
+    function applyFontFamily(family, type) {
         var container = document.getElementById("verses");
         if (!container) return;
 
-        var classes = ["font-simsun", "font-kaiti", "font-serif"];
+        var zhClasses = ["font-zh-simsun", "font-zh-kaiti"];
+        var enClasses = ["font-en-serif", "font-en-sans"];
+        var allClasses = zhClasses.concat(enClasses);
         var verseTexts = container.querySelectorAll(".verse-text, .verse-secondary");
+
         for (var i = 0; i < verseTexts.length; i++) {
-            for (var j = 0; j < classes.length; j++) {
-                verseTexts[i].classList.remove(classes[j]);
+            for (var j = 0; j < allClasses.length; j++) {
+                verseTexts[i].classList.remove(allClasses[j]);
             }
             if (family && family !== "default") {
-                verseTexts[i].classList.add("font-" + family);
+                var prefix = type === "zh" ? "font-zh-" : "font-en-";
+                verseTexts[i].classList.add(prefix + family);
             }
         }
     }
@@ -238,13 +242,32 @@
             });
         }
 
-        // Font family select
-        var fontSelect = document.getElementById("font-family-select");
-        if (fontSelect) {
-            fontSelect.addEventListener("change", function () {
-                state.fontFamily = fontSelect.value;
-                applyFontFamily(fontSelect.value);
+        // Font family selects — 根据主要版本语言显示/隐藏
+        var zhRow = document.querySelector(".display-row-zh-font");
+        var enRow = document.querySelector(".display-row-en-font");
+        var zhSelect = document.getElementById("font-zh-select");
+        var enSelect = document.getElementById("font-en-select");
+        var pv = state.primaryVersion || "";
+        var isEn = pv.indexOf("en_") === 0;
+
+        if (zhRow) zhRow.hidden = isEn;
+        if (enRow) enRow.hidden = !isEn;
+
+        if (zhSelect) {
+            zhSelect.value = state.fontZh || "default";
+            zhSelect.addEventListener("change", function () {
+                state.fontZh = zhSelect.value;
+                applyFontFamily(zhSelect.value, "zh");
             });
+            applyFontFamily(state.fontZh || "default", "zh");
+        }
+        if (enSelect) {
+            enSelect.value = state.fontEn || "default";
+            enSelect.addEventListener("change", function () {
+                state.fontEn = enSelect.value;
+                applyFontFamily(enSelect.value, "en");
+            });
+            applyFontFamily(state.fontEn || "default", "en");
         }
 
         // Set initial state

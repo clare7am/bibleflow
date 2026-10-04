@@ -350,10 +350,12 @@ body {
     background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
 }
 
-/* 字体族 */
-.verse-text.font-simsun, .verse-secondary.font-simsun { font-family: "Songti SC", "STSong", "SimSun", "宋体", serif !important; }
-.verse-text.font-kaiti, .verse-secondary.font-kaiti { font-family: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif !important; }
-.verse-text.font-serif, .verse-secondary.font-serif { font-family: "Georgia", "Times New Roman", "Songti SC", serif !important; }
+/* 字体族 — 中文 */
+.verse-text.font-zh-simsun, .verse-secondary.font-zh-simsun { font-family: "Songti SC", "STSong", "SimSun", "宋体", serif !important; }
+.verse-text.font-zh-kaiti, .verse-secondary.font-zh-kaiti { font-family: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif !important; }
+/* 字体族 — 英文 */
+.verse-text.font-en-serif, .verse-secondary.font-en-serif { font-family: "Georgia", "Times New Roman", serif !important; }
+.verse-text.font-en-sans, .verse-secondary.font-en-sans { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif !important; }
 
 .slider-wrap input[type="range"] {
     flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
