@@ -253,6 +253,8 @@
             progress.style.setProperty('--progress', pct + '%');
         }
         window.highlightWordAt(Math.floor(audio.currentTime * 1000));
+        // 更新音频面板时间显示
+        if (window.updateAudioTime) window.updateAudioTime();
     });
 
     audio.addEventListener('play', syncPlayButtonIcon);

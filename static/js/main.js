@@ -684,8 +684,29 @@
 
         if (currentEl) {
             var curVer = cfg.versions.find(function(v) { return v.key === currentAudio; });
-            currentEl.textContent = "正在播放：" + (curVer ? curVer.label : currentAudio);
+            currentEl.textContent = curVer ? curVer.label : currentAudio;
         }
+    }
+
+    /* ============================================================
+       Audio time update
+       ============================================================ */
+
+    function formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return "0:00";
+        var mins = Math.floor(seconds / 60);
+        var secs = Math.floor(seconds % 60);
+        return mins + ":" + (secs < 10 ? "0" : "") + secs;
+    }
+
+    function updateAudioTime() {
+        var audio = document.getElementById("audio-player");
+        var timeEl = document.getElementById("audio-time-current");
+        var totalEl = document.getElementById("audio-time-total");
+        if (!audio || !timeEl || !totalEl) return;
+
+        timeEl.textContent = formatTime(audio.currentTime);
+        totalEl.textContent = formatTime(audio.duration);
     }
 
     function initAudioVersionToggle() {
@@ -915,5 +936,6 @@
     window.updateVersionButtonLabel = updateVersionButtonLabel;
     window.init = init;
     window.updateMiniPlayerTitle = updateMiniPlayerTitle;
+    window.updateAudioTime = updateAudioTime;
 
 })();
