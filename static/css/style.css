@@ -441,6 +441,16 @@ body {
     content: "✓";
     width: 16px; text-align: center; color: var(--accent);
 }
+.filter-group-title {
+    padding: 8px 14px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+}
 
 .search-sidebar-body { flex: 1; overflow-y: auto; padding: 0; font-size: 17px; }
 .search-sidebar-body li {

@@ -635,36 +635,78 @@
 
             container.innerHTML = '';
 
-            // 当前书卷（第一个板块）
+            // 1. 全部书卷（默认选项）
+            const allOpt = document.createElement('div');
+            allOpt.className = 'filter-option' + (currentValue === 'all' ? ' selected' : '');
+            allOpt.dataset.value = 'all';
+            allOpt.textContent = '全部书卷';
+            container.appendChild(allOpt);
+
+            // 2. 当前书卷
             if (state.book) {
                 const currentBook = (data.allBooks || []).find(b => b.id === state.book);
                 if (currentBook) {
-                    const titleDiv = document.createElement('div');
-                    titleDiv.className = 'filter-group-title';
-                    titleDiv.textContent = '当前书卷';
-                    container.appendChild(titleDiv);
-
                     const opt = document.createElement('div');
                     opt.className = 'filter-option' + (currentValue === 'current' ? ' selected' : '');
                     opt.dataset.value = 'current';
-                    opt.textContent = utils.getBookDisplayName(currentBook);
+                    opt.textContent = '当前书卷：' + utils.getBookDisplayName(currentBook);
                     container.appendChild(opt);
                 }
             }
 
             // 分隔线
-            const sep = document.createElement('div');
-            sep.style.cssText = 'height:1px;background:var(--line-2);margin:4px 12px;';
-            container.appendChild(sep);
+            const sep1 = document.createElement('div');
+            sep1.style.cssText = 'height:1px;background:var(--line-2);margin:6px 0;';
+            container.appendChild(sep1);
 
-            // 所有书卷列表（第二个板块）
+            // 3. 按约分组
             const books = data.allBooks || [];
-            books.forEach(book => {
-                const opt = document.createElement('div');
-                opt.className = 'filter-option' + (parseInt(currentValue, 10) === book.id ? ' selected' : '');
-                opt.dataset.value = book.id;
-                opt.textContent = utils.getBookDisplayName(book);
-                container.appendChild(opt);
+            const categories = data.bookCategories || [];
+
+            categories.forEach(function(cat) {
+                // 分组标题
+                var titleDiv = document.createElement('div');
+                titleDiv.className = 'filter-group-title';
+                // 根据主要版本语言显示中文名或英文名
+                var field = window.BibleFlow.utils.getBookNameField();
+                var catName = cat[field] ? (cat[field].name || cat[field]) : cat.name;
+                titleDiv.textContent = catName;
+                container.appendChild(titleDiv);
+
+                // 分组内的书卷
+                function addBooksFromCategories(cats) {
+                    cats.forEach(function(c) {
+                        if (c.categories) {
+                            addBooksFromCategories(c.categories);
+                        } else if (c.books) {
+                            c.books.forEach(function(bookId) {
+                                var book = books.find(function(b) { return b.id === bookId; });
+                                if (book) {
+                                    var opt = document.createElement('div');
+                                    opt.className = 'filter-option' + (parseInt(currentValue, 10) === bookId ? ' selected' : '');
+                                    opt.dataset.value = bookId;
+                                    opt.textContent = utils.getBookDisplayName(book);
+                                    container.appendChild(opt);
+                                }
+                            });
+                        }
+                    });
+                }
+
+                if (cat.categories) {
+                    addBooksFromCategories(cat.categories);
+                } else if (cat.books) {
+                    cat.books.forEach(function(bookId) {
+                        var book = books.find(function(b) { return b.id === bookId; });
+                        if (book) {
+                            var opt = document.createElement('div');
+                            opt.className = 'filter-option' + (parseInt(currentValue, 10) === bookId ? ' selected' : '');
+                            opt.dataset.value = bookId;
+                            opt.textContent = utils.getBookDisplayName(book);
+                            container.appendChild(opt);
+                        }
+                    });
+                }
             });
 
             // 更新按钮显示文字
@@ -674,7 +716,7 @@
                     triggerText.textContent = '全部书卷';
                 } else if (currentValue === 'current') {
                     const currentBook = books.find(b => b.id === state.book);
-                    triggerText.textContent = currentBook ? utils.getBookDisplayName(currentBook) : '当前书卷';
+                    triggerText.textContent = currentBook ? '当前：' + utils.getBookDisplayName(currentBook) : '当前书卷';
                 } else {
                     const bookId = parseInt(currentValue, 10);
                     const book = books.find(b => b.id === bookId);
