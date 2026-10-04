@@ -180,14 +180,80 @@
             if (!sel || sel.isCollapsed || !sel.rangeCount) return;
 
             const range = sel.getRangeAt(0);
+
+            // 收集选中的所有 verse-block
+            const verseBlocks = [];
+            const fragment = range.cloneContents();
+            const tempDiv = document.createElement('div');
+            tempDiv.appendChild(fragment);
+
+            // 方法1：如果选中文本跨越多个 verse-block
+            const selectedBlocks = tempDiv.querySelectorAll('.verse-block');
+            if (selectedBlocks.length > 1) {
+                // 跨节复制
+                const firstBlock = range.startContainer.nodeType === Node.TEXT_NODE
+                    ? range.startContainer.parentNode.closest('.verse-block')
+                    : range.startContainer.closest('.verse-block');
+
+                if (!firstBlock) return;
+
+                const bookId = state.book;
+                const chapter = state.chapter;
+                const book = (window.BibleFlow.data.allBooks || []).find(b => b.id === bookId);
+                if (!book) return;
+
+                // 获取版本
+                const firstText = firstBlock.querySelector('.verse-text');
+                const versionKey = firstText ? firstText.dataset.version : null;
+                let bookName;
+                if (versionKey) {
+                    const fieldName = utils.getFieldForVersion(versionKey);
+                    bookName = book[fieldName]?.name || utils.getBookDisplayName(book);
+                } else {
+                    bookName = utils.getBookDisplayName(book);
+                }
+                if (!bookName) return;
+
+                // 提取所有选中的 verse-block 的节号和文本
+                const verses = [];
+                const allBlocks = document.querySelectorAll('.verse-block');
+                let inSelection = false;
+
+                allBlocks.forEach(function(block) {
+                    const verseNum = block.querySelector('.verse-num')?.textContent?.trim() || '';
+                    const verseText = block.querySelector('.verse-text')?.textContent?.trim() || '';
+
+                    // 检查此 block 是否在选中范围内
+                    const blockRange = document.createRange();
+                    blockRange.selectNodeContents(block);
+                    const intersects = range.intersectsNode(block);
+
+                    if (intersects && verseNum && verseText) {
+                        verses.push({ num: parseInt(verseNum, 10), text: verseText });
+                    }
+                });
+
+                if (verses.length === 0) return;
+
+                // 格式化：书卷名 章:开始节-结束节 经文内容
+                const startVerse = verses[0].num;
+                const endVerse = verses[verses.length - 1].num;
+                const verseRange = startVerse === endVerse ? String(startVerse) : startVerse + '-' + endVerse;
+                const verseText = verses.map(function(v) { return v.text; }).join('');
+
+                const formatted = bookName + ' ' + chapter + ':' + verseRange + ' ' + verseText;
+                e.clipboardData.setData('text/plain', formatted);
+                e.preventDefault();
+                return;
+            }
+
+            // 方法2：单节复制（原有逻辑）
             let node = range.commonAncestorContainer;
             if (node.nodeType === Node.TEXT_NODE) node = node.parentNode;
 
-            // 向上查找最近的 .verse-block
             const verseBlock = node.closest ? node.closest('.verse-block') : findClosestVerseBlock(node);
             if (!verseBlock) return;
 
-            // 查找选中文本具体属于哪个版本的 .verse-text
             const textNode = findClosestVerseText(node);
             const versionKey = textNode ? textNode.dataset.version : null;
 
@@ -199,26 +265,21 @@
             const book = (window.BibleFlow.data.allBooks || []).find(b => b.id === bookId);
             if (!book) return;
 
-            // 根据版本获取书卷名称
             let bookName;
             if (versionKey) {
-                // 选中的是特定版本的文本，用该版本的书卷名字段
                 const fieldName = utils.getFieldForVersion(versionKey);
                 bookName = book[fieldName]?.name || utils.getBookDisplayName(book);
             } else {
-                // 选中了节号或其他，用默认书卷名
                 bookName = utils.getBookDisplayName(book);
             }
 
             if (!bookName) return;
 
-            // 获取选中的纯文本
             let selectedText = sel.toString().trim();
             if (!selectedText) return;
 
-            // 如果选中的文本在 verse-block 内，添加引用
             if (verseBlock.contains(node)) {
-                const formatted = `${bookName} ${chapter}:${verseNum} ${selectedText}`;
+                const formatted = bookName + ' ' + chapter + ':' + verseNum + ' ' + selectedText;
                 e.clipboardData.setData('text/plain', formatted);
                 e.preventDefault();
             }
