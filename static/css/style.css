@@ -164,7 +164,7 @@ body {
     height: 50%;
     flex-shrink: 0;
     background: var(--bg);
-    border-top: 2px solid var(--line);
+    border-top: 1px solid var(--line);
 }
 
 /* --- 搜索面板：顶部 50%（fixed 紧贴顶栏下方） --- */
@@ -175,7 +175,7 @@ body {
     height: 50%;
     z-index: 900;
     background: var(--bg);
-    border-bottom: 2px solid var(--line);
+    border-bottom: 1px solid var(--line);
 }
 
 /* --- 音频面板：Compact Bar（文档流内，底部栏上方） --- */
@@ -187,7 +187,7 @@ body {
     max-height: 160px;
     flex-shrink: 0;
     background: var(--bg);
-    border-top: 2px solid var(--line);
+    border-top: 1px solid var(--line);
 }
 
 /* --- 桌面端：右侧分屏 --- */
