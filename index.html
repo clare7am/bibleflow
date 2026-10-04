@@ -12,8 +12,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <link rel="stylesheet" href="./static/css/style.css?v=8">
-    
+    <link rel="stylesheet" href="./static/css/style.css?v=1">
+
     <!-- Google Material Icons -->
     <link href="https://cdn.bootcdn.net/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css" rel="stylesheet">
 </head>
@@ -28,7 +28,7 @@
         </svg>
     </button>
 
-    <!-- 居中标题（点开侧栏） -->
+    <!-- 居中标题 -->
     <button id="book-btn" class="top-title" aria-label="选择书卷与章节">
         <span id="book-btn-text">Genesis 1</span>
         <svg class="top-title-caret" width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
@@ -42,141 +42,135 @@
             <polyline points="9 18 15 12 9 6"/>
         </svg>
     </button>
-
-    <!-- 阅读模式切换按钮 -->
-    <button id="reading-toggle" class="top-icon-btn" aria-label="阅读模式" title="切换阅读模式">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <line x1="7" y1="8" x2="17" y2="8"/>
-            <line x1="7" y1="12" x2="17" y2="12"/>
-            <line x1="7" y1="16" x2="13" y2="16"/>
-        </svg>
-    </button>
-
-    <!-- 节号切换按钮 -->
-    <button id="verse-num-toggle" class="top-icon-btn" aria-label="节号" title="显示/隐藏节号">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <line x1="9" y1="3" x2="9" y2="21"/>
-            <line x1="15" y1="3" x2="15" y2="21"/>
-            <line x1="4" y1="9" x2="20" y2="9"/>
-            <line x1="4" y1="15" x2="20" y2="15"/>
-        </svg>
-    </button>
-
-    <!-- 版本切换按钮（地球图标，搜索左边） -->
-    <button id="version-toggle" class="top-icon-btn" aria-label="切换版本" title="版本设置">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <path d="M12 3a14 14 0 0 1 0 18"/>
-            <path d="M12 3a14 14 0 0 0 0 18"/>
-        </svg>
-    </button>
-
-    <!-- 搜索按钮 -->
-    <button id="search-toggle" class="top-icon-btn" aria-label="搜索">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="11" cy="11" r="7"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-    </button>
 </div>
 
-<!-- ===== 版本选择面板（底部上滑） ===== -->
-<div id="version-overlay" class="version-overlay"></div>
-<div id="version-panel" class="version-panel">
-    <!-- 拖拽条 -->
-    <div class="panel-drag-handle" id="version-drag-handle">
-        <div class="panel-drag-indicator"></div>
+<!-- ===== 统一活动面板 ===== -->
+<div id="side-panel" class="side-panel">
+    <!-- 书卷面板 -->
+    <div class="panel-content" data-panel="book" hidden>
+        <div class="book-tab-bar">
+            <button class="book-tab active" data-testament="old_testament">Old Testament</button>
+            <button class="book-tab" data-testament="new_testament">New Testament</button>
+        </div>
+        <div class="book-split">
+            <div class="book-list-wrap">
+                <div class="book-list" id="book-list"></div>
+            </div>
+            <div class="chapter-list-wrap">
+                <div class="chapter-list-header" id="chapter-list-header">选择书卷</div>
+                <div class="chapter-list" id="chapter-list">
+                    <div class="chapter-empty">← 选择左侧书卷</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="version-panel-header">
-        <span class="version-panel-title">版本设置</span>
-        <button class="version-panel-close" id="version-panel-close" aria-label="关闭">&times;</button>
-    </div>
-    <div class="version-list" id="version-list"></div>
-</div>
 
-<!-- ===== 搜索面板（底部上滑） ===== -->
-<div id="search-overlay" class="search-overlay"></div>
+    <!-- 译本面板 -->
+    <div class="panel-content" data-panel="version" hidden>
+        <div class="version-list" id="version-list"></div>
+    </div>
 
-<div id="search-sidebar" class="search-sidebar">
-    <!-- 拖拽条 -->
-    <div class="panel-drag-handle" id="search-drag-handle">
-        <div class="panel-drag-indicator"></div>
+    <!-- 显示面板 -->
+    <div class="panel-content" data-panel="display" hidden>
+        <div class="display-panel-content">
+            <div class="display-row">
+                <span class="display-label">节号</span>
+                <button id="display-verse-num" class="display-toggle" aria-label="显示/隐藏节号">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </button>
+            </div>
+            <div class="display-row">
+                <span class="display-label">阅读模式</span>
+                <button id="display-reading-mode" class="display-toggle" aria-label="切换阅读模式">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </button>
+            </div>
+            <div class="display-row display-row-slider">
+                <span class="display-label">字号</span>
+                <div class="slider-wrap">
+                    <input id="font-size-slider" type="range" min="14" max="24" value="18" step="1">
+                    <span id="font-size-value">18px</span>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="search-sidebar-header">
-        <input
-            id="search-input"
-            type="text"
-            placeholder="输入关键词搜索经文"
-            autocomplete="off"
-        />
-        <button id="search-close" class="search-close-btn">&times;</button>
+
+    <!-- 搜索面板 -->
+    <div class="panel-content" data-panel="search" hidden>
+        <div class="search-sidebar-header">
+            <input id="search-input" type="text" placeholder="输入关键词搜索经文" autocomplete="off" />
+        </div>
+        <div id="search-filters" class="search-filters-bar">
+            <div class="filter-dropdown" id="filter-version-dropdown">
+                <span class="filter-label">搜索范围：</span>
+                <button class="filter-trigger" data-filter="version" type="button">
+                    <span class="filter-trigger-text">全部已启用译本</span>
+                    <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+                </button>
+                <div class="filter-popup" hidden>
+                    <div class="filter-option selected" data-value="all">全部已启用译本</div>
+                </div>
+            </div>
+            <div class="filter-dropdown" id="filter-sort-dropdown" style="display:none;">
+                <span class="filter-label">排序：</span>
+                <button class="filter-trigger" data-filter="sort" type="button">
+                    <span class="filter-trigger-text">穿插显示</span>
+                    <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+                </button>
+                <div class="filter-popup" hidden>
+                    <div class="filter-option selected" data-value="interleave">穿插显示</div>
+                    <div class="filter-option" data-value="grouped">按译本分组</div>
+                </div>
+            </div>
+            <div class="filter-dropdown" id="filter-book-dropdown">
+                <button class="filter-trigger" data-filter="book" type="button">
+                    <span class="filter-trigger-text">全部书卷</span>
+                    <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+                </button>
+                <div class="filter-popup" hidden></div>
+            </div>
+        </div>
+        <div id="search-results" class="search-sidebar-body"></div>
     </div>
-    <!-- 筛选栏（一行三个，苹果风格自定义下拉） -->
-    <div id="search-filters" class="search-filters-bar">
-        <div class="filter-dropdown" id="filter-version-dropdown">
-            <span class="filter-label">搜索范围：</span>
-            <button class="filter-trigger" data-filter="version" type="button">
-                <span class="filter-trigger-text">全部已启用译本</span>
-                <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+
+    <!-- 音频面板 -->
+    <div class="panel-content" data-panel="audio" hidden>
+        <input id="progress" type="range" min="0" max="100" value="0" step="0.1">
+        <div class="player-controls-custom">
+            <button id="play-mode" class="ctrl-btn mode-btn" onclick="togglePlayMode()" aria-label="播放模式" title="顺序播放">
+                <span class="material-icons" id="icon-mode-sequential">repeat</span>
+                <span class="material-icons" id="icon-mode-repeat" style="display:none;">repeat_one</span>
+                <span id="icon-mode-stop" style="display:none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">1</text>
+                    </svg>
+                </span>
             </button>
-            <div class="filter-popup" hidden>
-                <div class="filter-option selected" data-value="all">全部已启用译本</div>
-                <!-- 分隔线 + "仅在以下译本中搜索"标题 + 主要/次要译本，JS 动态填充 -->
-            </div>
-        </div>
-        <div class="filter-dropdown" id="filter-sort-dropdown" style="display:none;">
-            <span class="filter-label">排序：</span>
-            <button class="filter-trigger" data-filter="sort" type="button">
-                <span class="filter-trigger-text">穿插显示</span>
-                <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+            <button id="rewind-btn" class="ctrl-btn skip-btn" onclick="skipAudio(-10)" aria-label="快退 10 秒">
+                <span class="material-icons">replay_10</span>
             </button>
-            <div class="filter-popup" hidden>
-                <div class="filter-option selected" data-value="interleave">穿插显示</div>
-                <div class="filter-option" data-value="grouped">按译本分组</div>
-            </div>
-        </div>
-        <div class="filter-dropdown" id="filter-book-dropdown">
-            <button class="filter-trigger" data-filter="book" type="button">
-                <span class="filter-trigger-text">全部书卷</span>
-                <svg class="filter-chevron" width="10" height="6" viewBox="0 0 10 6"><path fill="#8e8e93" d="M0 0l5 6 5-6z"/></svg>
+            <button id="prev-chapter-audio" class="ctrl-btn chapter-btn" onclick="prevChapterAudio()" aria-label="上一章">
+                <span class="material-icons">skip_previous</span>
             </button>
-            <div class="filter-popup" hidden>
-                <!-- JS 动态填充：当前书卷 / 分隔线 / 所有书卷 -->
-            </div>
+            <button id="play-pause" class="ctrl-btn play-large" onclick="togglePlay()" aria-label="播放 / 暂停">
+                <span class="material-icons" id="icon-play-big">play_circle_filled</span>
+                <span class="material-icons" id="icon-pause-big" style="display:none;">pause_circle_filled</span>
+            </button>
+            <button id="next-chapter-audio" class="ctrl-btn chapter-btn" onclick="nextChapterAudio()" aria-label="下一章">
+                <span class="material-icons">skip_next</span>
+            </button>
+            <button id="forward-btn" class="ctrl-btn skip-btn" onclick="skipAudio(10)" aria-label="快进 10 秒">
+                <span class="material-icons">forward_10</span>
+            </button>
+            <button id="playback-rate" class="ctrl-btn rate-btn" onclick="togglePlaybackRate()" aria-label="播放速度" title="播放速度">
+                <span id="playback-rate-label">1x</span>
+            </button>
         </div>
-    </div>
-    <div id="search-results" class="search-sidebar-body"></div>
-</div>
-
-<!-- ===== 书卷+章节 面板（底部上滑） ===== -->
-<div id="book-overlay" class="book-overlay"></div>
-
-<div id="book-panel" class="book-panel">
-    <!-- 拖拽条 -->
-    <div class="panel-drag-handle" id="book-drag-handle">
-        <div class="panel-drag-indicator"></div>
-    </div>
-    <!-- Tab 栏（文字由 JS 动态设置） -->
-    <div class="book-tab-bar">
-        <button class="book-tab active" data-testament="old_testament">Old Testament</button>
-        <button class="book-tab" data-testament="new_testament">New Testament</button>
-        <button class="book-panel-close-btn" id="book-panel-close" aria-label="关闭">&times;</button>
-    </div>
-
-    <!-- 并排双区 -->
-    <div class="book-split">
-        <!-- 左：书卷 -->
-        <div class="book-list-wrap">
-            <div class="book-list" id="book-list"></div>
-        </div>
-        <!-- 右：章节 -->
-        <div class="chapter-list-wrap">
-            <div class="chapter-list-header" id="chapter-list-header">选择书卷</div>
-            <div class="chapter-list" id="chapter-list">
-                <div class="chapter-empty">← 选择左侧书卷</div>
-            </div>
+        <!-- 音频版本选择 -->
+        <div class="audio-version-section">
+            <div class="audio-version-title">音频版本</div>
+            <div class="audio-version-list" id="audio-version-list"></div>
         </div>
     </div>
 </div>
@@ -184,56 +178,12 @@
 <!-- ===== 经文内容 ===== -->
 <div id="verses" class="verses-container"></div>
 
-<!-- ===== 底部播放器 ===== -->
-<div class="player">
-    <!-- 进度条：顶部细线 -->
-    <input id="progress" type="range" min="0" max="100" value="0" step="0.1">
-
-    <!-- 按钮区：水平居中 -->
-    <div class="player-controls-custom">
-        <!-- 播放模式按钮 -->
-        <button id="play-mode" class="ctrl-btn mode-btn" onclick="togglePlayMode()" aria-label="播放模式" title="顺序播放">
-            <span class="material-icons" id="icon-mode-sequential">repeat</span>
-            <span class="material-icons" id="icon-mode-repeat" style="display:none;">repeat_one</span>
-            <span id="icon-mode-stop" style="display:none;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">1</text>
-                </svg>
-            </span>
-        </button>
-
-        <!-- 快退 10 秒 -->
-        <button id="rewind-btn" class="ctrl-btn skip-btn" onclick="skipAudio(-10)" aria-label="快退 10 秒">
-            <span class="material-icons">replay_10</span>
-        </button>
-
-        <!-- 上一章 -->
-        <button id="prev-chapter-audio" class="ctrl-btn chapter-btn" onclick="prevChapterAudio()" aria-label="上一章">
-            <span class="material-icons">skip_previous</span>
-        </button>
-
-        <!-- 播放/暂停 -->
-        <button id="play-pause" class="ctrl-btn play-large" onclick="togglePlay()" aria-label="播放 / 暂停">
-            <span class="material-icons" id="icon-play-big">play_circle_filled</span>
-            <span class="material-icons" id="icon-pause-big" style="display:none;">pause_circle_filled</span>
-        </button>
-
-        <!-- 下一章 -->
-        <button id="next-chapter-audio" class="ctrl-btn chapter-btn" onclick="nextChapterAudio()" aria-label="下一章">
-            <span class="material-icons">skip_next</span>
-        </button>
-
-        <!-- 快进 10 秒 -->
-        <button id="forward-btn" class="ctrl-btn skip-btn" onclick="skipAudio(10)" aria-label="快进 10 秒">
-            <span class="material-icons">forward_10</span>
-        </button>
-
-        <!-- 播放速度 -->
-        <button id="playback-rate" class="ctrl-btn rate-btn" onclick="togglePlaybackRate()" aria-label="播放速度" title="播放速度">
-            <span id="playback-rate-label">1x</span>
-        </button>
-    </div>
+<!-- ===== 底部迷你播放器（桌面端显示） ===== -->
+<div class="mini-player" id="mini-player">
+    <button id="mini-player-btn" class="mini-player-btn" aria-label="展开播放器">
+        <span id="mini-player-title">未播放</span>
+        <span class="material-icons">expand_more</span>
+    </button>
 </div>
 
 <!-- 播放速度选择菜单 -->
@@ -246,32 +196,55 @@
     <div class="rate-menu-item" data-rate="2">2x</div>
 </div>
 
+<!-- ===== 底部 Tab Bar（手机端显示） ===== -->
+<div id="bottom-tab-bar" class="bottom-tab-bar">
+    <button class="tab-btn" data-panel="book" aria-label="书卷">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        <span class="tab-label">书卷</span>
+    </button>
+    <button class="tab-btn" data-panel="version" aria-label="译本">
+        <span class="material-icons">translate</span>
+        <span class="tab-label">译本</span>
+    </button>
+    <button class="tab-btn" data-panel="display" aria-label="显示">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <span class="tab-label">显示</span>
+    </button>
+    <button class="tab-btn" data-panel="search" aria-label="搜索">
+        <span class="material-icons">search</span>
+        <span class="tab-label">搜索</span>
+    </button>
+    <button class="tab-btn" data-panel="audio" aria-label="音频">
+        <span class="material-icons">headset</span>
+        <span class="tab-label">音频</span>
+    </button>
+</div>
+
 <audio id="audio-player" preload="none"></audio>
 
 <!-- ===== JS（按依赖顺序加载）===== -->
-<!-- 1. 配置 + 状态 -->
 <script src="./static/js/config.js"></script>
-<!-- 2. 工具函数（依赖 config） -->
 <script src="./static/js/utils.js"></script>
-
-<!-- 3. 无外部依赖的基础模块 -->
 <script src="./static/js/entity.js"></script>
 <script src="./static/js/highlight.js"></script>
-
-<!-- 4. 经文渲染（依赖 config, utils, entity） -->
 <script src="./static/js/verse.js"></script>
-
-<!-- 5. 书卷/章节（依赖 config, utils, verse） -->
 <script src="./static/js/book.js"></script>
 <script src="./static/js/chapter.js"></script>
-
-<!-- 6. 播放器（依赖 config, utils, verse, chapter, highlight） -->
 <script src="./static/js/player.js"></script>
-
-<!-- 7. 搜索（依赖 config, utils, book, verse） -->
 <script src="./static/js/search.js"></script>
-
-<!-- 8. 主入口 + 版本面板（依赖 config, utils, book, verse, player） -->
 <script src="./static/js/main.js"></script>
 
 </body>

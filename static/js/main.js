@@ -1,7 +1,12 @@
 /**
- * main.js — 版本选择面板（侧拉式）+ 统一初始化入口
+ * main.js — Unified panel management + display settings + version drag-drop
  *
- * 依赖：config.js, utils.js, book.js, verse.js, player.js
+ * Dependencies: config.js, utils.js, book.js, verse.js, player.js
+ *
+ * Exports:
+ *   openPanel, closePanel, renderVersionPanel,
+ *   selectPrimaryVersion, selectPrimaryVersionSilent, toggleSecondaryVersion,
+ *   updateVersionButtonLabel, init, updateMiniPlayerTitle
  */
 
 (function () {
@@ -11,166 +16,342 @@
     var cfg = window.BibleFlow.config;
     var utils = window.BibleFlow.utils;
 
-    /* ========= 渲染版本选择面板（拖拽排序） ========= */
+    /* ============================================================
+       Panel types and state
+       ============================================================ */
+
+    var panelTypes = ["book", "version", "display", "search", "audio"];
+
+    /* ============================================================
+       Unified panel open / close
+       ============================================================ */
+
+    function openPanel(type) {
+        var sidePanel = document.getElementById("side-panel");
+        if (!sidePanel) return;
+
+        // If the requested panel is already open, close it (toggle)
+        if (state.activePanel === type) {
+            closePanel();
+            return;
+        }
+
+        // Set side-panel open state
+        sidePanel.classList.add("open");
+        sidePanel.setAttribute("data-active", type);
+
+        // 搜索/显示/音频面板：移入文档流，在经文区下方
+        if (type === "search" || type === "display" || type === "audio") {
+            sidePanel.style.position = "relative";
+            sidePanel.style.top = "";
+            sidePanel.style.left = "";
+            sidePanel.style.right = "";
+            sidePanel.style.bottom = "";
+            sidePanel.style.zIndex = "";
+        } else {
+            sidePanel.style.position = "";
+        }
+
+        // Hide all panels, show the requested one
+        var panels = sidePanel.querySelectorAll(".panel-content");
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].classList.remove("active");
+            panels[i].setAttribute("hidden", "");
+        }
+
+        var target = sidePanel.querySelector('.panel-content[data-panel="' + type + '"]');
+        if (target) {
+            target.classList.add("active");
+            target.removeAttribute("hidden");
+        }
+
+        state.activePanel = type;
+
+        // Sync bottom tab bar active state
+        syncTabBarState(type);
+
+        // Panel-specific initialization
+        if (type === "version") {
+            renderVersionPanel();
+        } else if (type === "display") {
+            syncDisplayPanel();
+        } else if (type === "audio") {
+            renderAudioVersionList();
+        } else if (type === "search") {
+            focusSearchInput();
+        }
+    }
+
+    function closePanel() {
+        var sidePanel = document.getElementById("side-panel");
+        if (!sidePanel) return;
+
+        sidePanel.classList.remove("open");
+        sidePanel.removeAttribute("data-active");
+        sidePanel.style.position = "";
+
+        var panels = sidePanel.querySelectorAll(".panel-content");
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].classList.remove("active");
+            panels[i].setAttribute("hidden", "");
+        }
+
+        state.activePanel = null;
+        syncTabBarState(null);
+    }
+
+    function syncTabBarState(type) {
+        var tabBar = document.getElementById("bottom-tab-bar");
+        if (!tabBar) return;
+        var btns = tabBar.querySelectorAll(".tab-btn");
+        for (var i = 0; i < btns.length; i++) {
+            var p = btns[i].getAttribute("data-panel");
+            if (p === type) {
+                btns[i].classList.add("active");
+            } else {
+                btns[i].classList.remove("active");
+            }
+        }
+    }
+
+    /* ============================================================
+       Display panel
+       ============================================================ */
+
+    function syncDisplayPanel() {
+        // Verse number toggle
+        var verseBtn = document.getElementById("display-verse-num");
+        if (verseBtn) {
+            if (state.showVerseNum) {
+                verseBtn.classList.add("on");
+            } else {
+                verseBtn.classList.remove("on");
+            }
+        }
+
+        // Reading mode toggle
+        var readBtn = document.getElementById("display-reading-mode");
+        if (readBtn) {
+            if (state.readingMode) {
+                readBtn.classList.add("on");
+            } else {
+                readBtn.classList.remove("on");
+            }
+        }
+
+        // Font size slider
+        var slider = document.getElementById("font-size-slider");
+        var valueSpan = document.getElementById("font-size-value");
+        if (slider) {
+            var currentSize = parseInt(slider.getAttribute("value"), 10) || 18;
+            slider.setAttribute("value", currentSize);
+            slider.value = currentSize;
+            applyFontSize(currentSize);
+        }
+        if (valueSpan) {
+            valueSpan.textContent = (slider ? slider.value : 18) + "px";
+        }
+    }
+
+    function applyFontSize(px) {
+        var container = document.getElementById("verses");
+        if (container) {
+            container.style.setProperty("--verse-font-size", px + "px");
+            // 直接设置经文元素字号
+            var verseTexts = container.querySelectorAll(".verse-text");
+            for (var i = 0; i < verseTexts.length; i++) {
+                verseTexts[i].style.fontSize = px + "px";
+            }
+            var verseSecondary = container.querySelectorAll(".verse-secondary");
+            for (var i = 0; i < verseSecondary.length; i++) {
+                verseSecondary[i].style.fontSize = (px - 4) + "px";
+            }
+        }
+    }
+
+    function initDisplayPanel() {
+        // Verse number toggle
+        var verseBtn = document.getElementById("display-verse-num");
+        if (verseBtn) {
+            verseBtn.addEventListener("click", function () {
+                state.showVerseNum = !state.showVerseNum;
+                verseBtn.classList.toggle("on", state.showVerseNum);
+                var container = document.getElementById("verses");
+                if (container) {
+                    container.classList.toggle("verse-num-hidden", !state.showVerseNum);
+                }
+            });
+        }
+
+        // Reading mode toggle
+        var readBtn = document.getElementById("display-reading-mode");
+        if (readBtn) {
+            readBtn.addEventListener("click", function () {
+                state.readingMode = !state.readingMode;
+                readBtn.classList.toggle("on", state.readingMode);
+                var container = document.getElementById("verses");
+                if (container) {
+                    container.classList.toggle("reading-mode", state.readingMode);
+                }
+                if (state.book && state.chapter) {
+                    window.loadVersesMulti();
+                }
+            });
+        }
+
+        // Font size slider
+        var slider = document.getElementById("font-size-slider");
+        var valueSpan = document.getElementById("font-size-value");
+        if (slider) {
+            slider.setAttribute("min", "14");
+            slider.setAttribute("max", "24");
+            slider.setAttribute("value", "18");
+            slider.addEventListener("input", function () {
+                var val = parseInt(slider.value, 10);
+                applyFontSize(val);
+                if (valueSpan) {
+                    valueSpan.textContent = val + "px";
+                }
+            });
+        }
+
+        // Set initial state
+        state.showVerseNum = true;
+    }
+
+    /* ============================================================
+       Version panel — render + drag-drop
+       ============================================================ */
+
     function renderVersionPanel() {
-        const container = document.getElementById("version-list");
+        var container = document.getElementById("version-list");
         if (!container) return;
 
         container.innerHTML = "";
 
-        const primary = state.primaryVersion;
-        const secondary = state.secondaryVersions || [];
-        const enabled = [primary, ...secondary];
-        const disabled = cfg.versions.filter(v => v.key !== primary && !secondary.includes(v.key));
+        var primary = state.primaryVersion;
+        var secondary = state.secondaryVersions || [];
+        var enabled = [primary].concat(secondary);
+        var disabled = [];
+        for (var i = 0; i < cfg.versions.length; i++) {
+            var v = cfg.versions[i];
+            if (v.key !== primary && secondary.indexOf(v.key) < 0) {
+                disabled.push(v);
+            }
+        }
 
-        console.log(`[renderVersionPanel] primary=${primary}, secondary=[${secondary.join(", ")}], enabled=[${enabled.join(", ")}]`);
-
-        // ---- 已启用区域 ----
-        const enabledSection = document.createElement("div");
+        // ---- Enabled section ----
+        var enabledSection = document.createElement("div");
         enabledSection.className = "version-section";
-        enabledSection.dataset.section = "enabled";
+        enabledSection.setAttribute("data-section", "enabled");
 
-        const enabledTitle = document.createElement("div");
+        var enabledTitle = document.createElement("div");
         enabledTitle.className = "version-section-title";
-        enabledTitle.textContent = `已启用（拖拽排序，排第一为主要经文）`;
+        enabledTitle.textContent = "已启用（拖拽排序，排第一为主要经文）";
         enabledSection.appendChild(enabledTitle);
 
-        const enabledList = document.createElement("div");
+        var enabledList = document.createElement("div");
         enabledList.className = "version-sortable-list";
-        enabledList.dataset.section = "enabled";
+        enabledList.setAttribute("data-section", "enabled");
 
-        enabled.forEach(key => {
-            const ver = utils.getVersionConfig(key);
-            if (!ver) return;
-            const item = buildVersionItem(ver, key === primary);
+        for (var j = 0; j < enabled.length; j++) {
+            var key = enabled[j];
+            var ver = utils.getVersionConfig(key);
+            if (!ver) continue;
+            var item = buildVersionItem(ver, key === primary);
             enabledList.appendChild(item);
-        });
+        }
 
         enabledSection.appendChild(enabledList);
         container.appendChild(enabledSection);
 
-        // ---- 未启用区域 ----
-        const disabledSection = document.createElement("div");
+        // ---- Disabled section ----
+        var disabledSection = document.createElement("div");
         disabledSection.className = "version-section";
-        disabledSection.dataset.section = "disabled";
+        disabledSection.setAttribute("data-section", "disabled");
 
-        const disabledTitle = document.createElement("div");
+        var disabledTitle = document.createElement("div");
         disabledTitle.className = "version-section-title";
         disabledTitle.textContent = "未启用（可拖入已启用）";
         disabledSection.appendChild(disabledTitle);
 
-        const disabledList = document.createElement("div");
+        var disabledList = document.createElement("div");
         disabledList.className = "version-sortable-list";
-        disabledList.dataset.section = "disabled";
+        disabledList.setAttribute("data-section", "disabled");
 
-        disabled.forEach(ver => {
-            const item = buildVersionItem(ver, false);
-            disabledList.appendChild(item);
-        });
+        for (var k = 0; k < disabled.length; k++) {
+            var dItem = buildVersionItem(disabled[k], false);
+            disabledList.appendChild(dItem);
+        }
 
         disabledSection.appendChild(disabledList);
         container.appendChild(disabledSection);
 
-        // ---- 音频设置区域 ----
-        const audioSection = document.createElement("div");
-        audioSection.className = "version-section version-audio-section";
-
-        const audioTitle = document.createElement("div");
-        audioTitle.className = "version-section-title";
-        audioTitle.textContent = "音频朗读版本";
-        audioSection.appendChild(audioTitle);
-
-        const audioSelect = document.createElement("select");
-        audioSelect.className = "version-audio-select";
-        audioSelect.id = "version-audio-select";
-
-        cfg.versions.forEach(ver => {
-            const opt = document.createElement("option");
-            opt.value = ver.key;
-            opt.textContent = ver.label;
-            if (!ver.has_audio) {
-                opt.disabled = true;
-                opt.textContent += "（无音频）";
-            }
-            audioSelect.appendChild(opt);
-        });
-
-        // 设置当前音频版本
-        const currentAudio = state.audioVersion || "en_nrsvce";
-        audioSelect.value = cfg.versions.find(v => v.key === currentAudio && v.has_audio)
-            ? currentAudio
-            : "en_nrsvce";
-
-        audioSelect.addEventListener("change", () => {
-            state.audioVersion = audioSelect.value;
-            window.updateAudio();
-        });
-
-        audioSection.appendChild(audioSelect);
-        container.appendChild(audioSection);
-
-        // ---- 初始化拖拽 ----
+        // ---- Init drag-drop ----
         initDragDrop();
     }
 
-    /** 构建单个版本项（含拖拽属性） */
     function buildVersionItem(ver, isPrimary) {
-        const item = document.createElement("div");
+        var item = document.createElement("div");
         item.className = "version-item draggable" + (isPrimary ? " is-primary" : "");
-        item.draggable = true;
-        item.dataset.version = ver.key;
+        item.setAttribute("draggable", "true");
+        item.setAttribute("data-version", ver.key);
 
-        const dragIcon = document.createElement("span");
+        var dragIcon = document.createElement("span");
         dragIcon.className = "version-drag-handle";
         dragIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/></svg>';
         item.appendChild(dragIcon);
 
         if (isPrimary) {
-            const badge = document.createElement("span");
+            var badge = document.createElement("span");
             badge.className = "version-primary-badge";
             badge.textContent = "主要";
             item.appendChild(badge);
         }
 
-        const label = document.createElement("span");
+        var label = document.createElement("span");
         label.className = "version-label-text";
         label.textContent = ver.label;
         item.appendChild(label);
 
         if (!ver.available) {
-            const badge = document.createElement("span");
-            badge.className = "version-badge";
-            badge.textContent = "待更新";
-            item.appendChild(badge);
+            var vBadge = document.createElement("span");
+            vBadge.className = "version-badge";
+            vBadge.textContent = "待更新";
+            item.appendChild(vBadge);
         }
 
         return item;
     }
 
-    /** 初始化拖拽排序（桌面 + 移动端） */
-    function initDragDrop() {
-        const lists = document.querySelectorAll(".version-sortable-list");
-        let draggedItem = null;
-        let draggedFrom = null;
-        let touchClone = null;  // 移动端浮动元素
-        let touchStartY = 0;
+    /* ---- Drag-drop (desktop + mobile touch) ---- */
 
-        lists.forEach(list => {
-            // ===== 桌面 Drag & Drop =====
+    function initDragDrop() {
+        var lists = document.querySelectorAll(".version-sortable-list");
+        var draggedItem = null;
+        var draggedFrom = null;
+        var touchClone = null;
+        var touchStartY = 0;
+
+        for (var li = 0; li < lists.length; li++) {
+            var list = lists[li];
+
+            // Desktop drag
             list.addEventListener("dragstart", function (e) {
                 draggedItem = e.target.closest(".draggable");
                 if (!draggedItem) return;
                 draggedFrom = list;
                 e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData("text/plain", draggedItem.dataset.version);
-                setTimeout(() => draggedItem.classList.add("dragging"), 0);
+                e.dataTransfer.setData("text/plain", draggedItem.getAttribute("data-version"));
+                setTimeout(function () { draggedItem.classList.add("dragging"); }, 0);
             });
 
             list.addEventListener("dragend", function () {
                 if (draggedItem) draggedItem.classList.remove("dragging");
-                document.querySelectorAll(".version-sortable-list").forEach(l => {
-                    l.classList.remove("drag-over");
-                });
+                var allLists = document.querySelectorAll(".version-sortable-list");
+                for (var i = 0; i < allLists.length; i++) {
+                    allLists[i].classList.remove("drag-over");
+                }
                 draggedItem = null;
                 draggedFrom = null;
             });
@@ -191,65 +372,59 @@
                 e.preventDefault();
                 list.classList.remove("drag-over");
                 if (!draggedItem) return;
-
-                const targetList = list;
-                const afterElement = getDragAfterElement(targetList, e.clientY);
-
+                var targetList = list;
+                var afterElement = getDragAfterElement(targetList, e.clientY);
                 if (!canMoveTo(targetList)) return;
-
                 moveItem(draggedItem, targetList, afterElement);
                 draggedItem.classList.remove("dragging");
                 draggedItem = null;
                 draggedFrom = null;
             });
 
-            // ===== 移动端 Touch 支持 =====
-            list.addEventListener("touchstart", function (e) {
-                const item = e.target.closest(".draggable");
-                if (!item) return;
+            // Mobile touch
+            (function (currentList) {
+                currentList.addEventListener("touchstart", function (e) {
+                    var item = e.target.closest(".draggable");
+                    if (!item) return;
+                    draggedItem = item;
+                    draggedFrom = currentList;
+                    touchStartY = e.touches[0].clientY;
 
-                draggedItem = item;
-                draggedFrom = list;
-                touchStartY = e.touches[0].clientY;
+                    touchClone = item.cloneNode(true);
+                    touchClone.style.cssText = "position:fixed;z-index:99999;pointer-events:none;opacity:0.85;width:" + item.offsetWidth + "px;background:var(--bg);box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:8px;";
+                    touchClone.classList.add("dragging");
+                    document.body.appendChild(touchClone);
+                    positionTouchClone(e.touches[0]);
+                    item.style.opacity = "0.3";
+                }, { passive: true });
 
-                // 创建浮动镜像
-                touchClone = item.cloneNode(true);
-                touchClone.style.cssText = "position:fixed;z-index:99999;pointer-events:none;opacity:0.85;width:" + item.offsetWidth + "px;background:var(--bg);box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:8px;";
-                touchClone.classList.add("dragging");
-                document.body.appendChild(touchClone);
-                positionTouchClone(e.touches[0]);
+                currentList.addEventListener("touchmove", function (e) {
+                    if (!touchClone) return;
+                    e.preventDefault();
+                    positionTouchClone(e.touches[0]);
+                    var allLists = document.querySelectorAll(".version-sortable-list");
+                    for (var i = 0; i < allLists.length; i++) {
+                        allLists[i].classList.remove("drag-over");
+                    }
+                    var target = getElementFromPoint(e.touches[0].clientX, e.touches[0].clientY, ".version-sortable-list");
+                    if (target) target.classList.add("drag-over");
+                }, { passive: false });
 
-                item.style.opacity = "0.3";
-            }, { passive: true });
-
-            list.addEventListener("touchmove", function (e) {
-                if (!touchClone) return;
-                e.preventDefault();
-                positionTouchClone(e.touches[0]);
-
-                // 高亮目标列表
-                document.querySelectorAll(".version-sortable-list").forEach(l => l.classList.remove("drag-over"));
-                const target = getElementFromPoint(e.touches[0].clientX, e.touches[0].clientY, ".version-sortable-list");
-                if (target) target.classList.add("drag-over");
-            }, { passive: false });
-
-            list.addEventListener("touchend", function (e) {
-                if (!draggedItem || !touchClone) {
+                currentList.addEventListener("touchend", function (e) {
+                    if (!draggedItem || !touchClone) {
+                        cleanupTouch();
+                        return;
+                    }
+                    var touch = e.changedTouches[0];
+                    var targetList = getElementFromPoint(touch.clientX, touch.clientY, ".version-sortable-list");
+                    if (targetList && canMoveTo(targetList)) {
+                        var afterEl = getDragAfterElement(targetList, touch.clientY);
+                        moveItem(draggedItem, targetList, afterEl);
+                    }
                     cleanupTouch();
-                    return;
-                }
-
-                const touch = e.changedTouches[0];
-                const targetList = getElementFromPoint(touch.clientX, touch.clientY, ".version-sortable-list");
-
-                if (targetList && canMoveTo(targetList)) {
-                    const afterElement = getDragAfterElement(targetList, touch.clientY);
-                    moveItem(draggedItem, targetList, afterElement);
-                }
-
-                cleanupTouch();
-            });
-        });
+                });
+            })(list);
+        }
 
         function positionTouchClone(touch) {
             if (!touchClone) return;
@@ -258,7 +433,7 @@
         }
 
         function getElementFromPoint(x, y, selector) {
-            const el = document.elementFromPoint(x, y);
+            var el = document.elementFromPoint(x, y);
             if (!el) return null;
             return el.closest(selector) || el.querySelector(selector);
         }
@@ -271,16 +446,18 @@
             if (draggedItem) {
                 draggedItem.style.opacity = "";
             }
-            document.querySelectorAll(".version-sortable-list").forEach(l => l.classList.remove("drag-over"));
+            var allLists = document.querySelectorAll(".version-sortable-list");
+            for (var i = 0; i < allLists.length; i++) {
+                allLists[i].classList.remove("drag-over");
+            }
             draggedItem = null;
             draggedFrom = null;
         }
 
-        /** 检查是否允许移动到此列表 */
         function canMoveTo(targetList) {
             if (!draggedItem) return false;
-            const isToDisabled = targetList.dataset.section === "disabled";
-            const enabledList = document.querySelector('.version-sortable-list[data-section="enabled"]');
+            var isToDisabled = targetList.getAttribute("data-section") === "disabled";
+            var enabledList = document.querySelector('.version-sortable-list[data-section="enabled"]');
             if (isToDisabled && enabledList && enabledList.children.length <= 1) {
                 showToast("至少需要一个已启用的译本");
                 return false;
@@ -288,7 +465,6 @@
             return true;
         }
 
-        /** 移动 DOM 元素并同步 state */
         function moveItem(item, targetList, beforeElement) {
             if (item.parentNode) item.parentNode.removeChild(item);
             if (beforeElement) {
@@ -299,55 +475,68 @@
             syncStateFromDOM();
         }
 
-        /** 获取拖拽位置之后的元素 */
         function getDragAfterElement(list, y) {
-            const items = [...list.querySelectorAll(".draggable:not(.dragging)")];
-            return items.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = box.top + box.height / 2 - y;
-                return offset > 0 && offset < closest.offset ? { offset, element: child } : closest;
-            }, { offset: Number.MAX_VALUE }).element;
+            var items = [];
+            var draggables = list.querySelectorAll(".draggable:not(.dragging)");
+            for (var i = 0; i < draggables.length; i++) {
+                items.push(draggables[i]);
+            }
+            var closest = { offset: Number.MAX_VALUE, element: null };
+            for (var j = 0; j < items.length; j++) {
+                var box = items[j].getBoundingClientRect();
+                var offset = box.top + box.height / 2 - y;
+                if (offset > 0 && offset < closest.offset) {
+                    closest = { offset: offset, element: items[j] };
+                }
+            }
+            return closest.element;
         }
     }
 
-    /** 从 DOM 同步 state */
     function syncStateFromDOM() {
-        const enabledList = document.querySelector('.version-sortable-list[data-section="enabled"]');
-        const items = [...enabledList.querySelectorAll(".draggable")];
-        const keys = items.map(el => el.dataset.version);
-
+        var enabledList = document.querySelector('.version-sortable-list[data-section="enabled"]');
+        if (!enabledList) return;
+        var items = [];
+        var draggables = enabledList.querySelectorAll(".draggable");
+        for (var i = 0; i < draggables.length; i++) {
+            items.push(draggables[i]);
+        }
+        var keys = [];
+        for (var j = 0; j < items.length; j++) {
+            keys.push(items[j].getAttribute("data-version"));
+        }
         if (keys.length === 0) return;
 
-        const newPrimary = keys[0];
-        const newSecondary = keys.slice(1);
-
-        const primaryChanged = newPrimary !== state.primaryVersion;
-        const oldPrimary = state.primaryVersion;
+        var newPrimary = keys[0];
+        var newSecondary = keys.slice(1);
+        var primaryChanged = newPrimary !== state.primaryVersion;
+        var oldPrimary = state.primaryVersion;
 
         state.primaryVersion = newPrimary;
         state.secondaryVersions = newSecondary;
 
-        // 通知搜索面板刷新译本选项
-        document.dispatchEvent(new CustomEvent('versionsChanged'));
+        document.dispatchEvent(new CustomEvent("versionsChanged"));
 
-        console.log(`🔄 版本顺序 → 主要: ${oldPrimary} → ${newPrimary}, 次要: [${newSecondary.join(", ")}]`);
-        console.log(`   state.primaryVersion 现在是: ${state.primaryVersion}`);
-
-        // 立即更新主要版本标记（在重新渲染前）
-        items.forEach((el, i) => {
-            el.classList.toggle("is-primary", i === 0);
-            const existingBadge = el.querySelector(".version-primary-badge");
-            if (i === 0 && !existingBadge) {
-                const badge = document.createElement("span");
-                badge.className = "version-primary-badge";
-                badge.textContent = "主要";
-                el.insertBefore(badge, el.querySelector(".version-label-text"));
-            } else if (i !== 0 && existingBadge) {
+        // Update DOM badges
+        for (var k = 0; k < items.length; k++) {
+            var isP = k === 0;
+            items[k].classList.toggle("is-primary", isP);
+            var existingBadge = items[k].querySelector(".version-primary-badge");
+            if (isP && !existingBadge) {
+                var b = document.createElement("span");
+                b.className = "version-primary-badge";
+                b.textContent = "主要";
+                var labelText = items[k].querySelector(".version-label-text");
+                if (labelText) {
+                    items[k].insertBefore(b, labelText);
+                } else {
+                    items[k].appendChild(b);
+                }
+            } else if (!isP && existingBadge) {
                 existingBadge.remove();
             }
-        });
+        }
 
-        // 更新顶栏按钮标签
         updateVersionButtonLabel();
 
         if (primaryChanged) {
@@ -358,9 +547,8 @@
         window.updateAudio();
     }
 
-    /** 显示提示 */
     function showToast(msg) {
-        let toast = document.getElementById("toast-msg");
+        var toast = document.getElementById("toast-msg");
         if (!toast) {
             toast = document.createElement("div");
             toast.id = "toast-msg";
@@ -370,14 +558,150 @@
         toast.textContent = msg;
         toast.style.opacity = "1";
         clearTimeout(window._toastTimer);
-        window._toastTimer = setTimeout(() => { toast.style.opacity = "0"; }, 2000);
+        window._toastTimer = setTimeout(function () { toast.style.opacity = "0"; }, 2000);
     }
 
-    /* ========= 兼容 stub（供外部直接调用） ========= */
+    /* ============================================================
+       Audio version list (in audio panel)
+       ============================================================ */
+
+    function renderAudioVersionList() {
+        var container = document.getElementById("audio-version-list");
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        var currentAudio = state.audioVersion || "en_nrsvce";
+
+        for (var i = 0; i < cfg.versions.length; i++) {
+            var ver = cfg.versions[i];
+            if (!ver.has_audio) continue;
+
+            var row = document.createElement("div");
+            row.className = "audio-version-item" + (ver.key === currentAudio ? " active" : "");
+            row.setAttribute("data-version", ver.key);
+
+            var label = document.createElement("span");
+            label.className = "audio-version-label";
+            label.textContent = ver.label;
+            row.appendChild(label);
+
+            (function (key) {
+                row.addEventListener("click", function () {
+                    state.audioVersion = key;
+                    // Update active state
+                    var items = container.querySelectorAll(".audio-version-item");
+                    for (var m = 0; m < items.length; m++) {
+                        items[m].classList.toggle("active", items[m].getAttribute("data-version") === key);
+                    }
+                    window.updateAudio();
+                });
+            })(ver.key);
+
+            container.appendChild(row);
+        }
+    }
+
+    /* ============================================================
+       Mini player
+       ============================================================ */
+
+    function updateMiniPlayerTitle() {
+        var titleEl = document.getElementById("mini-player-title");
+        if (!titleEl) return;
+
+        if (state.book && state.chapter) {
+            var bookCfg = null;
+            if (window.BibleFlow.data && window.BibleFlow.data.allBooks) {
+                var books = window.BibleFlow.data.allBooks;
+                for (var i = 0; i < books.length; i++) {
+                    if (books[i].key === state.book) {
+                        bookCfg = books[i];
+                        break;
+                    }
+                }
+            }
+            var bookName = bookCfg ? bookCfg.name : state.book;
+            titleEl.textContent = bookName + " " + state.chapter;
+        } else {
+            titleEl.textContent = "未播放";
+        }
+    }
+
+    function initMiniPlayer() {
+        var btn = document.getElementById("mini-player-btn");
+        if (!btn) return;
+        btn.addEventListener("click", function () {
+            openPanel("audio");
+        });
+    }
+
+    /* ============================================================
+       Bottom Tab Bar event binding
+       ============================================================ */
+
+    function initBottomTabBar() {
+        var tabBar = document.getElementById("bottom-tab-bar");
+        if (!tabBar) return;
+
+        var btns = tabBar.querySelectorAll(".tab-btn");
+        for (var i = 0; i < btns.length; i++) {
+            (function (btn) {
+                btn.addEventListener("click", function () {
+                    var panel = btn.getAttribute("data-panel");
+                    if (panel) {
+                        openPanel(panel);
+                    }
+                });
+            })(btns[i]);
+        }
+    }
+
+    /* ============================================================
+       Search panel helpers
+       ============================================================ */
+
+    function focusSearchInput() {
+        var input = document.getElementById("search-input");
+        if (input) {
+            setTimeout(function () { input.focus(); }, 100);
+        }
+    }
+
+    /* ============================================================
+       Version button label
+       ============================================================ */
+
+    function updateVersionButtonLabel() {
+        var labelEl = document.getElementById("version-label");
+        if (!labelEl) return;
+
+        var pri = utils.getVersionConfig(state.primaryVersion);
+        var sec = [];
+        var secList = state.secondaryVersions || [];
+        for (var i = 0; i < secList.length; i++) {
+            var s = utils.getVersionConfig(secList[i]);
+            if (s) sec.push(s);
+        }
+
+        var text = pri ? pri.label : "";
+        if (sec.length > 0) {
+            var labels = [];
+            for (var j = 0; j < sec.length; j++) {
+                labels.push(sec[j].label);
+            }
+            text += " + " + labels.join("/");
+        }
+        labelEl.textContent = text;
+    }
+
+    /* ============================================================
+       Backward-compatible version selectors
+       ============================================================ */
+
     function selectPrimaryVersion(versionKey) {
-        // 拖拽模式下不直接使用，但保留以防外部调用
         if (versionKey === state.primaryVersion) return;
-        state.secondaryVersions = (state.secondaryVersions || []).filter(k => k !== versionKey);
+        state.secondaryVersions = (state.secondaryVersions || []).filter(function (k) { return k !== versionKey; });
         state.primaryVersion = versionKey;
         renderVersionPanel();
         updateVersionButtonLabel();
@@ -388,7 +712,7 @@
 
     function selectPrimaryVersionSilent(versionKey) {
         if (versionKey === state.primaryVersion) return;
-        state.secondaryVersions = (state.secondaryVersions || []).filter(k => k !== versionKey);
+        state.secondaryVersions = (state.secondaryVersions || []).filter(function (k) { return k !== versionKey; });
         state.primaryVersion = versionKey;
         renderVersionPanel();
         updateVersionButtonLabel();
@@ -398,142 +722,32 @@
     }
 
     function toggleSecondaryVersion(versionKey) {
-        const list = state.secondaryVersions || [];
-        const idx = list.indexOf(versionKey);
-        if (idx >= 0) list.splice(idx, 1); else list.push(versionKey);
+        var list = state.secondaryVersions || [];
+        var idx = list.indexOf(versionKey);
+        if (idx >= 0) {
+            list.splice(idx, 1);
+        } else {
+            list.push(versionKey);
+        }
         state.secondaryVersions = list;
         renderVersionPanel();
         window.loadVersesMulti();
     }
 
-    /* ========= 更新顶栏版本标签 ========= */
-    function updateVersionButtonLabel() {
-        const labelEl = document.getElementById("version-label");
-        if (!labelEl) return;
-
-        const pri = utils.getVersionConfig(state.primaryVersion);
-        const sec = (state.secondaryVersions || []).map(k => utils.getVersionConfig(k)).filter(Boolean);
-
-        let text = pri ? pri.label : "";
-        if (sec.length > 0) {
-            text += " + " + sec.map(s => s.label).join("/");
-        }
-        labelEl.textContent = text;
-    }
-
-    /* ========= 打开 / 关闭版本面板 ========= */
-    function openVersionPanel() {
-        renderVersionPanel();
-        const overlay = document.getElementById("version-overlay");
-        const panel = document.getElementById("version-panel");
-        if (overlay) overlay.classList.add("open");
-        if (panel) panel.classList.add("open");
-    }
-
-    function closeVersionPanel() {
-        const overlay = document.getElementById("version-overlay");
-        const panel = document.getElementById("version-panel");
-        if (overlay) overlay.classList.remove("open");
-        if (panel) panel.classList.remove("open");
-    }
-
     /* ============================================================
-       统一初始化入口
+       Material Icons init
        ============================================================ */
 
-    function init() {
-        // 1. 版本面板标签
-        updateVersionButtonLabel();
-
-        // 2. 版本面板事件绑定
-        const verToggle = document.getElementById("version-toggle");
-        const verClose = document.getElementById("version-panel-close");
-        const verOverlay = document.getElementById("version-overlay");
-
-        if (verToggle) verToggle.addEventListener("click", openVersionPanel);
-        if (verClose) verClose.addEventListener("click", closeVersionPanel);
-        if (verOverlay) verOverlay.addEventListener("click", closeVersionPanel);
-
-        // 3. 搜索面板事件绑定
-        const searchToggle = document.getElementById("search-toggle");
-        const searchClose = document.getElementById("search-close");
-        const searchOverlay = document.getElementById("search-overlay");
-
-        if (searchToggle) searchToggle.addEventListener("click", openSearchPanel);
-        if (searchClose) searchClose.addEventListener("click", closeSearchPanel);
-        if (searchOverlay) searchOverlay.addEventListener("click", closeSearchPanel);
-
-        // 4. 书卷 + 章节面板初始化
-        window.initBookSelector();
-
-        // 5. 阅读模式切换
-        initReadingMode();
-
-        // 6. 节号显示/隐藏切换
-        initVerseNumToggle();
-
-        // 7. 面板拖拽调整高度
-        initPanelDrag("version-drag-handle", "version-panel");
-        initPanelDrag("search-drag-handle", "search-sidebar");
-        initPanelDrag("book-drag-handle", "book-panel");
-
-        // 8. Material Icons 字体加载完成后显示图标
-        initMaterialIcons();
-    }
-
-    /** 初始化节号显示/隐藏切换 */
-    function initVerseNumToggle() {
-        const btn = document.getElementById("verse-num-toggle");
-        if (!btn) return;
-
-        // 默认显示节号
-        state.showVerseNum = true;
-
-        btn.addEventListener("click", function() {
-            state.showVerseNum = !state.showVerseNum;
-            btn.classList.toggle("active", !state.showVerseNum);
-
-            const container = document.getElementById("verses");
-            if (container) {
-                container.classList.toggle("verse-num-hidden", !state.showVerseNum);
-            }
-        });
-    }
-
-    /** 初始化阅读模式 */
-    function initReadingMode() {
-        const btn = document.getElementById("reading-toggle");
-        if (!btn) return;
-
-        btn.addEventListener("click", function() {
-            state.readingMode = !state.readingMode;
-            btn.classList.toggle("active", state.readingMode);
-
-            // 更新经文容器类名
-            const container = document.getElementById("verses");
-            if (container) {
-                container.classList.toggle("reading-mode", state.readingMode);
-            }
-
-            // 切换后重新加载经文
-            if (state.book && state.chapter) {
-                window.loadVersesMulti();
-            }
-        });
-    }
-
-    /** 等待 Material Icons 字体加载完成后显示图标 */
     function initMaterialIcons() {
         if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(function() {
+            document.fonts.ready.then(function () {
                 var icons = document.querySelectorAll(".material-icons");
                 for (var i = 0; i < icons.length; i++) {
                     icons[i].classList.add("loaded");
                 }
             });
         } else {
-            // 降级方案：延迟显示
-            setTimeout(function() {
+            setTimeout(function () {
                 var icons = document.querySelectorAll(".material-icons");
                 for (var i = 0; i < icons.length; i++) {
                     icons[i].classList.add("loaded");
@@ -542,97 +756,54 @@
         }
     }
 
-    /** 初始化面板拖拽调整高度 */
-    function initPanelDrag(handleId, panelId) {
-        var handle = document.getElementById(handleId);
-        var panel = document.getElementById(panelId);
-        if (!handle || !panel) return;
-
-        var startY = 0;
-        var startHeightVh = 50; // 默认 50vh
-        var isDragging = false;
-
-        function onStart(e) {
-            isDragging = true;
-            startY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
-
-            // 统一用 vh 计算起始高度
-            var currentStyle = panel.style.height;
-            if (currentStyle && currentStyle.endsWith("vh")) {
-                startHeightVh = parseFloat(currentStyle);
-            } else {
-                startHeightVh = (panel.offsetHeight / window.innerHeight) * 100;
-            }
-
-            panel.style.transition = "none";
-            document.body.style.userSelect = "none";
-            document.body.style.webkitUserSelect = "none";
-        }
-
-        function onMove(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            var clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
-            var deltaY = startY - clientY;
-            var deltaYVh = (deltaY / window.innerHeight) * 100;
-            var newHeight = startHeightVh + deltaYVh;
-
-            // 最小 20vh，最大为可视区域减去安全边距（留出拖拽把手可见区域）
-            var minH = 20;
-            var maxH = ((window.innerHeight - 60) / window.innerHeight) * 100;
-            newHeight = Math.max(minH, Math.min(maxH, newHeight));
-
-            panel.style.height = newHeight + "vh";
-        }
-
-        function onEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            panel.style.transition = "";
-            document.body.style.userSelect = "";
-            document.body.style.webkitUserSelect = "";
-        }
-
-        handle.addEventListener("mousedown", onStart);
-        handle.addEventListener("touchstart", onStart, { passive: false });
-        document.addEventListener("mousemove", onMove);
-        document.addEventListener("touchmove", onMove, { passive: false });
-        document.addEventListener("mouseup", onEnd);
-        document.addEventListener("touchend", onEnd);
-    }
-
-    /** 打开搜索面板 */
-    function openSearchPanel() {
-        var panel = document.getElementById("search-sidebar");
-        var overlay = document.getElementById("search-overlay");
-        if (panel) panel.classList.add("open");
-        if (overlay) overlay.classList.add("open");
-        var input = document.getElementById("search-input");
-        if (input) setTimeout(function() { input.focus(); }, 300);
-    }
-
-    /** 关闭搜索面板 */
-    function closeSearchPanel() {
-        var panel = document.getElementById("search-sidebar");
-        var overlay = document.getElementById("search-overlay");
-        if (panel) panel.classList.remove("open");
-        if (overlay) overlay.classList.remove("open");
-    }
-
-    // 页面加载完成后初始化
-    window.addEventListener("DOMContentLoaded", init);
-
     /* ============================================================
-       导出到全局
+       Unified init
        ============================================================ */
 
+    function init() {
+        // 1. Version button label
+        updateVersionButtonLabel();
+
+        // 2. Display panel toggles + slider
+        initDisplayPanel();
+
+        // 3. Mini player
+        initMiniPlayer();
+
+        // 4. Bottom tab bar
+        initBottomTabBar();
+
+        // 5. Book selector (delegated to book.js)
+        window.initBookSelector();
+
+        // 6. Material Icons
+        initMaterialIcons();
+
+        // 7. Set default state
+        if (state.showVerseNum === undefined) {
+            state.showVerseNum = true;
+        }
+    }
+
+    // DOM ready
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+
+    /* ============================================================
+       Export to global scope
+       ============================================================ */
+
+    window.openPanel = openPanel;
+    window.closePanel = closePanel;
     window.renderVersionPanel = renderVersionPanel;
     window.selectPrimaryVersion = selectPrimaryVersion;
     window.selectPrimaryVersionSilent = selectPrimaryVersionSilent;
     window.toggleSecondaryVersion = toggleSecondaryVersion;
     window.updateVersionButtonLabel = updateVersionButtonLabel;
-    window.openVersionPanel = openVersionPanel;
-    window.closeVersionPanel = closeVersionPanel;
     window.init = init;
+    window.updateMiniPlayerTitle = updateMiniPlayerTitle;
 
 })();

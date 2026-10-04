@@ -66,6 +66,7 @@
 
             bindUI();
             updateTopTitle(first, 1);
+            updateTabLabels();
 
             await loadChaptersForBook(first.id, 1);
         } catch (err) {
@@ -350,15 +351,21 @@
     function selectChapter(book, chapter, btnEl) {
         state.chapter = chapter;
 
-        document.querySelectorAll(".chapter-item").forEach(el => {
-            el.classList.remove("active");
-        });
+        var items = document.querySelectorAll(".chapter-item");
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.remove("active");
+        }
         if (btnEl) btnEl.classList.add("active");
 
         updateTopTitle(book, chapter);
 
         window.loadVersesMulti();
         window.updateAudio();
+
+        // 选完章后自动关闭书卷面板
+        if (window.closePanel) {
+            window.closePanel();
+        }
     }
 
     /* ---------- 更新顶部标题 ---------- */
@@ -384,42 +391,15 @@
         if (book) updateTopTitle(book, state.chapter);
     }
 
-    /* ---------- 更新 Tab 文字（双语：英文 + 中文小字）---------- */
+    /* ---------- 更新 Tab 文字（跟随主要版本语言） ---------- */
     function updateTabLabels() {
-        const field = utils.getBookNameField();   // "en" | "zh_cath" | "zh_prot"
-        const cats = data.bookCategories || [];
-
-        // 获取次要版本对应的字段
-        const secondary = state.secondaryVersions || [];
-        const secField = secondary.length > 0 ? utils.getFieldForVersion(secondary[0]) : null;
-
-        document.querySelectorAll(".book-tab").forEach(tab => {
-            const testament = tab.dataset.testament;   // "old_testament" | "new_testament"
-            const cat = cats.find(c => c.key === testament);
-            if (!cat) return;
-
-            // 清空后重建（支持双语）
-            tab.innerHTML = "";
-
-            // 主要版本名称
-            const mainBucket = cat[field];
-            const mainName = (mainBucket && mainBucket.name) ? mainBucket.name : (testament === "old_testament" ? "Old Testament" : "New Testament");
-            const mainSpan = document.createElement("span");
-            mainSpan.className = "tab-main";
-            mainSpan.textContent = mainName;
-            tab.appendChild(mainSpan);
-
-            // 次要版本名称（小字）
-            if (secField && secField !== field) {
-                const secBucket = cat[secField];
-                if (secBucket && secBucket.name && secBucket.name !== mainName) {
-                    const subSpan = document.createElement("span");
-                    subSpan.className = "tab-sub";
-                    subSpan.textContent = secBucket.name;
-                    tab.appendChild(subSpan);
-                }
-            }
-        });
+        var tabs = document.querySelectorAll(".book-tab");
+        for (var i = 0; i < tabs.length; i++) {
+            (function(tab) {
+                var testament = tab.dataset.testament;
+                tab.textContent = testament === "old_testament" ? "旧约" : "新约";
+            })(tabs[i]);
+        }
     }
 
     /* ---------- 打开 / 关闭面板 ---------- */
