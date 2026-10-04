@@ -591,17 +591,20 @@ body {
     transition: background var(--transition);
 }
 .audio-version-toggle-btn:active { background: var(--tap); }
-.audio-version-chevron { flex-shrink: 0; color: var(--ink-3); transition: transform 0.2s; width: 12px; height: 12px; }
-.audio-version-toggle-btn.open .audio-version-chevron { transform: rotate(180deg); }
 .audio-version-text {
     flex: 1;
-    text-align: center;
+    text-align: left;
     font-weight: 400;
     font-size: 13px;
     color: var(--ink-3);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.audio-version-prefix {
+    font-size: 12px;
+    color: var(--ink-3);
+    opacity: 0.7;
 }
 .audio-time {
     font-size: 12px;

@@ -671,8 +671,6 @@
                         }
                     }
                     // Close popup
-                    var toggleBtn = document.getElementById("audio-version-toggle");
-                    if (toggleBtn) toggleBtn.classList.remove("open");
                     popup.hidden = true;
 
                     window.updateAudio();
@@ -717,14 +715,12 @@
         toggleBtn.addEventListener("click", function () {
             var isOpen = !popup.hidden;
             popup.hidden = isOpen;
-            toggleBtn.classList.toggle("open", !isOpen);
         });
 
         // Close popup when clicking outside
         document.addEventListener("click", function (e) {
             if (!popup.hidden && !toggleBtn.contains(e.target) && !popup.contains(e.target)) {
                 popup.hidden = true;
-                toggleBtn.classList.remove("open");
             }
         });
     }
