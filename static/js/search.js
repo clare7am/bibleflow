@@ -399,7 +399,7 @@
                 li.appendChild(textLine);
 
                 li.onclick = () => {
-                    jumpToVerse(r.bookId, r.chapter, r.verse);
+                    jumpToVerse(r.bookId, r.chapter, r.verse, r.versionKey);
                 };
                 ul.appendChild(li);
             });
@@ -427,13 +427,13 @@
     }
 
     /* ========= 跳转到经文（不修改版本选择）========= */
-    function jumpToVerse(bookId, chapter, verse) {
+    function jumpToVerse(bookId, chapter, verse, versionKey) {
         // 跳转经文，保留搜索结果
         const input = document.getElementById('search-input');
         if (input) input.blur();
 
         // ✅ 如果点击的译本未启用，自动启用为次要译本
-        var hitVersionKey = hit.versionKey;
+        var hitVersionKey = versionKey;
         var isVersionEnabled = hitVersionKey === state.primaryVersion ||
             (state.secondaryVersions || []).indexOf(hitVersionKey) !== -1;
         if (!isVersionEnabled) {
