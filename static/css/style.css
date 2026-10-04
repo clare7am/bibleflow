@@ -411,6 +411,14 @@ body {
     font-size: 13px; font-weight: 500; font-family: inherit;
     border: none; border-radius: 8px; background: var(--bg); color: var(--ink);
     cursor: pointer; box-shadow: 0 0.5px 2px rgba(0,0,0,0.08), inset 0 0 0 0.5px rgba(0,0,0,0.06);
+    transition: box-shadow 0.15s, background-color 0.15s;
+}
+.filter-trigger:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), inset 0 0 0 0.5px rgba(0,0,0,0.08);
+}
+.filter-trigger:active {
+    box-shadow: 0 0.5px 1px rgba(0,0,0,0.06), inset 0 0 0 0.5px rgba(0,0,0,0.04);
+    background-color: #f0f0f3;
 }
 .filter-trigger.active { box-shadow: 0 0 0 2px var(--accent); }
 .filter-trigger-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
@@ -420,15 +428,57 @@ body {
 .filter-popup {
     position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 2000;
     background: var(--bg); border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 6px 0; max-height: 240px; overflow-y: auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08);
+    padding: 6px 0; max-height: 240px; overflow-y: auto;
 }
-.filter-option { padding: 10px 14px; font-size: 14px; color: var(--ink); cursor: pointer; }
+.filter-option {
+    padding: 10px 14px; font-size: 14px; color: var(--ink); cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+}
 .filter-option:active { background: #e8e8ed; }
 .filter-option.selected { color: var(--accent); font-weight: 600; }
+.filter-option.selected::before {
+    content: "✓";
+    width: 16px; text-align: center; color: var(--accent);
+}
 
-.search-sidebar-body { flex: 1; overflow-y: auto; padding: 8px 0 32px; font-size: 17px; }
-.search-sidebar-body li { cursor: pointer; padding: 14px 20px; border-bottom: 0.5px solid var(--line-2); }
+.search-sidebar-body { flex: 1; overflow-y: auto; padding: 0; font-size: 17px; }
+.search-sidebar-body li {
+    cursor: pointer; padding: 14px 20px; border-bottom: 0.5px solid var(--line-2);
+    transition: background var(--transition);
+}
 .search-sidebar-body li:active { background: var(--tap); }
+.search-sidebar-body b { color: var(--ink); font-weight: 600; }
+
+.search-loading, .search-empty {
+    padding: 24px 20px; font-size: 15px; color: var(--ink-3); text-align: center;
+}
+
+.search-result-header {
+    font-size: 13px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 8px 20px 12px; border-bottom: 0.5px solid var(--line-2);
+}
+.search-result-item {
+    cursor: pointer; padding: 14px 20px; border-bottom: 0.5px solid var(--line-2);
+    display: flex; flex-direction: column; gap: 6px;
+    transition: background var(--transition);
+}
+.search-result-item:hover { background: var(--hover-bg); }
+.search-result-item:active { background: var(--tap); }
+
+.search-result-ref {
+    font-size: 13px; font-weight: 600; color: var(--ink-3);
+    display: flex; align-items: center; gap: 8px;
+}
+.search-result-tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    color: var(--ink-2); background: var(--line-2);
+    padding: 2px 8px; border-radius: 4px;
+}
+.search-result-text {
+    font-size: 15px; color: var(--ink); line-height: 1.5;
+}
 
 /* ============================================================
    书卷面板
