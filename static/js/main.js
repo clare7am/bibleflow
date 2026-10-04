@@ -764,7 +764,11 @@
         // 1. Version button label
         updateVersionButtonLabel();
 
-        // 2. Display panel toggles + slider
+        // 2. 顶栏书卷按钮
+        var bookBtn = document.getElementById("book-btn");
+        if (bookBtn) bookBtn.addEventListener("click", function() { openPanel("book"); });
+
+        // 3. Display panel toggles + slider
         initDisplayPanel();
 
         // 3. Mini player
