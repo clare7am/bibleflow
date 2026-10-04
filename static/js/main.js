@@ -243,17 +243,16 @@
         }
 
         // Font family selects — 根据主要版本语言显示/隐藏
-        var zhRow = document.querySelector(".display-row-zh-font");
-        var enRow = document.querySelector(".display-row-en-font");
+        var fontRow = document.querySelector(".display-row-fonts");
         var zhSelect = document.getElementById("font-zh-select");
         var enSelect = document.getElementById("font-en-select");
         var pv = state.primaryVersion || "";
         var isEn = pv.indexOf("en_") === 0;
 
-        if (zhRow) zhRow.hidden = isEn;
-        if (enRow) enRow.hidden = !isEn;
+        if (fontRow) fontRow.hidden = false; // 始终显示，但内部 select 根据版本启用/禁用
 
         if (zhSelect) {
+            zhSelect.disabled = isEn;
             zhSelect.value = state.fontZh || "default";
             zhSelect.addEventListener("change", function () {
                 state.fontZh = zhSelect.value;
@@ -262,6 +261,7 @@
             applyFontFamily(state.fontZh || "default", "zh");
         }
         if (enSelect) {
+            enSelect.disabled = !isEn;
             enSelect.value = state.fontEn || "default";
             enSelect.addEventListener("change", function () {
                 state.fontEn = enSelect.value;
