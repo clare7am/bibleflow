@@ -497,6 +497,56 @@ body {
 }
 
 /* ============================================================
+   深色模式
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+    :root:not(.light-mode) {
+        --bg: #1a1a1e;
+        --bg-alt: #121214;
+        --bg-card: #242428;
+        --ink: #e8e8ed;
+        --ink-2: #a0a0a8;
+        --ink-3: #6e6e78;
+        --line: #3a3a40;
+        --line-2: #2e2e34;
+        --hover-bg: #2a2a30;
+        --tap: rgba(255,255,255,0.06);
+    }
+}
+body.dark-mode {
+    --bg: #1a1a1e;
+    --bg-alt: #121214;
+    --bg-card: #242428;
+    --ink: #e8e8ed;
+    --ink-2: #a0a0a8;
+    --ink-3: #6e6e78;
+    --line: #3a3a40;
+    --line-2: #2e2e34;
+    --hover-bg: #2a2a30;
+    --tap: rgba(255,255,255,0.06);
+}
+body.dark-mode .top-bar,
+body.dark-mode .bottom-tab-bar {
+    background: rgba(26,26,30,0.92);
+}
+body.dark-mode .search-sidebar-header input,
+body.dark-mode .filter-trigger,
+body.dark-mode .display-select,
+body.dark-mode .audio-version-popup {
+    background: var(--bg-card);
+    color: var(--ink);
+    border-color: var(--line);
+}
+body.dark-mode .filter-popup {
+    background: var(--bg-card);
+    border-color: var(--line);
+}
+body.dark-mode .book-panel-close-btn,
+body.dark-mode .search-close-btn {
+    color: var(--ink-3);
+}
+
+/* ============================================================
    书卷面板
    ============================================================ */
 .book-tab-bar {

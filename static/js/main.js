@@ -226,6 +226,21 @@
             });
         }
 
+        // Dark mode toggle
+        var darkBtn = document.getElementById("display-dark-mode");
+        if (darkBtn) {
+            var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            state.darkMode = prefersDark;
+            darkBtn.classList.toggle("on", state.darkMode);
+            if (state.darkMode) document.body.classList.add("dark-mode");
+
+            darkBtn.addEventListener("click", function () {
+                state.darkMode = !state.darkMode;
+                darkBtn.classList.toggle("on", state.darkMode);
+                document.body.classList.toggle("dark-mode", state.darkMode);
+            });
+        }
+
         // Reading mode toggle
         var readBtn = document.getElementById("display-reading-mode");
         if (readBtn) {
