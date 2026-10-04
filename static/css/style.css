@@ -376,34 +376,7 @@ body {
 .display-toggle.on .toggle-thumb { transform: translateX(20px); }
 
 .display-row-slider { flex-direction: column; align-items: stretch; gap: 8px; }
-.display-row-select { flex-direction: column; align-items: stretch; gap: 8px; }
-.display-row-select.display-row-fonts {
-    flex-direction: row;
-    gap: 12px;
-    align-items: center;
-}
-.display-row-select.display-row-fonts .display-label {
-    flex-shrink: 0;
-    min-width: auto;
-}
-.display-row-select.display-row-fonts .display-select {
-    flex: 1;
-}
 .slider-wrap { display: flex; align-items: center; gap: 12px; }
-.display-select {
-    width: 100%; padding: 8px 12px; font-size: 15px; font-family: inherit;
-    color: var(--ink); background: var(--bg); border: 1px solid var(--line);
-    border-radius: 8px; cursor: pointer; appearance: none; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
-}
-
-/* 字体族 — 中文 */
-.verse-text.font-zh-simsun, .verse-secondary.font-zh-simsun { font-family: "Songti SC", "STSong", "SimSun", "宋体", serif !important; }
-.verse-text.font-zh-kaiti, .verse-secondary.font-zh-kaiti { font-family: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif !important; }
-/* 字体族 — 英文 */
-.verse-text.font-en-serif, .verse-secondary.font-en-serif { font-family: "Georgia", "Times New Roman", serif !important; }
-.verse-text.font-en-sans, .verse-secondary.font-en-sans { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif !important; }
 
 .slider-wrap input[type="range"] {
     flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
