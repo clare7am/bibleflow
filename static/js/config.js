@@ -65,7 +65,8 @@
         primaryVersion: "zh_sigao",
         secondaryVersions: ["en_nrsvce"],
         audioVersion: "en_nrsvce",
-        readingMode: false  // 阅读模式开关
+        readingMode: false,  // 阅读模式开关
+        fontSize: 18  // 字号（px）
     };
 
     /* ========= 数据（运行时加载） ========= */

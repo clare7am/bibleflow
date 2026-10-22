@@ -159,13 +159,13 @@
         var slider = document.getElementById("font-size-slider");
         var valueSpan = document.getElementById("font-size-value");
         if (slider) {
-            var currentSize = parseInt(slider.getAttribute("value"), 10) || 18;
+            var currentSize = state.fontSize || 18;
             slider.setAttribute("value", currentSize);
             slider.value = currentSize;
             applyFontSize(currentSize);
         }
         if (valueSpan) {
-            valueSpan.textContent = (slider ? slider.value : 18) + "px";
+            valueSpan.textContent = (state.fontSize || 18) + "px";
         }
 
         // Font family select
@@ -177,18 +177,10 @@
     }
 
     function applyFontSize(px) {
+        state.fontSize = px;
         var container = document.getElementById("verses");
         if (container) {
             container.style.setProperty("--verse-font-size", px + "px");
-            // 直接设置经文元素字号
-            var verseTexts = container.querySelectorAll(".verse-text");
-            for (var i = 0; i < verseTexts.length; i++) {
-                verseTexts[i].style.fontSize = px + "px";
-            }
-            var verseSecondary = container.querySelectorAll(".verse-secondary");
-            for (var i = 0; i < verseSecondary.length; i++) {
-                verseSecondary[i].style.fontSize = (px - 4) + "px";
-            }
         }
     }
 
@@ -263,9 +255,10 @@
         if (slider) {
             slider.setAttribute("min", "14");
             slider.setAttribute("max", "24");
-            slider.setAttribute("value", "18");
+            slider.setAttribute("value", state.fontSize || 18);
             slider.addEventListener("input", function () {
                 var val = parseInt(slider.value, 10);
+                state.fontSize = val;
                 applyFontSize(val);
                 if (valueSpan) {
                     valueSpan.textContent = val + "px";
