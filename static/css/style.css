@@ -693,7 +693,7 @@ body.dark-mode .search-close-btn {
     display: inline; font-size: 10px; font-weight: 500; color: var(--ink-3);
     vertical-align: super; margin: 0 2px 0 0;
 }
-.verses-container.reading-mode .verse-text { display: inline; font-size: 16px; line-height: 1.65; margin-bottom: 0; }
+.verses-container.reading-mode .verse-text { display: inline; font-size: var(--verse-font-size, 18px); line-height: 1.65; margin-bottom: 0; }
 .verses-container.reading-mode .verse-secondary { display: none; }
 .verses-container.verse-num-hidden .verse-num { display: none !important; }
 .verse-secondary.expanded { display: none; }
