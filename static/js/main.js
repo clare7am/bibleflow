@@ -415,50 +415,52 @@
         for (var li = 0; li < lists.length; li++) {
             var list = lists[li];
 
-            // Desktop drag
-            list.addEventListener("dragstart", function (e) {
-                draggedItem = e.target.closest(".draggable");
-                if (!draggedItem) return;
-                draggedFrom = list;
-                e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData("text/plain", draggedItem.getAttribute("data-version"));
-                setTimeout(function () { draggedItem.classList.add("dragging"); }, 0);
-            });
+            // Desktop drag — wrap in IIFE to capture current list value
+            (function (self) {
+                self.addEventListener("dragstart", function (e) {
+                    draggedItem = e.target.closest(".draggable");
+                    if (!draggedItem) return;
+                    draggedFrom = self;
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", draggedItem.getAttribute("data-version"));
+                    setTimeout(function () { draggedItem.classList.add("dragging"); }, 0);
+                });
 
-            list.addEventListener("dragend", function () {
-                if (draggedItem) draggedItem.classList.remove("dragging");
-                var allLists = document.querySelectorAll(".version-sortable-list");
-                for (var i = 0; i < allLists.length; i++) {
-                    allLists[i].classList.remove("drag-over");
-                }
-                draggedItem = null;
-                draggedFrom = null;
-            });
+                self.addEventListener("dragend", function () {
+                    if (draggedItem) draggedItem.classList.remove("dragging");
+                    var allLists = document.querySelectorAll(".version-sortable-list");
+                    for (var i = 0; i < allLists.length; i++) {
+                        allLists[i].classList.remove("drag-over");
+                    }
+                    draggedItem = null;
+                    draggedFrom = null;
+                });
 
-            list.addEventListener("dragover", function (e) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-                list.classList.add("drag-over");
-            });
+                self.addEventListener("dragover", function (e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    self.classList.add("drag-over");
+                });
 
-            list.addEventListener("dragleave", function (e) {
-                if (!list.contains(e.relatedTarget)) {
-                    list.classList.remove("drag-over");
-                }
-            });
+                self.addEventListener("dragleave", function (e) {
+                    if (!self.contains(e.relatedTarget)) {
+                        self.classList.remove("drag-over");
+                    }
+                });
 
-            list.addEventListener("drop", function (e) {
-                e.preventDefault();
-                list.classList.remove("drag-over");
-                if (!draggedItem) return;
-                var targetList = list;
-                var afterElement = getDragAfterElement(targetList, e.clientY);
-                if (!canMoveTo(targetList)) return;
-                moveItem(draggedItem, targetList, afterElement);
-                draggedItem.classList.remove("dragging");
-                draggedItem = null;
-                draggedFrom = null;
-            });
+                self.addEventListener("drop", function (e) {
+                    e.preventDefault();
+                    self.classList.remove("drag-over");
+                    if (!draggedItem) return;
+                    var targetList = self;
+                    var afterElement = getDragAfterElement(targetList, e.clientY);
+                    if (!canMoveTo(targetList)) return;
+                    moveItem(draggedItem, targetList, afterElement);
+                    draggedItem.classList.remove("dragging");
+                    draggedItem = null;
+                    draggedFrom = null;
+                });
+            })(list);
 
             // Mobile touch
             (function (currentList) {
