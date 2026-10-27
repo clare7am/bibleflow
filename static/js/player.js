@@ -65,9 +65,6 @@
         if (version.indexOf("zh_") === 0 && (!state.playbackRate || state.playbackRate === 1)) {
             state.playbackRate = 1.25;
         }
-        if (state.playbackRate && state.playbackRate !== 1) {
-            audio.playbackRate = state.playbackRate;
-        }
 
         iconPlay.style.display = 'block';
         iconPause.style.display = 'none';
@@ -76,6 +73,10 @@
         if (_wasPlaying || shouldAutoPlay || autoPlay) {
             audio.src = url;
             audio.load();
+            // load() 之后设置 playbackRate，否则 load() 会重置倍速
+            if (state.playbackRate && state.playbackRate !== 1) {
+                audio.playbackRate = state.playbackRate;
+            }
             audio.play().catch(() => {
                 syncPlayButtonIcon();
             });
@@ -333,6 +334,7 @@
 
     function setPlaybackRate(rate) {
         currentRate = rate;
+        state.playbackRate = rate;  // 同步到全局状态，切换章节时保持
         audio.playbackRate = rate;
 
         // 更新按钮文字
