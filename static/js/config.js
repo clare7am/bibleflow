@@ -49,7 +49,15 @@
             },
             {
                 key: "zh_cuv2010",
-                label: "和合本",
+                label: "和合本2010（神版）",
+                language: "zh",
+                has_audio: false,
+                has_tokens: false,
+                available: true
+            },
+            {
+                key: "zh_cunps",
+                label: "新标点和合本",
                 language: "zh",
                 has_audio: false,
                 has_tokens: false,

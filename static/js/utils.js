@@ -138,7 +138,7 @@
 
     /** 判断是否为 Protestant（新教）版本 */
     function isProtestantVersion(version) {
-        return version === "zh_cuv2010" || version === "en_kjv" || version === "en_niv";
+        return version === "zh_cuv2010" || version === "zh_cunps" || version === "en_kjv" || version === "en_niv";
     }
 
     /** 根据 bookId 获取 books.json 中的书卷对象 */
